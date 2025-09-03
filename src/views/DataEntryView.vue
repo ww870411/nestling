@@ -4,7 +4,7 @@
     
     <div class="content-wrapper">
       <div class="main-content">
-        <div class="table-wrapper">
+        <div class="table-wrapper" :style="zoomStyle">
           <el-table :data="tableData" :cell-class-name="getCellClass" border row-key="id" style="width: 100%">
             <!-- All table columns -->
             <el-table-column prop="name" label="指标名称" :width="scaledColumnWidths.name" fixed>
@@ -160,6 +160,16 @@ const scaledColumnWidths = computed(() => {
     scaled[key] = baseColumnWidths[key] * scale;
   }
   return scaled;
+});
+
+const zoomStyle = computed(() => {
+  const baseFontSize = 14;
+  const scale = zoomLevel.value / 100;
+  // Reduce the font size change by half
+  const fontScale = (1 + scale) / 2;
+  return {
+    '--table-font-size': `${baseFontSize * fontScale}px`,
+  };
 });
 
 
