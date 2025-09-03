@@ -5,7 +5,7 @@
     <div class="content-wrapper">
       <div class="main-content">
         <div class="table-wrapper">
-          <el-table :data="tableData" :cell-class-name="getCellClass" border style="width: 100%" row-key="id">
+          <el-table :data="tableData" :cell-class-name="getCellClass" border style="width: 100%" row-key="id" height="calc(100vh - 220px)">
             <!-- All table columns -->
             <el-table-column prop="name" label="指标名称" width="250" fixed>
               <template #default="{ row }">
@@ -151,23 +151,33 @@ const validateCell = (row, monthKey, field) => {
 const updateAllCalculations = () => {
   if (tableData.value.length === 0) return;
 
+  // Iterate to handle dependencies
+  for (let i = 0; i < 5; i++) {
+    tableData.value.forEach(row => {
+      if (row.type === 'calculated' && row.formula) {
+        months.value.forEach(month => {
+          const formula = row.formula;
+          const planReplaced = formula.replace(/VAL\((\d+)\)/g, (match, p1) => {
+            return getRowById(parseInt(p1))?.monthlyData[month.key].plan || 0;
+          });
+          try {
+            row.monthlyData[month.key].plan = parseFloat(new Function(`return ${planReplaced}`)().toFixed(2));
+          } catch (e) {}
+
+          const samePeriodReplaced = formula.replace(/VAL\((\d+)\)/g, (match, p1) => {
+            return getRowById(parseInt(p1))?.monthlyData[month.key].samePeriod || 0;
+          });
+          try {
+            row.monthlyData[month.key].samePeriod = parseFloat(new Function(`return ${samePeriodReplaced}`)().toFixed(2));
+          } catch (e) {}
+        });
+      }
+    });
+  }
+
   tableData.value.forEach(row => {
     row.totals.plan = months.value.reduce((acc, month) => acc + Number(row.monthlyData[month.key].plan || 0), 0);
     row.totals.samePeriod = months.value.reduce((acc, month) => acc + Number(row.monthlyData[month.key].samePeriod || 0), 0);
-  });
-
-  tableData.value.forEach(row => {
-    if (row.type === 'calculated' && row.formula) {
-      const formula = row.formula;
-      const replaced = formula.replace(/VAL\((\d+)\)/g, (match, p1) => {
-        return getRowById(parseInt(p1))?.totals.plan || 0;
-      });
-      try {
-        row.totals.plan = parseFloat(new Function(`return ${replaced}`)().toFixed(2));
-      } catch (e) {
-        console.error('Error evaluating formula:', formula, e);
-      }
-    }
   });
 };
 
@@ -304,21 +314,66 @@ const handleSubmit = () => {
   isErrorPanelVisible.value = false;
 };
 const handleExport = () => {
-  const dataToExport = tableData.value.map(row => {
-    const flatRow = {
-      '指标名称': row.name,
-      '计量单位': row.unit,
-      '本期计划': row.totals.plan,
-      '同期完成': row.totals.samePeriod,
-      '差异率': calculateDifferenceRate(row),
-    };
-    months.value.forEach(month => {
-      flatRow[`${month.label}-计划`] = row.monthlyData[month.key].plan;
-      flatRow[`${month.label}-同期`] = row.monthlyData[month.key].samePeriod;
-    });
-    return flatRow;
+  const header = [
+    '指标名称', '计量单位', '本期计划', '同期完成', '差异率',
+    ...months.value.flatMap(m => [`${m.label}-计划`, `${m.label}-同期`])
+  ];
+
+  const data = [header];
+  const rowIdToRowIndex = new Map();
+  tableData.value.forEach((row, index) => {
+    rowIdToRowIndex.set(row.id, index + 2);
   });
-  const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+
+  tableData.value.forEach((row, rowIndex) => {
+    const r = rowIndex + 2;
+    const rowData = [];
+    rowData[0] = row.name;
+    rowData[1] = row.unit;
+
+    if (row.type === 'calculated' && row.formula) {
+      const excelFormulaC = row.formula.replace(/VAL\((\d+)\)/g, (match, p1) => `C${rowIdToRowIndex.get(parseInt(p1))}`);
+      rowData[2] = { t: 'n', f: excelFormulaC };
+      const excelFormulaD = row.formula.replace(/VAL\((\d+)\)/g, (match, p1) => `D${rowIdToRowIndex.get(parseInt(p1))}`);
+      rowData[3] = { t: 'n', f: excelFormulaD };
+    } else {
+      const monthPlanCells = months.value.map((m, i) => XLSX.utils.encode_cell({c: 5 + i * 2, r: r - 1})).join(',');
+      rowData[2] = { t: 'n', f: `SUM(${monthPlanCells})` };
+      const monthSamePeriodCells = months.value.map((m, i) => XLSX.utils.encode_cell({c: 6 + i * 2, r: r - 1})).join(',');
+      rowData[3] = { t: 'n', f: `SUM(${monthSamePeriodCells})` };
+    }
+    
+    rowData[4] = { t: 'n', f: `IF(D${r}=0, 0, (C${r}-D${r})/D${r})`, z: '0.00%' };
+
+    months.value.forEach((month, monthIndex) => {
+      const planCol = 5 + monthIndex * 2;
+      const samePeriodCol = 6 + monthIndex * 2;
+      
+      if (row.type === 'calculated' && row.formula) {
+        const planFormula = row.formula.replace(/VAL\((\d+)\)/g, (match, p1) => `${XLSX.utils.encode_col(planCol)}${rowIdToRowIndex.get(parseInt(p1))}`);
+        rowData[planCol] = { t: 'n', f: planFormula };
+
+        const samePeriodFormula = row.formula.replace(/VAL\((\d+)\)/g, (match, p1) => `${XLSX.utils.encode_col(samePeriodCol)}${rowIdToRowIndex.get(parseInt(p1))}`);
+        rowData[samePeriodCol] = { t: 'n', f: samePeriodFormula };
+      } else {
+        rowData[planCol] = row.monthlyData[month.key].plan;
+        rowData[samePeriodCol] = row.monthlyData[month.key].samePeriod;
+      }
+    });
+    data.push(rowData);
+  });
+
+  const worksheet = XLSX.utils.aoa_to_sheet(data);
+  
+  data.forEach((rowData, r) => {
+    rowData.forEach((cellData, c) => {
+      if (typeof cellData === 'object' && cellData !== null && cellData.f) {
+        const cellRef = XLSX.utils.encode_cell({r, c});
+        worksheet[cellRef] = cellData;
+      }
+    });
+  });
+
   const workbook = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
   XLSX.writeFile(workbook, `${pageTitle.value}.xlsx`);
