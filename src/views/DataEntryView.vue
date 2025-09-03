@@ -9,20 +9,32 @@
             <!-- All table columns -->
             <el-table-column prop="name" label="指标名称" width="250" fixed>
               <template #default="{ row }">
-                <span :class="{ 'calculated-indicator': row.type === 'calculated' }">{{ row.name }}</span>
+                <div class="cell-content">
+                  <span :class="{ 'calculated-indicator': row.type === 'calculated' }">{{ row.name }}</span>
+                </div>
               </template>
             </el-table-column>
-            <el-table-column prop="unit" label="计量单位" width="100" fixed />
+            <el-table-column prop="unit" label="计量单位" width="100" fixed>
+              <template #default="{ row }">
+                <div class="cell-content">{{ row.unit }}</div>
+              </template>
+            </el-table-column>
             
             <el-table-column label="本期计划" width="120">
-              <template #default="{ row }">{{ row.totals.plan }}</template>
+              <template #default="{ row }">
+                <div class="cell-content">{{ row.totals.plan }}</div>
+              </template>
             </el-table-column>
             <el-table-column label="同期完成" width="120">
-              <template #default="{ row }">{{ row.totals.samePeriod }}</template>
+              <template #default="{ row }">
+                <div class="cell-content">{{ row.totals.samePeriod }}</div>
+              </template>
             </el-table-column>
             <el-table-column label="差异率" width="100">
               <template #default="{ row }">
-                <span :class="getDifferenceRateClass(row)">{{ calculateDifferenceRate(row) }}</span>
+                <div class="cell-content">
+                  <span :class="getDifferenceRateClass(row)">{{ calculateDifferenceRate(row) }}</span>
+                </div>
               </template>
             </el-table-column>
 
@@ -48,7 +60,9 @@
                 </template>
               </el-table-column>
               <el-table-column label="同期" :prop="`monthlyData.${month.key}.samePeriod`" width="110">
-                <template #default="{ row }">{{ row.monthlyData[month.key].samePeriod }}</template>
+                <template #default="{ row }">
+                  <div class="cell-content">{{ row.monthlyData[month.key].samePeriod }}</div>
+                </template>
               </el-table-column>
             </el-table-column>
           </el-table>
@@ -217,17 +231,30 @@ const startResize = (event) => {
   document.documentElement.addEventListener('mouseup', stopDrag, false);
 };
 const getCellClass = ({ row, column }) => {
-  if (row.type === 'calculated' && column.property?.includes('.plan')) return 'is-calculated';
   const prop = column.property;
-  if (!prop) return '';
-  const monthKey = months.value.find(m => prop.startsWith(`monthlyData.${m.key}`))?.key;
-  if (!monthKey) return '';
-  const key = `${row.id}-${monthKey}-plan`;
-  const error = errors.value[key];
-  if (error) {
-    if (error.type === 'A') return 'is-error';
-    if (error.type === 'B') return 'is-warning';
+
+  // --- Style non-editable cells ---
+  const isMonthlyPlan = prop?.includes('monthlyData') && prop?.includes('.plan');
+  const isMonthlySamePeriod = prop?.includes('.samePeriod');
+  const isTotalColumn = ['本期计划', '同期完成', '差异率'].includes(column.label);
+
+  if ((row.type === 'calculated' && isMonthlyPlan) || isMonthlySamePeriod || isTotalColumn) {
+    return 'is-calculated';
   }
+
+  // --- Style error/warning cells ---
+  if (prop) {
+    const monthKey = months.value.find(m => prop.startsWith(`monthlyData.${m.key}`))?.key;
+    if (monthKey) {
+      const key = `${row.id}-${monthKey}-plan`;
+      const error = errors.value[key];
+      if (error) {
+        if (error.type === 'A') return 'is-error';
+        if (error.type === 'B') return 'is-warning';
+      }
+    }
+  }
+
   return '';
 };
 const calculateDifferenceRate = (row) => {
@@ -301,10 +328,42 @@ const handleExport = () => {
 </script>
 
 <style>
+/* General Table Style Enhancement */
+.el-table {
+  border-left: 1px solid #ebeef5;
+  border-top: 1px solid #ebeef5;
+}
+.el-table th.el-table__cell, .el-table td.el-table__cell {
+  border-right: 1px solid #ebeef5;
+  border-bottom: 1px solid #ebeef5;
+}
+.el-table th.el-table__cell {
+  background-color: #fafafa;
+}
+
+/* Error and Warning Styles */
 .is-error .el-input__wrapper, .is-error .cell-content { box-shadow: 0 0 0 1px #f56c6c inset !important; border-radius: 4px; }
 .is-warning .el-input__wrapper, .is-warning .cell-content { box-shadow: 0 0 0 1px #e6a23c inset !important; border-radius: 4px; }
-.is-calculated .cell-content:hover { cursor: not-allowed; }
-.is-calculated span { color: #909399; }
+
+/* Style for non-editable/calculated cells */
+.is-calculated .cell-content {
+  background-color: #f0f2f5; /* A slightly darker grey */
+  background-image: linear-gradient(
+    45deg,
+    #e9ecef 25%,
+    transparent 25%,
+    transparent 50%,
+    #e9ecef 50%,
+    #e9ecef 75%,
+    transparent 75%,
+    transparent
+  );
+  background-size: 12px 12px;
+  color: #909399;
+  cursor: not-allowed;
+  font-style: italic; /* Italicize text to further indicate it's different */
+}
+
 .calculated-indicator { font-weight: bold; }
 </style>
 

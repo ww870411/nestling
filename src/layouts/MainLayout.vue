@@ -131,7 +131,6 @@ const handleLogout = () => {
   border-right: none;
 }
 
-.status-new { color: #f56c6c !important; }
 .status-saved { color: #e6a23c !important; }
 .status-submitted { color: #67c23a !important; }
 
