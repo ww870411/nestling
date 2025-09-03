@@ -5,7 +5,10 @@
     <div class="content-wrapper">
       <div class="main-content">
         <div class="table-wrapper" :style="zoomStyle">
-          <el-table :data="tableData" :cell-class-name="getCellClass" border row-key="id" style="width: 100%">
+          <el-table :data="tableData" :cell-class-name="getCellClass" border row-key="id" style="width: 100%"
+                    :header-cell-style="{ textAlign: 'center' }"
+                    :cell-style="{ textAlign: 'center' }"
+                    height="100%">
             <!-- All table columns -->
             <el-table-column prop="name" label="指标名称" :width="scaledColumnWidths.name" fixed>
               <template #default="{ row }">
@@ -38,7 +41,7 @@
               </template>
             </el-table-column>
 
-            <el-table-column v-for="month in months" :key="month.key" :label="month.label">
+            <el-table-column v-for="month in months" :key="month.key" :label="month.label" header-align="center">
               <el-table-column label="计划" :prop="`monthlyData.${month.key}.plan`" :width="scaledColumnWidths.monthPlan">
                 <template #default="{ row, $index }">
                   <el-tooltip
@@ -469,7 +472,7 @@ const handleExport = () => {
 .content-wrapper { flex-grow: 1; display: flex; overflow: hidden; }
 .main-content { flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; }
 .table-controls { display: flex; align-items: center; }
-.table-wrapper { flex-grow: 1; overflow: auto; min-height: 0; }
+.table-wrapper { flex-grow: 1; overflow: hidden; min-height: 0; }
 .error-panel { position: relative; flex-shrink: 0; margin-left: 20px; border: 1px solid #ebeef5; border-radius: 4px; padding: 15px; display: flex; flex-direction: column; }
 .resizer { position: absolute; left: -5px; top: 0; height: 100%; width: 10px; cursor: col-resize; z-index: 10; }
 .error-panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid #ebeef5; }
