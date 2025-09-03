@@ -5,67 +5,69 @@
     <div class="content-wrapper">
       <div class="main-content">
         <div class="table-wrapper">
-          <el-table :data="tableData" :cell-class-name="getCellClass" border style="width: 100%" row-key="id" height="calc(100vh - 220px)">
-            <!-- All table columns -->
-            <el-table-column prop="name" label="指标名称" width="250" fixed>
-              <template #default="{ row }">
-                <div class="cell-content">
-                  <span :class="{ 'calculated-indicator': row.type === 'calculated' }">{{ row.name }}</span>
-                </div>
-              </template>
-            </el-table-column>
-            <el-table-column prop="unit" label="计量单位" width="100" fixed>
-              <template #default="{ row }">
-                <div class="cell-content">{{ row.unit }}</div>
-              </template>
-            </el-table-column>
-            
-            <el-table-column label="本期计划" width="120">
-              <template #default="{ row }">
-                <div class="cell-content">{{ row.totals.plan }}</div>
-              </template>
-            </el-table-column>
-            <el-table-column label="同期完成" width="120">
-              <template #default="{ row }">
-                <div class="cell-content">{{ row.totals.samePeriod }}</div>
-              </template>
-            </el-table-column>
-            <el-table-column label="差异率" width="100">
-              <template #default="{ row }">
-                <div class="cell-content">
-                  <span :class="getDifferenceRateClass(row)">{{ calculateDifferenceRate(row) }}</span>
-                </div>
-              </template>
-            </el-table-column>
-
-            <el-table-column v-for="month in months" :key="month.key" :label="month.label">
-              <el-table-column label="计划" :prop="`monthlyData.${month.key}.plan`" width="110">
-                <template #default="{ row, $index }">
-                   <el-tooltip
-                    :disabled="!errors[`${row.id}-${month.key}-plan`]?.message"
-                    :content="errors[`${row.id}-${month.key}-plan`]?.message"
-                    placement="top"
-                    effect="dark"
-                  >
-                    <div @click="startEdit(row, month.key)" class="cell-content">
-                      <el-input
-                        v-if="isEditing(row.id, month.key)"
-                        v-model.number="row.monthlyData[month.key].plan"
-                        @blur="finishEdit(row, month.key)"
-                        @keyup.enter="finishEdit(row, month.key)"
-                      />
-                      <span v-else>{{ row.monthlyData[month.key].plan }}</span>
-                    </div>
-                  </el-tooltip>
-                </template>
-              </el-table-column>
-              <el-table-column label="同期" :prop="`monthlyData.${month.key}.samePeriod`" width="110">
+          <div :style="scalerStyle">
+            <el-table :data="tableData" :cell-class-name="getCellClass" border row-key="id" height="100%" style="width: 100%">
+              <!-- All table columns -->
+              <el-table-column prop="name" label="指标名称" width="250" fixed>
                 <template #default="{ row }">
-                  <div class="cell-content">{{ row.monthlyData[month.key].samePeriod }}</div>
+                  <div class="cell-content">
+                    <span :class="{ 'calculated-indicator': row.type === 'calculated' }">{{ row.name }}</span>
+                  </div>
                 </template>
               </el-table-column>
-            </el-table-column>
-          </el-table>
+              <el-table-column prop="unit" label="计量单位" width="100" fixed>
+                <template #default="{ row }">
+                  <div class="cell-content">{{ row.unit }}</div>
+                </template>
+              </el-table-column>
+              
+              <el-table-column label="本期计划" width="120">
+                <template #default="{ row }">
+                  <div class="cell-content">{{ row.totals.plan }}</div>
+                </template>
+              </el-table-column>
+              <el-table-column label="同期完成" width="120">
+                <template #default="{ row }">
+                  <div class="cell-content">{{ row.totals.samePeriod }}</div>
+                </template>
+              </el-table-column>
+              <el-table-column label="差异率" width="100">
+                <template #default="{ row }">
+                  <div class="cell-content">
+                    <span :class="getDifferenceRateClass(row)">{{ calculateDifferenceRate(row) }}</span>
+                  </div>
+                </template>
+              </el-table-column>
+
+              <el-table-column v-for="month in months" :key="month.key" :label="month.label">
+                <el-table-column label="计划" :prop="`monthlyData.${month.key}.plan`" width="110">
+                  <template #default="{ row, $index }">
+                    <el-tooltip
+                      :disabled="!errors[`${row.id}-${month.key}-plan`]?.message"
+                      :content="errors[`${row.id}-${month.key}-plan`]?.message"
+                      placement="top"
+                      effect="dark"
+                    >
+                      <div @click="startEdit(row, month.key)" class="cell-content">
+                        <el-input
+                          v-if="isEditing(row.id, month.key)"
+                          v-model.number="row.monthlyData[month.key].plan"
+                          @blur="finishEdit(row, month.key)"
+                          @keyup.enter="finishEdit(row, month.key)"
+                        />
+                        <span v-else>{{ row.monthlyData[month.key].plan }}</span>
+                      </div>
+                    </el-tooltip>
+                  </template>
+                </el-table-column>
+                <el-table-column label="同期" :prop="`monthlyData.${month.key}.samePeriod`" width="110">
+                  <template #default="{ row }">
+                    <div class="cell-content">{{ row.monthlyData[month.key].samePeriod }}</div>
+                  </template>
+                </el-table-column>
+              </el-table-column>
+            </el-table>
+          </div>
         </div>
 
         <div v-if="isErrorPanelVisible" class="error-panel" :style="{ width: `${panelWidth}px` }">
@@ -93,6 +95,14 @@
     <div class="footer-actions">
       <div>
         <el-button @click="handleExport">导出</el-button>
+      </div>
+      <div class="table-controls">
+        <label style="margin-right: 10px; font-size: 14px; color: #606266;">表格缩放:</label>
+        <el-radio-group v-model="zoomLevel" size="small">
+          <el-radio-button :label="50">50%</el-radio-button>
+          <el-radio-button :label="75">75%</el-radio-button>
+          <el-radio-button :label="100">100%</el-radio-button>
+        </el-radio-group>
       </div>
       <div>
         <el-button @click="handleSave">暂存</el-button>
@@ -133,6 +143,20 @@ const explanations = ref({});
 const isErrorPanelVisible = ref(false);
 const panelWidth = ref(240);
 const editingCell = ref(null);
+const zoomLevel = ref(100);
+
+const scalerStyle = computed(() => {
+  const scale = zoomLevel.value / 100;
+  if (scale === 1) {
+    return { width: '100%', height: '100%' };
+  }
+  return {
+    transform: `scale(${scale})`,
+    transformOrigin: 'top left',
+    width: `${100 / scale}%`,
+    height: `${100 / scale}%`,
+  };
+});
 
 // --- Calculation Engine (Simplified & Robust) ---
 const getRowById = (id) => tableData.value.find(r => r.id === id);
@@ -391,6 +415,8 @@ const handleExport = () => {
 .el-table th.el-table__cell, .el-table td.el-table__cell {
   border-right: 1px solid #ebeef5;
   border-bottom: 1px solid #ebeef5;
+  font-size: var(--table-font-size, 14px);
+  padding: var(--table-cell-vertical-padding, 12px) 0;
 }
 .el-table th.el-table__cell {
   background-color: #fafafa;
@@ -426,8 +452,9 @@ const handleExport = () => {
 .data-entry-container { display: flex; flex-direction: column; height: 100%; padding: 20px; box-sizing: border-box; }
 .page-title { flex-shrink: 0; text-align: center; margin-bottom: 20px; }
 .content-wrapper { flex-grow: 1; display: flex; overflow: hidden; }
-.main-content { flex-grow: 1; display: flex; overflow: hidden; }
-.table-wrapper { flex-grow: 1; overflow: auto; }
+.main-content { flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; }
+.table-controls { display: flex; align-items: center; }
+.table-wrapper { flex-grow: 1; overflow: auto; min-height: 0; }
 .error-panel { position: relative; flex-shrink: 0; margin-left: 20px; border: 1px solid #ebeef5; border-radius: 4px; padding: 15px; display: flex; flex-direction: column; }
 .resizer { position: absolute; left: -5px; top: 0; height: 100%; width: 10px; cursor: col-resize; z-index: 10; }
 .error-panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid #ebeef5; }

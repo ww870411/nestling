@@ -141,6 +141,24 @@ const handleLogout = () => {
   border-bottom: 1px solid #dcdfe6;
 }
 
+.header-center {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.zoom-label {
+  font-size: 14px;
+  color: #606266;
+}
+
+.zoom-value {
+  font-size: 14px;
+  color: #303133;
+  width: 40px;
+  text-align: right;
+}
+
 .header-left {
   display: flex;
   align-items: center;
