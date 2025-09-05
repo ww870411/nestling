@@ -1,7 +1,7 @@
 <template>
   <div class="data-entry-container">
     <h2 class="page-title">{{ pageTitle }}</h2>
-    
+
     <div class="content-wrapper">
       <div class="main-content">
         <div class="table-wrapper" :style="zoomStyle">
@@ -22,7 +22,7 @@
                 <div class="cell-content">{{ row.unit }}</div>
               </template>
             </el-table-column>
-            
+
             <el-table-column label="本期计划" :width="scaledColumnWidths.totalPlan">
               <template #default="{ row }">
                 <div class="cell-content">{{ row.totals.plan }}</div>
@@ -43,7 +43,7 @@
 
             <el-table-column v-for="month in months" :key="month.key" :label="month.label" header-align="center">
               <el-table-column label="计划" :prop="`monthlyData.${month.key}.plan`" :width="scaledColumnWidths.monthPlan">
-                <template #default="{ row, $index }">
+                <template #default="{ row }">
                   <el-tooltip
                     :disabled="!errors[`${row.id}-${month.key}-plan`]?.message"
                     :content="errors[`${row.id}-${month.key}-plan`]?.message"
@@ -107,6 +107,7 @@
       </div>
       <div>
         <el-button @click="handleSave">暂存</el-button>
+        <el-button @click="handleLoadDraft">取回暂存</el-button>
         <el-button type="primary" :disabled="hasHardErrors" @click="handleSubmit">提交</el-button>
       </div>
     </div>
@@ -134,7 +135,7 @@ const pageTitle = computed(() => {
 });
 
 const months = ref([
-  { key: 'october', label: '10月' }, { key: 'november', label: '11月' }, { key: 'december', label: '12月' }, 
+  { key: 'october', label: '10月' }, { key: 'november', label: '11月' }, { key: 'december', label: '12月' },
   { key: 'january', label: '1月' }, { key: 'february', label: '2月' }, { key: 'march', label: '3月' }, { key: 'april', label: '4月' }
 ]);
 
@@ -166,12 +167,16 @@ const scaledColumnWidths = computed(() => {
 });
 
 const zoomStyle = computed(() => {
-  const baseFontSize = 14;
+  const baseFontSize = 12;
+  const basePadding = 5; // Reduced from 12
   const scale = zoomLevel.value / 100;
-  // Reduce the font size change by half
-  const fontScale = (1 + scale) / 2;
+
+  // Reduce the font size change by half for better readability
+  const fontScale = (1 + scale) / 1.8;
+
   return {
     '--table-font-size': `${baseFontSize * fontScale}px`,
+    '--table-cell-vertical-padding': `${basePadding * scale}px`,
   };
 });
 
@@ -204,14 +209,14 @@ const updateAllCalculations = () => {
           });
           try {
             row.monthlyData[month.key].plan = parseFloat(new Function(`return ${planReplaced}`)().toFixed(2));
-          } catch (e) {}
+          } catch { /* intentional */ }
 
           const samePeriodReplaced = formula.replace(/VAL\((\d+)\)/g, (match, p1) => {
             return getRowById(parseInt(p1))?.monthlyData[month.key].samePeriod || 0;
           });
           try {
             row.monthlyData[month.key].samePeriod = parseFloat(new Function(`return ${samePeriodReplaced}`)().toFixed(2));
-          } catch (e) {}
+          } catch { /* intentional */ }
         });
       }
     });
@@ -328,10 +333,55 @@ const setStatus = (status) => {
   localStorage.setItem(key, status);
   window.dispatchEvent(new Event('storage'));
 };
+
 const handleSave = () => {
+  // 1. Save the status
   setStatus('saved');
+
+  // 2. Save the actual data
+  const draftData = {};
+  tableData.value.forEach(row => {
+    if (row.type === 'basic') {
+      draftData[row.id] = {};
+      months.value.forEach(month => {
+        // Only save the 'plan' field which is user-editable
+        draftData[row.id][month.key] = row.monthlyData[month.key].plan;
+      });
+    }
+  });
+
+  const dataKey = `data-draft-${route.params.id}`;
+  localStorage.setItem(dataKey, JSON.stringify(draftData));
+
   ElMessage.success('草稿已暂存');
 };
+
+const handleLoadDraft = () => {
+  const dataKey = `data-draft-${route.params.id}`;
+  const savedData = localStorage.getItem(dataKey);
+
+  if (!savedData) {
+    ElMessage.warning('没有找到可用的暂存数据');
+    return;
+  }
+
+  const draftData = JSON.parse(savedData);
+
+  tableData.value.forEach(row => {
+    if (draftData[row.id]) {
+      months.value.forEach(month => {
+        if (draftData[row.id][month.key] !== undefined) {
+          row.monthlyData[month.key].plan = draftData[row.id][month.key];
+        }
+      });
+    }
+  });
+
+  // Recalculate everything after loading data
+  updateAllCalculations();
+  ElMessage.success('暂存数据已成功拉取');
+};
+
 const handleSubmit = () => {
   if (hasHardErrors.value) {
     ElMessage.error('提交失败，请修正所有红色错误后再试。');
@@ -384,13 +434,13 @@ const handleExport = () => {
       const monthSamePeriodCells = months.value.map((m, i) => XLSX.utils.encode_cell({c: 6 + i * 2, r: r - 1})).join(',');
       rowData[3] = { t: 'n', f: `SUM(${monthSamePeriodCells})` };
     }
-    
+
     rowData[4] = { t: 'n', f: `IF(D${r}=0, 0, (C${r}-D${r})/D${r})`, z: '0.00%' };
 
     months.value.forEach((month, monthIndex) => {
       const planCol = 5 + monthIndex * 2;
       const samePeriodCol = 6 + monthIndex * 2;
-      
+
       if (row.type === 'calculated' && row.formula) {
         const planFormula = row.formula.replace(/VAL\((\d+)\)/g, (match, p1) => `${XLSX.utils.encode_col(planCol)}${rowIdToRowIndex.get(parseInt(p1))}`);
         rowData[planCol] = { t: 'n', f: planFormula };
@@ -406,7 +456,7 @@ const handleExport = () => {
   });
 
   const worksheet = XLSX.utils.aoa_to_sheet(data);
-  
+
   data.forEach((rowData, r) => {
     rowData.forEach((cellData, c) => {
       if (typeof cellData === 'object' && cellData !== null && cellData.f) {
@@ -430,6 +480,23 @@ const handleExport = () => {
   border-left: 1px solid #ebeef5;
   border-top: 1px solid #ebeef5;
 }
+
+/* Style for the input component within the table */
+:deep(.el-input__inner) {
+  text-align: center;
+  border: none;
+  padding: 0 2px;
+  font-size: 13px; /* Slightly smaller font for more room */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+:deep(.el-input__wrapper) {
+  padding: 0;
+  box-shadow: none !important; /* Remove focus shadow to blend in */
+}
+
 .el-table th.el-table__cell, .el-table td.el-table__cell {
   border-right: 1px solid #ebeef5;
   border-bottom: 1px solid #ebeef5;
@@ -468,7 +535,7 @@ const handleExport = () => {
 
 <style scoped>
 .data-entry-container { display: flex; flex-direction: column; height: 100%; padding: 20px; box-sizing: border-box; }
-.page-title { flex-shrink: 0; text-align: center; margin-bottom: 20px; }
+.page-title { flex-shrink: 0; text-align: center; margin: 5px 0; font-size: 18px; }
 .content-wrapper { flex-grow: 1; display: flex; overflow: hidden; }
 .main-content { flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; }
 .table-controls { display: flex; align-items: center; }
@@ -483,7 +550,7 @@ const handleExport = () => {
 .error-item label { font-weight: bold; font-size: 14px; }
 .error-item .error-message { font-size: 12px; color: #909399; margin: 5px 0; }
 .footer-actions { flex-shrink: 0; display: flex; justify-content: space-between; align-items: center; padding-top: 20px; }
-.cell-content { cursor: pointer; min-height: 24px; padding: 5px; }
+.cell-content { cursor: pointer; min-height: 20px; padding: 2px 5px; }
 .text-danger { color: #f56c6c; }
 .text-success { color: #67c23a; }
 </style>
