@@ -354,6 +354,10 @@ const handleSave = () => {
     });
   });
   localStorage.setItem(`data-draft-${route.params.id}`, JSON.stringify(draftData));
+  
+  // Set status for dashboard
+  localStorage.setItem(`status-${route.params.id}`, 'saved');
+
   ElMessage.success('草稿已暂存');
 };
 
@@ -390,6 +394,10 @@ const handleSubmit = () => {
         return;
     }
   }
+
+  // Set status and submission time for dashboard
+  localStorage.setItem(`status-${route.params.id}`, 'submitted');
+  localStorage.setItem(`submittedAt-${route.params.id}`, new Date().toISOString());
 
   ElMessage.success('提交成功！');
   isErrorPanelVisible.value = false;

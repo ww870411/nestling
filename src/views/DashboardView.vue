@@ -1,24 +1,40 @@
 <template>
   <div class="dashboard-container">
-    <h2 class="dashboard-title">报表中心</h2>
+    <h2 class="dashboard-title">{{ config.title }}</h2>
     <div class="table-container">
       <el-table :data="allReports" stripe style="width: 100%">
-        <el-table-column prop="groupName" label="所属单位" width="180" />
-        <el-table-column prop="name" label="报表名称" />
-        <el-table-column label="填报状态" width="120">
-          <template #default="{ row }">
-            <span :class="getStatusClass(row.id)" class="status-text">
-              ● {{ getStatusText(row.id) }}
-            </span>
-          </template>
-        </el-table-column>
-        <el-table-column label="操作" width="120">
-          <template #default="{ row }">
-            <el-button type="primary" link @click="goToReport(row.id)">
-              进入
-            </el-button>
-          </template>
-        </el-table-column>
+        <template v-for="column in config.columns" :key="column.prop">
+          <el-table-column :prop="column.prop" :label="column.label" :width="column.width">
+            
+            <template #default="{ row }">
+              <!-- 状态列 -->
+              <div v-if="column.type === 'status'">
+                <span :class="getStatusInfo(row.status).className" class="status-text">
+                  ● {{ getStatusInfo(row.status).text }}
+                </span>
+              </div>
+
+              <!-- 时间列 -->
+              <div v-else-if="column.type === 'datetime'">
+                <span v-if="row.status === 'submitted'">{{ formatDateTime(row.submittedAt) }}</span>
+                <span v-else></span>
+              </div>
+
+              <!-- 操作列 -->
+              <div v-else-if="column.type === 'actions'">
+                <el-button type="primary" link @click="goToReport(row.id)">
+                  进入
+                </el-button>
+              </div>
+
+              <!-- 默认列 -->
+              <div v-else>
+                {{ row[column.prop] }}
+              </div>
+            </template>
+
+          </el-table-column>
+        </template>
       </el-table>
     </div>
   </div>
@@ -29,56 +45,64 @@ import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { useProjectStore } from '@/stores/projectStore';
+import { dashboardConfig } from '@/projects/heating_plan_2025-2026/dashboardData.js';
 
 const router = useRouter();
 const projectStore = useProjectStore();
 const { menuData } = storeToRefs(projectStore);
 
-const reportStatuses = ref({});
+const config = ref(dashboardConfig);
+const reportInfo = ref({});
 
-// Flatten menuData for the table
+// 将菜单数据和状态数据结合
 const allReports = computed(() => {
   return menuData.value.flatMap(group => 
     group.tables.map(table => ({
       ...table,
-      groupName: group.name
+      groupName: group.name,
+      status: reportInfo.value[table.id]?.status || 'new',
+      submittedAt: reportInfo.value[table.id]?.submittedAt || null
     }))
   );
 });
 
-const updateStatuses = () => {
-  const statuses = {};
+// 从 localStorage 更新状态
+const updateReportInfo = () => {
+  const info = {};
   for (let i = 0; i < localStorage.length; i++) {
     const key = localStorage.key(i);
     if (key.startsWith('status-')) {
       const reportId = key.replace('status-', '');
-      statuses[reportId] = localStorage.getItem(key);
+      if (!info[reportId]) info[reportId] = {};
+      info[reportId].status = localStorage.getItem(key);
+    } else if (key.startsWith('submittedAt-')) {
+      const reportId = key.replace('submittedAt-', '');
+      if (!info[reportId]) info[reportId] = {};
+      info[reportId].submittedAt = localStorage.getItem(key);
     }
   }
-  reportStatuses.value = statuses;
+  reportInfo.value = info;
 };
 
 onMounted(() => {
-  updateStatuses();
-  window.addEventListener('storage', updateStatuses);
+  updateReportInfo();
+  window.addEventListener('storage', updateReportInfo);
 });
 
 onUnmounted(() => {
-  window.removeEventListener('storage', updateStatuses);
+  window.removeEventListener('storage', updateReportInfo);
 });
 
-const getStatusClass = (reportId) => {
-  const status = reportStatuses.value[reportId];
-  if (status === 'saved') return 'status-saved';
-  if (status === 'submitted') return 'status-submitted';
-  return 'status-new';
+// 根据状态获取显示信息
+const getStatusInfo = (status) => {
+  return config.value.statusMap[status] || config.value.statusMap.new;
 };
 
-const getStatusText = (reportId) => {
-  const status = reportStatuses.value[reportId];
-  if (status === 'saved') return '已暂存';
-  if (status === 'submitted') return '已提交';
-  return '未填写';
+// 格式化时间
+const formatDateTime = (isoString) => {
+  if (!isoString) return '';
+  const date = new Date(isoString);
+  return date.toLocaleString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
 };
 
 const goToReport = (reportId) => {
