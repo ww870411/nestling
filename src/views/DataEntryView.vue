@@ -138,6 +138,7 @@ const initializeTableData = () => {
       style: metric.style,
       type: metric.type, // Pass metric type to row
       validation: metric.validation, // Pass personalized validation to row
+      samePeriodEditable: metric.samePeriodEditable, // Pass editable flag to row
       values: {},
     };
 

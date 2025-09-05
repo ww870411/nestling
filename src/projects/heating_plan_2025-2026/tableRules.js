@@ -12,8 +12,18 @@ export const isCellWritable = (row, field) => {
   if (!row || !field) {
     return false;
   }
-  // 必须同时满足：行是基础行，且列是输入列
-  return row.type === 'basic' && field.component === 'input';
+
+  // 规则 1: 常规输入单元格 (基础行 & 输入列)
+  if (row.type === 'basic' && field.component === 'input') {
+    return true;
+  }
+
+  // 规则 2: 特殊情况 - 同期值可编辑 (行标记为可写 & 列为同期值列)
+  if (row.samePeriodEditable && field.name && field.name.endsWith('.samePeriod')) {
+    return true;
+  }
+
+  return false;
 };
 
 
