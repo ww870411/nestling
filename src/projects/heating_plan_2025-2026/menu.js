@@ -1,6 +1,4 @@
-import { ref } from 'vue';
-
-export const menuData = ref([
+export const menuData = [
   {
     name: '集团公司',
     tables: [
@@ -54,4 +52,4 @@ export const menuData = ref([
     name: '研究院',
     tables: [ { id: '14', name: '14 研究院表' } ]
   }
-]);
+];

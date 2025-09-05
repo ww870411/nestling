@@ -50,7 +50,7 @@
         </div>
       </el-header>
       <el-main>
-        <router-view></router-view>
+        <router-view v-if="isProjectLoaded"></router-view>
       </el-main>
     </el-container>
   </el-container>
@@ -60,13 +60,16 @@
 // Script is the same as before
 import { ref, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
+import { storeToRefs } from 'pinia';
+import { useProjectStore } from '@/stores/projectStore';
 import { HomeFilled, Grid } from '@element-plus/icons-vue';
 
 const router = useRouter();
+const projectStore = useProjectStore();
+const { menuData, isProjectLoaded, currentProjectName } = storeToRefs(projectStore);
+
 const reportStatuses = ref({});
 const isSidebarCollapsed = ref(false);
-
-import { menuData } from '../services/menuData.js';
 
 const toggleSidebar = () => {
   isSidebarCollapsed.value = !isSidebarCollapsed.value;
@@ -101,7 +104,8 @@ const getStatusClass = (reportId) => {
 };
 
 const handleLogout = () => {
-  localStorage.clear();
+  localStorage.removeItem('authenticated');
+  projectStore.clearProject();
   router.push('/login');
 };
 </script>

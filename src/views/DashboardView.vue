@@ -27,9 +27,13 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { menuData } from '../services/menuData.js';
+import { storeToRefs } from 'pinia';
+import { useProjectStore } from '@/stores/projectStore';
 
 const router = useRouter();
+const projectStore = useProjectStore();
+const { menuData } = storeToRefs(projectStore);
+
 const reportStatuses = ref({});
 
 // Flatten menuData for the table
