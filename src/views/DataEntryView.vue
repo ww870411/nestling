@@ -337,11 +337,36 @@ const getErrorLabel = (key) => {
 
 // --- Actions (Save, Load, Submit, Export) ---
 const handleSave = () => {
-  ElMessage.info('功能正在重构中');
+  const draftData = {};
+  tableData.value.forEach(row => {
+    if (row.type !== 'basic') return;
+    draftData[row.metricId] = {};
+    fieldConfig.value.forEach(field => {
+      if (field.component === 'input') {
+        draftData[row.metricId][field.id] = row.values[field.id];
+      }
+    });
+  });
+  localStorage.setItem(`data-draft-${route.params.id}`, JSON.stringify(draftData));
+  ElMessage.success('草稿已暂存');
 };
 
 const handleLoadDraft = () => {
-  ElMessage.info('功能正在重构中');
+  const savedData = localStorage.getItem(`data-draft-${route.params.id}`);
+  if (!savedData) {
+    ElMessage.warning('没有找到可用的暂存数据');
+    return;
+  }
+  const draftData = JSON.parse(savedData);
+  tableData.value.forEach(row => {
+    if (draftData[row.metricId]) {
+      Object.keys(draftData[row.metricId]).forEach(fieldId => {
+        row.values[fieldId] = draftData[row.metricId][fieldId];
+      });
+    }
+  });
+  calculateAll();
+  ElMessage.success('暂存数据已成功拉取');
 };
 
 const handleSubmit = () => {
@@ -365,7 +390,65 @@ const handleSubmit = () => {
 };
 
 const handleExport = () => {
-  ElMessage.info('功能正在重构中');
+  const header = fieldConfig.value.map(f => f.label);
+  const data = [header];
+
+  const metricIdToRowIndex = new Map();
+  tableData.value.forEach((row, index) => {
+    metricIdToRowIndex.set(row.metricId, index + 1); // 0-based index for worksheet
+  });
+
+  const fieldIdToColIndex = new Map();
+  fieldConfig.value.forEach((field, index) => {
+    fieldIdToColIndex.set(field.id, index);
+  });
+
+  tableData.value.forEach(row => {
+    const rowData = fieldConfig.value.map(field => row.values[field.id] ?? '');
+    data.push(rowData);
+  });
+
+  const worksheet = XLSX.utils.aoa_to_sheet(data);
+
+  // Re-add formulas
+  tableData.value.forEach((row, rowIndex) => {
+    const r = rowIndex + 1; // 1-based for cell address
+    const metricDef = reportTemplate.value.find(m => m.id === row.metricId);
+
+    // Handle row-level formulas (e.g., VAL(8)+VAL(9))
+    if (metricDef && metricDef.type === 'calculated' && metricDef.formula) {
+      fieldConfig.value.forEach((field, colIndex) => {
+        if (field.component !== 'input') return; // Apply formula only to data columns
+        const c = colIndex;
+        const excelFormula = metricDef.formula.replace(/VAL\((\d+)\)/g, (match, id) => {
+          const sourceRowIndex = metricIdToRowIndex.get(parseInt(id));
+          return XLSX.utils.encode_cell({ r: sourceRowIndex, c });
+        });
+        worksheet[XLSX.utils.encode_cell({ r, c })] = { t: 'n', f: excelFormula };
+      });
+    }
+
+    // Handle column-level formulas (e.g., totals)
+    fieldConfig.value.forEach((field, colIndex) => {
+      if (field.type === 'calculated' && field.formula) {
+        const c = colIndex;
+        const excelFormula = field.formula.replace(/VAL\((\d+)\)/g, (match, id) => {
+          const sourceColIndex = fieldIdToColIndex.get(parseInt(id));
+          return XLSX.utils.encode_cell({ r, c: sourceColIndex });
+        });
+        worksheet[XLSX.utils.encode_cell({ r, c })] = { t: 'n', f: excelFormula };
+        // Add number formatting for percentage
+        if (field.name === 'totals.diffRate') {
+          worksheet[XLSX.utils.encode_cell({ r, c })].z = '0.00%';
+        }
+      }
+    });
+  });
+
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, pageTitle.value || 'Sheet1');
+  XLSX.writeFile(workbook, `${pageTitle.value}.xlsx`);
+  ElMessage.success('导出成功！');
 };
 
 </script>
