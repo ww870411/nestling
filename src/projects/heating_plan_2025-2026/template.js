@@ -6,6 +6,7 @@ export const reportTemplate = [
     unit: '℃',
     type: 'basic',
     formula: null,
+    style: { fontWeight: 'normal' },
   },
   {
     id: 2,
@@ -14,6 +15,7 @@ export const reportTemplate = [
     unit: '℃',
     type: 'basic',
     formula: null,
+    style: { fontWeight: 'normal' },
   },
   {
     id: 3,
@@ -22,6 +24,7 @@ export const reportTemplate = [
     unit: '万kW',
     type: 'basic',
     formula: null,
+    style: { fontWeight: 'normal' },
   },
   {
     id: 4,
@@ -30,6 +33,7 @@ export const reportTemplate = [
     unit: 'MW',
     type: 'basic',
     formula: null,
+    style: { fontWeight: 'normal' },
   },
   {
     id: 5,
@@ -38,6 +42,7 @@ export const reportTemplate = [
     unit: 'MW',
     type: 'basic',
     formula: null,
+    style: { fontWeight: 'normal' },
   },
   {
     id: 6,
@@ -46,6 +51,7 @@ export const reportTemplate = [
     unit: '万kWh',
     type: 'basic',
     formula: null,
+    style: { fontWeight: 'normal' },
   },
   {
     id: 7,
@@ -54,6 +60,7 @@ export const reportTemplate = [
     unit: 'GJ',
     type: 'calculated',
     formula: 'VAL(8)+VAL(9)+VAL(10)+VAL(11)+VAL(12)',
+    style: { fontWeight: 'bold' },
   },
   {
     id: 8,
@@ -62,6 +69,7 @@ export const reportTemplate = [
     unit: '吨',
     type: 'basic',
     formula: null,
+    style: { fontWeight: 'normal' },
   },
   {
     id: 9,
@@ -70,6 +78,7 @@ export const reportTemplate = [
     unit: 'GJ',
     type: 'basic',
     formula: null,
+    style: { fontWeight: 'normal' },
   },
   {
     id: 10,
@@ -78,6 +87,7 @@ export const reportTemplate = [
     unit: 'GJ',
     type: 'basic',
     formula: null,
+    style: { fontWeight: 'normal' },
   },
   {
     id: 11,
@@ -86,6 +96,7 @@ export const reportTemplate = [
     unit: 'GJ',
     type: 'basic',
     formula: null,
+    style: { fontWeight: 'normal' },
   },
   {
     id: 12,
@@ -94,6 +105,7 @@ export const reportTemplate = [
     unit: 'GJ',
     type: 'basic',
     formula: null,
+    style: { fontWeight: 'normal' },
   },
   {
     id: 13,
@@ -102,6 +114,7 @@ export const reportTemplate = [
     unit: '万kWh',
     type: 'basic',
     formula: null,
+    style: { fontWeight: 'normal' },
   },
   {
     id: 14,
@@ -110,6 +123,7 @@ export const reportTemplate = [
     unit: '吨',
     type: 'basic',
     formula: null,
+    style: { fontWeight: 'normal' },
   },
   {
     id: 15,
@@ -118,6 +132,7 @@ export const reportTemplate = [
     unit: '吨',
     type: 'basic',
     formula: null,
+    style: { fontWeight: 'normal' },
   },
   {
     id: 16,
@@ -126,6 +141,7 @@ export const reportTemplate = [
     unit: 'GJ',
     type: 'basic',
     formula: null,
+    style: { fontWeight: 'normal' },
   },
   {
     id: 17,
@@ -134,6 +150,7 @@ export const reportTemplate = [
     unit: '㎡',
     type: 'basic',
     formula: null,
+    style: { fontWeight: 'normal' },
   },
   {
     id: 18,
@@ -142,6 +159,7 @@ export const reportTemplate = [
     unit: '㎡',
     type: 'calculated',
     formula: 'VAL(19)+VAL(20)+VAL(21)+VAL(22)+VAL(23)',
+    style: { fontWeight: 'bold' },
   },
   {
     id: 19,
@@ -150,6 +168,7 @@ export const reportTemplate = [
     unit: '㎡',
     type: 'basic',
     formula: null,
+    style: { fontWeight: 'normal' },
   },
   {
     id: 20,
@@ -158,6 +177,7 @@ export const reportTemplate = [
     unit: '㎡',
     type: 'basic',
     formula: null,
+    style: { fontWeight: 'normal' },
   },
   {
     id: 21,
@@ -166,6 +186,7 @@ export const reportTemplate = [
     unit: '㎡',
     type: 'basic',
     formula: null,
+    style: { fontWeight: 'normal' },
   },
   {
     id: 22,
@@ -174,6 +195,7 @@ export const reportTemplate = [
     unit: '㎡',
     type: 'basic',
     formula: null,
+    style: { fontWeight: 'normal' },
   },
   {
     id: 23,
@@ -182,6 +204,7 @@ export const reportTemplate = [
     unit: '㎡',
     type: 'basic',
     formula: null,
+    style: { fontWeight: 'normal' },
   },
   {
     id: 24,
@@ -190,6 +213,7 @@ export const reportTemplate = [
     unit: 'GJ',
     type: 'basic',
     formula: null,
+    style: { fontWeight: 'normal' },
   },
   {
     id: 25,
@@ -198,6 +222,7 @@ export const reportTemplate = [
     unit: '吨',
     type: 'calculated',
     formula: 'VAL(26)+VAL(27)',
+    style: { fontWeight: 'bold' },
   },
   {
     id: 26,
@@ -206,6 +231,7 @@ export const reportTemplate = [
     unit: '吨',
     type: 'basic',
     formula: null,
+    style: { fontWeight: 'normal' },
   },
   {
     id: 27,
@@ -214,6 +240,7 @@ export const reportTemplate = [
     unit: '吨',
     type: 'basic',
     formula: null,
+    style: { fontWeight: 'normal' },
   },
   {
     id: 28,
@@ -222,6 +249,7 @@ export const reportTemplate = [
     unit: '吨',
     type: 'calculated',
     formula: 'VAL(29)+VAL(32)',
+    style: { fontWeight: 'bold' },
   },
   {
     id: 29,
@@ -230,6 +258,7 @@ export const reportTemplate = [
     unit: '吨',
     type: 'calculated',
     formula: 'VAL(30)+VAL(31)',
+    style: { fontWeight: 'bold' },
   },
   {
     id: 30,
@@ -238,6 +267,7 @@ export const reportTemplate = [
     unit: '吨',
     type: 'basic',
     formula: null,
+    style: { fontWeight: 'normal' },
   },
   {
     id: 31,
@@ -246,6 +276,7 @@ export const reportTemplate = [
     unit: '吨',
     type: 'basic',
     formula: null,
+    style: { fontWeight: 'normal' },
   },
   {
     id: 32,
@@ -254,6 +285,7 @@ export const reportTemplate = [
     unit: '吨',
     type: 'calculated',
     formula: 'VAL(33)+VAL(34)',
+    style: { fontWeight: 'bold' },
   },
   {
     id: 33,
@@ -262,6 +294,7 @@ export const reportTemplate = [
     unit: '吨',
     type: 'basic',
     formula: null,
+    style: { fontWeight: 'normal' },
   },
   {
     id: 34,
@@ -270,6 +303,7 @@ export const reportTemplate = [
     unit: '吨',
     type: 'basic',
     formula: null,
+    style: { fontWeight: 'normal' },
   },
   {
     id: 35,
@@ -278,6 +312,7 @@ export const reportTemplate = [
     unit: '吨',
     type: 'calculated',
     formula: 'VAL(30)+VAL(33)',
+    style: { fontWeight: 'bold' },
   },
   {
     id: 36,
@@ -286,6 +321,7 @@ export const reportTemplate = [
     unit: '吨',
     type: 'calculated',
     formula: 'VAL(37)+VAL(38)',
+    style: { fontWeight: 'bold' },
   },
   {
     id: 37,
@@ -294,6 +330,7 @@ export const reportTemplate = [
     unit: '吨',
     type: 'basic',
     formula: null,
+    style: { fontWeight: 'normal' },
   },
   {
     id: 38,
@@ -302,6 +339,7 @@ export const reportTemplate = [
     unit: '吨',
     type: 'basic',
     formula: null,
+    style: { fontWeight: 'normal' },
   },
   {
     id: 39,
@@ -310,6 +348,7 @@ export const reportTemplate = [
     unit: 'GJ',
     type: 'basic',
     formula: null,
+    style: { fontWeight: 'normal' },
   },
   {
     id: 40,
@@ -318,6 +357,7 @@ export const reportTemplate = [
     unit: '吨',
     type: 'calculated',
     formula: 'VAL(41)+VAL(42)+VAL(45)+VAL(46)+VAL(47)',
+    style: { fontWeight: 'bold' },
   },
   {
     id: 41,
@@ -326,6 +366,7 @@ export const reportTemplate = [
     unit: '吨',
     type: 'basic',
     formula: null,
+    style: { fontWeight: 'normal' },
   },
   {
     id: 42,
@@ -334,6 +375,7 @@ export const reportTemplate = [
     unit: '吨',
     type: 'calculated',
     formula: 'VAL(43)+VAL(44)',
+    style: { fontWeight: 'bold' },
   },
   {
     id: 43,
@@ -342,6 +384,7 @@ export const reportTemplate = [
     unit: '吨',
     type: 'basic',
     formula: null,
+    style: { fontWeight: 'normal' },
   },
   {
     id: 44,
@@ -350,6 +393,7 @@ export const reportTemplate = [
     unit: '吨',
     type: 'basic',
     formula: null,
+    style: { fontWeight: 'normal' },
   },
   {
     id: 45,
@@ -358,6 +402,7 @@ export const reportTemplate = [
     unit: '吨',
     type: 'basic',
     formula: null,
+    style: { fontWeight: 'normal' },
   },
   {
     id: 46,
@@ -366,6 +411,7 @@ export const reportTemplate = [
     unit: '吨',
     type: 'basic',
     formula: null,
+    style: { fontWeight: 'normal' },
   },
   {
     id: 47,
@@ -374,6 +420,7 @@ export const reportTemplate = [
     unit: '吨',
     type: 'basic',
     formula: null,
+    style: { fontWeight: 'normal' },
   },
   {
     id: 48,
@@ -382,6 +429,7 @@ export const reportTemplate = [
     unit: '吨',
     type: 'basic',
     formula: null,
+    style: { fontWeight: 'normal' },
   },
   {
     id: 49,
@@ -390,6 +438,7 @@ export const reportTemplate = [
     unit: '吨',
     type: 'basic',
     formula: null,
+    style: { fontWeight: 'normal' },
   },
   {
     id: 50,
@@ -398,6 +447,7 @@ export const reportTemplate = [
     unit: '吨',
     type: 'basic',
     formula: null,
+    style: { fontWeight: 'normal' },
   },
   {
     id: 51,
@@ -406,6 +456,7 @@ export const reportTemplate = [
     unit: '吨',
     type: 'basic',
     formula: null,
+    style: { fontWeight: 'normal' },
   },
   {
     id: 52,
@@ -414,6 +465,7 @@ export const reportTemplate = [
     unit: '吨',
     type: 'basic',
     formula: null,
+    style: { fontWeight: 'normal' },
   },
   {
     id: 53,
@@ -422,6 +474,7 @@ export const reportTemplate = [
     unit: '吨',
     type: 'basic',
     formula: null,
+    style: { fontWeight: 'normal' },
   },
   {
     id: 54,
@@ -430,6 +483,7 @@ export const reportTemplate = [
     unit: '吨',
     type: 'basic',
     formula: null,
+    style: { fontWeight: 'normal' },
   },
   {
     id: 55,
@@ -438,6 +492,7 @@ export const reportTemplate = [
     unit: '吨',
     type: 'basic',
     formula: null,
+    style: { fontWeight: 'normal' },
   },
   {
     id: 56,
@@ -446,6 +501,7 @@ export const reportTemplate = [
     unit: '吨',
     type: 'basic',
     formula: null,
+    style: { fontWeight: 'normal' },
   },
   {
     id: 57,
@@ -454,6 +510,7 @@ export const reportTemplate = [
     unit: '吨',
     type: 'basic',
     formula: null,
+    style: { fontWeight: 'normal' },
   },
   {
     id: 58,
@@ -462,6 +519,7 @@ export const reportTemplate = [
     unit: '吨',
     type: 'basic',
     formula: null,
+    style: { fontWeight: 'normal' },
   },
   {
     id: 59,
@@ -470,6 +528,7 @@ export const reportTemplate = [
     unit: '吨',
     type: 'basic',
     formula: null,
+    style: { fontWeight: 'normal' },
   },
   {
     id: 60,
@@ -478,6 +537,7 @@ export const reportTemplate = [
     unit: '万m3',
     type: 'basic',
     formula: null,
+    style: { fontWeight: 'normal' },
   },
   {
     id: 61,
@@ -486,6 +546,7 @@ export const reportTemplate = [
     unit: 'GJ',
     type: 'basic',
     formula: null,
+    style: { fontWeight: 'normal' },
   },
   {
     id: 62,
@@ -494,6 +555,7 @@ export const reportTemplate = [
     unit: '万kWh',
     type: 'calculated',
     formula: 'VAL(63)+VAL(68)',
+    style: { fontWeight: 'bold' },
   },
   {
     id: 63,
@@ -502,6 +564,7 @@ export const reportTemplate = [
     unit: '万kWh',
     type: 'calculated',
     formula: 'VAL(64)+VAL(65)',
+    style: { fontWeight: 'bold' },
   },
   {
     id: 64,
@@ -510,6 +573,7 @@ export const reportTemplate = [
     unit: '万kWh',
     type: 'basic',
     formula: null,
+    style: { fontWeight: 'normal' },
   },
   {
     id: 65,
@@ -518,6 +582,7 @@ export const reportTemplate = [
     unit: '万kWh',
     type: 'calculated',
     formula: 'VAL(66)+VAL(67)',
+    style: { fontWeight: 'bold' },
   },
   {
     id: 66,
@@ -526,6 +591,7 @@ export const reportTemplate = [
     unit: '万kWh',
     type: 'basic',
     formula: null,
+    style: { fontWeight: 'normal' },
   },
   {
     id: 67,
@@ -534,6 +600,7 @@ export const reportTemplate = [
     unit: '万kWh',
     type: 'basic',
     formula: null,
+    style: { fontWeight: 'normal' },
   },
   {
     id: 68,
@@ -542,6 +609,7 @@ export const reportTemplate = [
     unit: '万kWh',
     type: 'calculated',
     formula: 'VAL(69)+VAL(70)+VAL(71)+VAL(72)',
+    style: { fontWeight: 'bold' },
   },
   {
     id: 69,
@@ -550,6 +618,7 @@ export const reportTemplate = [
     unit: '万kWh',
     type: 'basic',
     formula: null,
+    style: { fontWeight: 'normal' },
   },
   {
     id: 70,
@@ -558,6 +627,7 @@ export const reportTemplate = [
     unit: '万kWh',
     type: 'basic',
     formula: null,
+    style: { fontWeight: 'normal' },
   },
   {
     id: 71,
@@ -566,6 +636,7 @@ export const reportTemplate = [
     unit: '万kWh',
     type: 'basic',
     formula: null,
+    style: { fontWeight: 'normal' },
   },
   {
     id: 72,
@@ -574,6 +645,7 @@ export const reportTemplate = [
     unit: '万kWh',
     type: 'basic',
     formula: null,
+    style: { fontWeight: 'normal' },
   },
   {
     id: 73,
@@ -582,6 +654,7 @@ export const reportTemplate = [
     unit: '吨',
     type: 'basic',
     formula: null,
+    style: { fontWeight: 'normal' },
   },
   {
     id: 74,
@@ -590,6 +663,7 @@ export const reportTemplate = [
     unit: '万kWh',
     type: 'basic',
     formula: null,
+    style: { fontWeight: 'normal' },
   },
   {
     id: 75,
@@ -598,6 +672,7 @@ export const reportTemplate = [
     unit: '%',
     type: 'calculated',
     formula: '(VAL(7)+VAL(13)*36)/29.308/VAL(28)',
+    style: { fontWeight: 'bold' },
   },
   {
     id: 76,
@@ -606,6 +681,7 @@ export const reportTemplate = [
     unit: '%',
     type: 'calculated',
     formula: '(VAL(13)*36+VAL(14)*2.952+VAL(24)+VAL(61))/29.308/VAL(28)',
+    style: { fontWeight: 'bold' },
   },
   {
     id: 77,
@@ -614,6 +690,7 @@ export const reportTemplate = [
     unit: '%',
     type: 'calculated',
     formula: '(VAL(7)+VAL(13)*36)/(VAL(28)*29.308)',
+    style: { fontWeight: 'bold' },
   },
   {
     id: 78,
@@ -622,6 +699,7 @@ export const reportTemplate = [
     unit: '%',
     type: 'calculated',
     formula: 'VAL(7)/(VAL(13)*36)',
+    style: { fontWeight: 'bold' },
   },
   {
     id: 79,
@@ -630,6 +708,7 @@ export const reportTemplate = [
     unit: '%',
     type: 'calculated',
     formula: 'VAL(32)/VAL(28)',
+    style: { fontWeight: 'bold' },
   },
   {
     id: 80,
@@ -638,6 +717,7 @@ export const reportTemplate = [
     unit: '%',
     type: 'calculated',
     formula: 'VAL(6)/VAL(3)/3744',
+    style: { fontWeight: 'bold' },
   },
   {
     id: 81,
@@ -646,6 +726,7 @@ export const reportTemplate = [
     unit: '%',
     type: 'calculated',
     formula: 'VAL(7)*1000/(VAL(4)+VAL(5))/13478400',
+    style: { fontWeight: 'bold' },
   },
   {
     id: 82,
@@ -654,6 +735,7 @@ export const reportTemplate = [
     unit: '%',
     type: 'calculated',
     formula: 'VAL(63)/VAL(6)',
+    style: { fontWeight: 'bold' },
   },
   {
     id: 83,
@@ -662,6 +744,7 @@ export const reportTemplate = [
     unit: '%',
     type: 'calculated',
     formula: 'VAL(66)/VAL(6)',
+    style: { fontWeight: 'bold' },
   },
   {
     id: 84,
@@ -670,6 +753,7 @@ export const reportTemplate = [
     unit: 'kWh/GJ',
     type: 'calculated',
     formula: 'VAL(67)*10000/VAL(7)',
+    style: { fontWeight: 'bold' },
   },
   {
     id: 85,
@@ -678,6 +762,7 @@ export const reportTemplate = [
     unit: 'g/kWh',
     type: 'calculated',
     formula: 'VAL(29)*100/VAL(6)',
+    style: { fontWeight: 'bold' },
   },
   {
     id: 86,
@@ -686,6 +771,7 @@ export const reportTemplate = [
     unit: 'g/kWh',
     type: 'calculated',
     formula: 'VAL(29)*100/(VAL(6)-VAL(66))',
+    style: { fontWeight: 'bold' },
   },
   {
     id: 87,
@@ -694,6 +780,7 @@ export const reportTemplate = [
     unit: 'kg/GJ',
     type: 'calculated',
     formula: 'VAL(32)*1000/VAL(7)',
+    style: { fontWeight: 'bold' },
   },
   {
     id: 88,
@@ -702,6 +789,7 @@ export const reportTemplate = [
     unit: '吨/万kWh',
     type: 'calculated',
     formula: '(VAL(41)-VAL(8))*(1-VAL(79))/VAL(6)',
+    style: { fontWeight: 'bold' },
   },
   {
     id: 89,
@@ -710,6 +798,7 @@ export const reportTemplate = [
     unit: '吨/GJ',
     type: 'calculated',
     formula: '((VAL(41)-VAL(8))*VAL(79)+VAL(8))/VAL(7)',
+    style: { fontWeight: 'bold' },
   },
   {
     id: 90,
@@ -718,6 +807,7 @@ export const reportTemplate = [
     unit: 'GJ/㎡',
     type: 'calculated',
     formula: 'VAL(61)/VAL(18)',
+    style: { fontWeight: 'bold' },
   },
   {
     id: 91,
@@ -726,6 +816,7 @@ export const reportTemplate = [
     unit: 'kg/㎡',
     type: 'calculated',
     formula: '(VAL(42)+VAL(45)+VAL(46)+VAL(47))*1000/VAL(18)',
+    style: { fontWeight: 'bold' },
   },
   {
     id: 92,
@@ -734,6 +825,7 @@ export const reportTemplate = [
     unit: 'kWh/㎡',
     type: 'calculated',
     formula: '(VAL(70)+VAL(71)+VAL(72))*10000/VAL(18)',
+    style: { fontWeight: 'bold' },
   },
   {
     id: 93,
@@ -742,6 +834,7 @@ export const reportTemplate = [
     unit: 'kJ/kg',
     type: 'calculated',
     formula: 'VAL(35)/VAL(25)*29308',
+    style: { fontWeight: 'bold' },
   },
   {
     id: 94,
@@ -750,6 +843,7 @@ export const reportTemplate = [
     unit: '万元',
     type: 'calculated',
     formula: 'VAL(95)+VAL(97)+VAL(99)+VAL(101)',
+    style: { fontWeight: 'bold' },
   },
   {
     id: 95,
@@ -758,6 +852,7 @@ export const reportTemplate = [
     unit: '万元',
     type: 'basic',
     formula: null,
+    style: { fontWeight: 'normal' },
   },
   {
     id: 96,
@@ -766,6 +861,7 @@ export const reportTemplate = [
     unit: '元/㎡',
     type: 'calculated',
     formula: 'VAL(95)*10000/VAL(18)',
+    style: { fontWeight: 'bold' },
   },
   {
     id: 97,
@@ -774,6 +870,7 @@ export const reportTemplate = [
     unit: '万元',
     type: 'basic',
     formula: null,
+    style: { fontWeight: 'normal' },
   },
   {
     id: 98,
@@ -782,6 +879,7 @@ export const reportTemplate = [
     unit: '元/kWh',
     type: 'calculated',
     formula: 'VAL(97)/VAL(13)',
+    style: { fontWeight: 'bold' },
   },
   {
     id: 99,
@@ -790,6 +888,7 @@ export const reportTemplate = [
     unit: '万元',
     type: 'basic',
     formula: null,
+    style: { fontWeight: 'normal' },
   },
   {
     id: 100,
@@ -798,6 +897,7 @@ export const reportTemplate = [
     unit: '元/吨',
     type: 'calculated',
     formula: 'VAL(99)*10000/VAL(14)',
+    style: { fontWeight: 'bold' },
   },
   {
     id: 101,
@@ -806,6 +906,7 @@ export const reportTemplate = [
     unit: '万元',
     type: 'basic',
     formula: null,
+    style: { fontWeight: 'normal' },
   },
   {
     id: 102,
@@ -814,6 +915,7 @@ export const reportTemplate = [
     unit: '元/GJ',
     type: 'calculated',
     formula: 'VAL(101)*10000/VAL(24)',
+    style: { fontWeight: 'bold' },
   },
   {
     id: 103,
@@ -822,6 +924,7 @@ export const reportTemplate = [
     unit: '万元',
     type: 'basic',
     formula: null,
+    style: { fontWeight: 'normal' },
   },
   {
     id: 104,
@@ -830,6 +933,7 @@ export const reportTemplate = [
     unit: '元/GJ',
     type: 'calculated',
     formula: 'VAL(103)*10000/VAL(39)',
+    style: { fontWeight: 'bold' },
   },
   {
     id: 105,
@@ -838,6 +942,7 @@ export const reportTemplate = [
     unit: '万元',
     type: 'basic',
     formula: null,
+    style: { fontWeight: 'normal' },
   },
   {
     id: 106,
@@ -846,6 +951,7 @@ export const reportTemplate = [
     unit: '元/吨',
     type: 'calculated',
     formula: 'VAL(105)*10000/VAL(28)',
+    style: { fontWeight: 'bold' },
   },
   {
     id: 107,
@@ -854,6 +960,7 @@ export const reportTemplate = [
     unit: '万元',
     type: 'basic',
     formula: null,
+    style: { fontWeight: 'normal' },
   },
   {
     id: 108,
@@ -862,13 +969,51 @@ export const reportTemplate = [
     unit: '元/kWh',
     type: 'calculated',
     formula: 'VAL(107)/VAL(68)',
+    style: { fontWeight: 'bold' },
   },
   {
     id: 109,
     category: '经济指标',
+    name: '水成本',
+    unit: '万元',
+    type: 'basic',
+    formula: null,
+    style: { fontWeight: 'normal' },
+  },
+    {
+    id: 110,
+    category: '经济指标',
+    name: '水单价',
+    unit: '元/吨',
+    type: 'calculated',
+    formula: 'VAL(109)*10000/VAL(42)',
+    style: { fontWeight: 'bold' },
+  },
+    {
+    id: 111,
+    category: '经济指标',
+    name: '劳务费',
+    unit: '万元',
+    type: 'basic',
+    formula: null,
+    style: { fontWeight: 'normal' },
+  },
+    {
+    id: 112,
+    category: '经济指标',
+    name: '抢修费',
+    unit: '万元',
+    type: 'basic',
+    formula: null,
+    style: { fontWeight: 'normal' },
+  },
+  {
+    id: 113,
+    category: '经济指标',
     name: '毛利',
     unit: '万元',
     type: 'calculated',
-    formula: 'VAL(94)-VAL(103)-VAL(105)-VAL(107)',
+    formula: 'VAL(94)-VAL(103)-VAL(105)-VAL(107)-VAL(109)-VAL(111)-VAL(112)',
+    style: { fontWeight: 'bold'},
   },
 ];

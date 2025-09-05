@@ -19,7 +19,7 @@
             <el-table-column prop="name" label="指标名称" :width="scaledColumnWidths.name" fixed>
               <template #default="{ row }">
                 <div class="cell-content">
-                  <span :class="{ 'calculated-indicator': row.type === 'calculated' }">{{ row.name }}</span>
+                  <span :style="row.style">{{ row.name }}</span>
                 </div>
               </template>
             </el-table-column>
@@ -180,7 +180,8 @@ const initializeTableData = () => {
   tableData.value = (reportTemplate.value || []).map(item => {
     const monthlyData = {};
     months.value.forEach(month => { monthlyData[month.key] = { plan: 0, samePeriod: 0 }; });
-    return { ...item, monthlyData, totals: { plan: 0, samePeriod: 0 } };
+    const plainItem = JSON.parse(JSON.stringify(item));
+    return { ...plainItem, monthlyData, totals: { plan: 0, samePeriod: 0 } };
   });
   updateAllCalculations();
   initialValidation();
@@ -311,7 +312,6 @@ const handleExport = () => {
 .is-error .el-input__wrapper, .is-error .cell-content { box-shadow: 0 0 0 1px #f56c6c inset !important; border-radius: 4px; }
 .is-warning .el-input__wrapper, .is-warning .cell-content { box-shadow: 0 0 0 1px #e6a23c inset !important; border-radius: 4px; }
 .is-calculated .cell-content { background-color: #f0f2f5; background-image: linear-gradient(45deg,#e9ecef 25%,transparent 25%,transparent 50%,#e9ecef 50%,#e9ecef 75%,transparent 75%,transparent); background-size: 12px 12px; color: #909399; cursor: not-allowed; font-style: italic; }
-.calculated-indicator { font-weight: bold; }
 .loading-indicator, .no-data-message { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; font-size: 16px; color: #606266; }
 .loading-indicator .el-icon { margin-bottom: 10px; }
 </style>
