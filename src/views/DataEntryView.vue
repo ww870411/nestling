@@ -46,9 +46,9 @@
                       <el-tooltip :content="errors[`${row.id}-${month.key}-${subCol.id}`]?.message"
                                   :disabled="!errors[`${row.id}-${month.key}-${subCol.id}`]"
                                   placement="top" effect="dark">
-                        <div v-if="subCol.component === 'input' && row.type === 'basic'"
-                             @click="startEdit(row, month.key)" class="cell-content">
-                          <el-input v-if="isEditing(row.id, month.key)"
+                        <div v-if="(subCol.id === 'plan' && row.type === 'basic') || (subCol.id === 'samePeriod' && row.samePeriodEditable)"
+                             @click="startEdit(row, month.key, subCol.id)" class="cell-content">
+                          <el-input v-if="isEditing(row.id, month.key, subCol.id)"
                                     v-model.number="row.monthlyData[month.key][subCol.id]"
                                     @blur="finishEdit()" @keyup.enter="finishEdit()" />
                           <span v-else>{{ row.monthlyData[month.key][subCol.id] }}</span>

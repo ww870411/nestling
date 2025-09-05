@@ -3,7 +3,7 @@
     <el-card class="selection-card">
       <template #header>
         <div class="card-header">
-          <span>选择一个项目开始</span>
+          <span>请在下方选择填报项目</span>
         </div>
       </template>
       <div v-for="project in projects" :key="project.id" class="project-item">
