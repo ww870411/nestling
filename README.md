@@ -1,35 +1,93 @@
-# nestling
+# Nestling - 数据在线填报平台
 
-This template should help get you started developing with Vue 3 in Vite.
+## 1. 项目简介
 
-## Recommended IDE Setup
+**Nestling (雏鸟计划)** 是一个为“大连洁净能源集团”开发的数据在线填报与汇总系统。旨在替代原有的、通过线下分发Excel表格来编制“供暖期生产计划”的传统工作模式。
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+本系统将原先“收作业”式的数据收集转变为“实时监控”式的在线协作，通过流程化、自动化的方式，解决了传统模式下数据易错、版本混乱、沟通成本高、汇总效率低等核心痛点，显著提升了集团计划工作的效率与准确性。
 
-## Customize configuration
+## 2. 核心功能
 
-See [Vite Configuration Reference](https://vite.dev/config/).
+- **动态报表渲染**：根据不同单位的权限，动态生成所需查看和填报的报表。
+- **在线数据填报**：用户可直接在网页上填写、修改产销计划数据。
+- **自动化计算**：系统内置计算引擎，可根据预设公式自动完成“累计”、“合计”、“差异率”等指标的计算，无需人工干预。
+- **分级数据汇总**：自动将各下属单位的“基础表”数据，按业务层级汇总生成“汇总表”。
+- **工作流管理**：
+    - **暂存**: 可随时保存数据草稿，不触发校验。
+    - **提交**: 完成填报后提交，系统将进行数据校验并锁定。
+    - **状态可视化**: 在菜单和报表状态中，通过不同颜色（红、橙、绿）清晰展示各表的“未填写”、“暂存”、“已提交”状态。
+- **数据校验**：内置硬性（如必填、数据类型）和软性（如与同期值偏差过大）两类校验规则，确保数据质量。
+- **权限隔离**：严格根据单位和角色区分报表的“可编辑”与“可查看”权限。
+- **数据导出**：一键将当前报表导出为 `.xlsx` 格式的文件，方便线下存档和分析。
 
-## Project Setup
+## 3. 技术栈
 
-```sh
-npm install
+本项目是一个基于 Vue.js 3 构建的现代化纯前端应用。
+
+- **核心框架**: [Vue 3](https://vuejs.org/) (使用了组合式 API)
+- **构建工具**: [Vite](https://vitejs.dev/)
+- **路由管理**: [Vue Router](https://router.vuejs.org/)
+- **状态管理**: [Pinia](https://pinia.vuejs.org/)
+- **UI 组件库**: [Element Plus](https://element-plus.org/)
+- **核心依赖**: [xlsx](https://github.com/SheetJS/sheetjs) (用于Excel文件导出)
+- **代码规范**: ESLint, Prettier
+
+## 4. 项目结构
+
+```
+/
+├───src/
+│   ├───layouts/          # 应用主布局
+│   ├───projects/         # **核心业务配置**：存放不同项目的配置信息
+│   │   └───heating_plan_2025-2026/
+│   │       ├───config.js     # 项目总配置
+│   │       ├───menu.js       # 定义菜单、单位与报表权限
+│   │       └───template.js   # 定义报表结构、指标、计算公式
+│   ├───router/           # 路由配置
+│   ├───stores/           # Pinia 状态管理
+│   ├───views/            # 页面组件 (登录、看板、数据填报等)
+│   └───main.js           # 应用入口
+├───vite.config.js      # Vite 配置文件
+└───package.json        # 项目依赖与脚本
 ```
 
-### Compile and Hot-Reload for Development
+## 5. 快速开始
 
-```sh
-npm run dev
-```
+1.  **克隆项目**
+    ```bash
+    git clone <repository-url>
+    cd nestling
+    ```
 
-### Compile and Minify for Production
+2.  **安装依赖**
+    确保你已安装 [Node.js](https://nodejs.org/) (版本要求: `^20.19.0 || >=22.12.0`)。
+    ```bash
+    npm install
+    ```
 
-```sh
-npm run build
-```
+3.  **启动本地开发服务器**
+    ```bash
+    npm run dev
+    ```
+    应用将在本地启动 (通常是 `http://localhost:5173`)，并支持热更新。
 
-### Lint with [ESLint](https://eslint.org/)
+## 6. 可用脚本
 
-```sh
-npm run lint
-```
+- `npm run dev`: 启动开发服务器。
+- `npm run build`: 构建用于生产环境的应用到 `dist` 目录。
+- `npm run preview`: 在本地预览生产构建的产物。
+- `npm run lint`: 使用 ESLint 检查并自动修复代码格式问题。
+- `npm run format`: 使用 Prettier 格式化 `src` 目录下的所有文件。
+
+## 7. 未来工作
+
+当前版本为功能完整的前端原型，已验证核心业务流程。后续开发重点如下：
+
+1.  **后端服务集成**:
+    - 实现真实的用户认证与登录接口。
+    - 开发数据持久化API，用于加载、保存和提交报表数据。
+    - 在后端实现安全、高效的数据汇总逻辑。
+2.  **完善数据校验**:
+    - 根据业务需求，细化并实装所有前端及后端的数据校验规则。
+3.  **后台管理功能**:
+    - 开发一个独立的后台管理界面，用于维护用户、单位、角色及权限配置。

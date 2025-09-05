@@ -89,7 +89,7 @@
 
     <div class="footer-actions">
       <div>
-        <el-button @click="handleExport">导出</el-button>
+        <el-button @click="handleExport">导出至本地</el-button>
       </div>
       <div class="table-controls">
         <label style="margin-right: 10px; font-size: 14px; color: #606266;">表格缩放:</label>
@@ -158,9 +158,9 @@ const updateAllCalculations = () => {
       if (row.type === 'calculated' && row.formula) {
         months.value.forEach(month => {
           const planReplaced = row.formula.replace(/VAL\((\d+)\)/g, (m, p1) => getRowById(parseInt(p1))?.monthlyData[month.key].plan || 0);
-          try { row.monthlyData[month.key].plan = parseFloat(new Function(`return ${planReplaced}`)().toFixed(2)); } catch {}
+          try { row.monthlyData[month.key].plan = parseFloat(new Function(`return ${planReplaced}`)().toFixed(2)); } catch (e) { console.error(`Error calculating plan for row ${row.id}, month ${month.key}:`, e); }
           const samePeriodReplaced = row.formula.replace(/VAL\((\d+)\)/g, (m, p1) => getRowById(parseInt(p1))?.monthlyData[month.key].samePeriod || 0);
-          try { row.monthlyData[month.key].samePeriod = parseFloat(new Function(`return ${samePeriodReplaced}`)().toFixed(2)); } catch {}
+          try { row.monthlyData[month.key].samePeriod = parseFloat(new Function(`return ${samePeriodReplaced}`)().toFixed(2)); } catch (e) { console.error(`Error calculating samePeriod for row ${row.id}, month ${month.key}:`, e); }
         });
       }
     });
@@ -267,9 +267,9 @@ const handleExport = () => {
     rowData[0] = row.name;
     rowData[1] = row.unit;
     if (row.type === 'calculated' && row.formula) {
-      const excelFormulaC = row.formula.replace(/VAL\((\d+)\)/g, (m, p1) => `C${rowIdToRowIndex.get(parseInt(p1))}`);
+      const excelFormulaC = row.formula.replace(/VAL\((\d+)\)/g, (m, p1) => `C${rowIdToRowIndex.get(parseInt(p1)) || 0}`);
       rowData[2] = { t: 'n', f: excelFormulaC };
-      const excelFormulaD = row.formula.replace(/VAL\((\d+)\)/g, (m, p1) => `D${rowIdToRowIndex.get(parseInt(p1))}`);
+      const excelFormulaD = row.formula.replace(/VAL\((\d+)\)/g, (m, p1) => `D${rowIdToRowIndex.get(parseInt(p1)) || 0}`);
       rowData[3] = { t: 'n', f: excelFormulaD };
     } else {
       const monthPlanCells = months.value.map((m, i) => XLSX.utils.encode_cell({c: 5 + i * 2, r: r - 1})).join(',');
