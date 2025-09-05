@@ -26,7 +26,7 @@
                     NOTE: 这里的逻辑需要随着数据结构的改变而重构。
                     暂时保留最简单的显示和输入。
                   -->
-                  <div v-if="field.component === 'input' && row.type === 'basic'" class="cell-content">
+                  <div v-if="isCellWritable(row, field)" class="cell-content">
                     <el-input 
                       v-model.number="row.values[field.id]"
                       @blur="handleInputBlur(row, field.id)" 
@@ -87,8 +87,9 @@ import { storeToRefs } from 'pinia';
 import { useProjectStore } from '@/stores/projectStore';
 import { Close, Loading } from '@element-plus/icons-vue';
 import * as XLSX from 'xlsx';
-import { getDefaultValidation } from '@/projects/heating_plan_2025-2026/validation.js';
+import { getDefaultValidation } from '@/projects/heating_plan_2025-2026/tableRules.js';
 import { validationRules } from '@/utils/validator.js';
+import { isCellWritable } from '@/projects/heating_plan_2025-2026/tableRules.js';
 
 // --- Store and Routing ---
 const route = useRoute();
@@ -207,6 +208,13 @@ const calculateAll = () => {
 const runValidation = ({ level = 'hard' } = {}) => {
   const newErrors = {};
 
+  const findFieldByIdentifier = (identifier) => {
+    if (typeof identifier === 'number') {
+      return fieldConfig.value.find(f => f.id === identifier);
+    }
+    return fieldConfig.value.find(f => f.name === identifier);
+  };
+
   // Clear previous errors based on validation level
   if (level === 'all') {
     Object.assign(newErrors, errors.value);
@@ -250,8 +258,8 @@ const runValidation = ({ level = 'hard' } = {}) => {
         const key = `${row.metricId}-soft-${index}`;
         let hasError = false;
         if (ruleDef.rule === 'comparison') {
-          const fieldA = fieldConfig.value.find(f => f.name === ruleDef.fieldA);
-          const fieldB = fieldConfig.value.find(f => f.name === ruleDef.fieldB);
+          const fieldA = findFieldByIdentifier(ruleDef.fieldA);
+          const fieldB = findFieldByIdentifier(ruleDef.fieldB);
           if (!fieldA || !fieldB) return;
 
           const valueA = row.values[fieldA.id];
@@ -301,18 +309,15 @@ const getCellClass = ({ row, column }) => {
   const field = fieldConfig.value.find(f => f.name === column.property);
   if (!field) return '';
 
-  // First, check for errors, as they have the highest priority.
   const key = `${row.metricId}-${field.id}`;
   if (errors.value[key]?.type === 'A') {
     return 'is-error';
   }
 
-  // Apply shadow if the ROW is calculated OR if the COLUMN is not an input field.
-  if (row.type === 'calculated' || field.component !== 'input') {
+  if (!isCellWritable(row, field)) {
     return 'is-readonly-shadow';
   }
-
-  // Otherwise, no special class.
+  
   return '';
 };
 
