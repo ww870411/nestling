@@ -1,9 +1,9 @@
 <template>
   <el-container style="height: 100vh;">
     <el-aside :width="isSidebarCollapsed ? '0px' : '200px'" class="sidebar-container">
-      <div class="system-message-box" v-if="!isSidebarCollapsed">
-        <h4>系统消息</h4>
-        <p>欢迎使用雏鸟计划数据填报平台！请各单位按时提交生产计划。</p>
+      <div class="system-message-box" v-if="!isSidebarCollapsed && systemMessages">
+        <h4>{{ systemMessages.title }}</h4>
+        <p>{{ systemMessages.content }}</p>
       </div>
       <el-scrollbar>
         <el-menu
@@ -66,7 +66,7 @@ import { HomeFilled, Grid } from '@element-plus/icons-vue';
 
 const router = useRouter();
 const projectStore = useProjectStore();
-const { menuData, isProjectLoaded, currentProjectName } = storeToRefs(projectStore);
+const { menuData, isProjectLoaded, currentProjectName, systemMessages } = storeToRefs(projectStore);
 
 const reportStatuses = ref({});
 const isSidebarCollapsed = ref(false);
@@ -127,7 +127,7 @@ const handleLogout = () => {
   flex-shrink: 0;
 }
 .system-message-box h4 { margin: 0 0 10px 0; font-size: 14px; }
-.system-message-box p { margin: 0; font-size: 12px; line-height: 1.5; }
+.system-message-box p { margin: 0; font-size: 12px; line-height: 1.5; white-space: pre-wrap; }
 
 .el-scrollbar { flex-grow: 1; }
 

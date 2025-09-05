@@ -6,11 +6,14 @@ export const projects = Object.values(projectModules).map(module => module.proje
 
 export const loadProjectConfig = async (projectId) => {
   try {
+    const configModule = await import(`./${projectId}/config.js`);
     const menuModule = await import(`./${projectId}/menu.js`);
     const templateModule = await import(`./${projectId}/template.js`);
     return {
       menuData: menuModule.menuData,
       reportTemplate: templateModule.reportTemplate,
+      fieldConfig: templateModule.fieldConfig,
+      systemMessages: configModule.systemMessages,
     };
   } catch (error) {
     console.error(`Failed to load project config for: ${projectId}`, error);

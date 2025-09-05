@@ -7,7 +7,9 @@ export const useProjectStore = defineStore('project', {
     currentProjectId: null,
     menuData: [],
     reportTemplate: [],
-    isLoading: false, // Add loading state
+    fieldConfig: [],
+    systemMessages: null,
+    isLoading: false,
   }),
 
   getters: {
@@ -24,51 +26,47 @@ export const useProjectStore = defineStore('project', {
         return true;
       }
 
-      this.isLoading = true; // Set loading to true
+      this.isLoading = true;
 
       try {
         const config = await loadProjectConfig(projectId);
         if (config) {
           this.currentProjectId = projectId;
-          // Normalize to plain arrays in state
           this.menuData = Array.isArray(config.menuData)
             ? config.menuData
             : (config.menuData && Array.isArray(config.menuData.value) ? config.menuData.value : []);
           this.reportTemplate = Array.isArray(config.reportTemplate)
             ? config.reportTemplate
             : (config.reportTemplate && Array.isArray(config.reportTemplate.value) ? config.reportTemplate.value : []);
+          this.fieldConfig = Array.isArray(config.fieldConfig)
+            ? config.fieldConfig
+            : (config.fieldConfig && Array.isArray(config.fieldConfig.value) ? config.fieldConfig.value : []);
+          this.systemMessages = config.systemMessages || null;
           localStorage.setItem('currentProjectId', projectId);
           return true;
         } else {
-          this.currentProjectId = null;
-          this.menuData = [];
-          this.reportTemplate = [];
-          localStorage.removeItem('currentProjectId');
+          this.clearProject();
           return false;
         }
       } finally {
-        this.isLoading = false; // Set loading to false regardless of success or failure
+        this.isLoading = false;
       }
     },
 
-    // Action to load the last selected project on app startup
-    async loadPersistedProject() { // Make it async
+    async loadPersistedProject() {
       const persistedId = localStorage.getItem('currentProjectId');
       if (persistedId && this.availableProjects.some(p => p.id === persistedId)) {
-        this.isLoading = true; // Set loading to true
-        try {
-          return await this.loadProject(persistedId); // Await the loadProject call
-        } finally {
-          this.isLoading = false; // Set loading to false
-        }
+        return await this.loadProject(persistedId);
       }
-      return false; // Return false if no persisted project
+      return false;
     },
 
     clearProject() {
       this.currentProjectId = null;
       this.menuData = [];
       this.reportTemplate = [];
+      this.fieldConfig = [];
+      this.systemMessages = null;
       localStorage.removeItem('currentProjectId');
     }
   },

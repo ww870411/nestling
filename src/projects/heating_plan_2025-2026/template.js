@@ -1,3 +1,66 @@
+export const fieldConfig = [
+  {
+    id: 'name',
+    label: '指标名称',
+    component: 'label',
+    width: 250,
+    fixed: true,
+  },
+  {
+    id: 'unit',
+    label: '计量单位',
+    component: 'label',
+    width: 100,
+    fixed: true,
+  },
+  {
+    id: 'totals.plan',
+    label: '本期计划',
+    component: 'display',
+    width: 120,
+  },
+  {
+    id: 'totals.samePeriod',
+    label: '同期完成',
+    component: 'display',
+    width: 120,
+  },
+  {
+    id: 'totals.diffRate',
+    label: '差异率',
+    component: 'display',
+    width: 100,
+  },
+  {
+    id: 'monthlyData',
+    label: '月度数据',
+    component: 'group',
+    months: [
+        { key: 'october', label: '10月' },
+        { key: 'november', label: '11月' },
+        { key: 'december', label: '12月' },
+        { key: 'january', label: '1月' },
+        { key: 'february', label: '2月' },
+        { key: 'march', label: '3月' },
+        { key: 'april', label: '4月' }
+    ],
+    subColumns: [
+      {
+        id: 'plan',
+        label: '计划',
+        component: 'input',
+        width: 110,
+      },
+      {
+        id: 'samePeriod',
+        label: '同期',
+        component: 'display',
+        width: 110,
+      }
+    ]
+  }
+];
+
 export const reportTemplate = [
   {
     id: 1,
@@ -1014,6 +1077,6 @@ export const reportTemplate = [
     unit: '万元',
     type: 'calculated',
     formula: 'VAL(94)-VAL(103)-VAL(105)-VAL(107)-VAL(109)-VAL(111)-VAL(112)',
-    style: { fontWeight: 'bold'},
+    style: { fontWeight: 'bold' },
   },
 ];
