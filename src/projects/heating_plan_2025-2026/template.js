@@ -1,66 +1,94 @@
+// template.js
+
+/**
+ * 新版字段配置 (fieldConfig)
+ * 
+ * 结构变更说明:
+ * 1.  ID系统: 所有字段ID已从字符串（如 'name'）更改为唯一的数字ID（从1001开始）。
+ * 2.  扁平化结构: 原来的 'monthlyData' 分组已被移除。每个月份的'计划'和'同期'现在都是拥有独立ID的顶级字段。
+ *    - 例如，'10月-计划' 的ID为 2001，'11月-计划' 的ID为 2003，以此类推。
+ * 3.  计算字段: 增加了 'type' 和 'formula' 属性。
+ *    - type: 'basic' (基础字段，用户可直接输入) 或 'calculated' (计算字段)。
+ *    - formula: 使用 VAL(id) 格式定义计算逻辑。
+ */
 export const fieldConfig = [
+  // --- 基础信息列 (ID: 1001-1002) ---
   {
-    id: 'name',
+    id: 1001,
+    name: 'name', // 保留原始name用于数据映射
     label: '指标名称',
+    type: 'basic',
     component: 'label',
     width: 250,
     fixed: true,
   },
   {
-    id: 'unit',
+    id: 1002,
+    name: 'unit',
     label: '计量单位',
+    type: 'basic',
     component: 'label',
     width: 100,
     fixed: true,
   },
+
+  // --- 汇总计算列 (ID: 1003-1005) ---
   {
-    id: 'totals.plan',
+    id: 1003,
+    name: 'totals.plan',
     label: '本期计划',
+    type: 'calculated',
     component: 'display',
     width: 120,
+    // 公式: 累加所有月份的“计划”值 (ID: 2001, 2003, 2005, ...)
+    formula: 'VAL(2001)+VAL(2003)+VAL(2005)+VAL(2007)+VAL(2009)+VAL(2011)+VAL(2013)',
   },
   {
-    id: 'totals.samePeriod',
+    id: 1004,
+    name: 'totals.samePeriod',
     label: '同期完成',
+    type: 'calculated',
     component: 'display',
     width: 120,
+    // 公式: 累加所有月份的“同期”值 (ID: 2002, 2004, 2006, ...)
+    formula: 'VAL(2002)+VAL(2004)+VAL(2006)+VAL(2008)+VAL(2010)+VAL(2012)+VAL(2014)',
   },
   {
-    id: 'totals.diffRate',
+    id: 1005,
+    name: 'totals.diffRate',
     label: '差异率',
+    type: 'calculated',
     component: 'display',
     width: 100,
+    // 公式: (本期计划 - 同期完成) / 同期完成
+    formula: '(VAL(1003)-VAL(1004))/VAL(1004)',
   },
-  {
-    id: 'monthlyData',
-    label: '月度数据',
-    component: 'group',
-    months: [
-        { key: 'october', label: '10月' },
-        { key: 'november', label: '11月' },
-        { key: 'december', label: '12月' },
-        { key: 'january', label: '1月' },
-        { key: 'february', label: '2月' },
-        { key: 'march', label: '3月' },
-        { key: 'april', label: '4月' }
-    ],
-    subColumns: [
-      {
-        id: 'plan',
-        label: '计划',
-        component: 'input',
-        width: 110,
-      },
-      {
-        id: 'samePeriod',
-        label: '同期',
-        component: 'display',
-        width: 110,
-      }
-    ]
-  }
+
+  // --- 月度数据列 (ID: 2001-2014) ---
+  // 10月
+  { id: 2001, name: 'monthlyData.october.plan', label: '10月-计划', type: 'basic', component: 'input', width: 110 },
+  { id: 2002, name: 'monthlyData.october.samePeriod', label: '10月-同期', type: 'basic', component: 'display', width: 110 },
+  // 11月
+  { id: 2003, name: 'monthlyData.november.plan', label: '11月-计划', type: 'basic', component: 'input', width: 110 },
+  { id: 2004, name: 'monthlyData.november.samePeriod', label: '11月-同期', type: 'basic', component: 'display', width: 110 },
+  // 12月
+  { id: 2005, name: 'monthlyData.december.plan', label: '12月-计划', type: 'basic', component: 'input', width: 110 },
+  { id: 2006, name: 'monthlyData.december.samePeriod', label: '12月-同期', type: 'basic', component: 'display', width: 110 },
+  // 1月
+  { id: 2007, name: 'monthlyData.january.plan', label: '1月-计划', type: 'basic', component: 'input', width: 110 },
+  { id: 2008, name: 'monthlyData.january.samePeriod', label: '1月-同期', type: 'basic', component: 'display', width: 110 },
+  // 2月
+  { id: 2009, name: 'monthlyData.february.plan', label: '2月-计划', type: 'basic', component: 'input', width: 110 },
+  { id: 2010, name: 'monthlyData.february.samePeriod', label: '2月-同期', type: 'basic', component: 'display', width: 110 },
+  // 3月
+  { id: 2011, name: 'monthlyData.march.plan', label: '3月-计划', type: 'basic', component: 'input', width: 110 },
+  { id: 2012, name: 'monthlyData.march.samePeriod', label: '3月-同期', type: 'basic', component: 'display', width: 110 },
+  // 4月
+  { id: 2013, name: 'monthlyData.april.plan', label: '4月-计划', type: 'basic', component: 'input', width: 110 },
+  { id: 2014, name: 'monthlyData.april.samePeriod', label: '4月-同期', type: 'basic', component: 'display', width: 110 },
 ];
 
+// reportTemplate 保持不变
 export const reportTemplate = [
   {
     id: 1,

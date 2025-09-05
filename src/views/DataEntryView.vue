@@ -16,50 +16,26 @@
                     :header-cell-style="{ textAlign: 'center' }"
                     :cell-style="{ textAlign: 'center' }" height="100%">
             <template v-for="field in fieldConfig" :key="field.id">
-              <!-- Handle simple, fixed columns -->
-              <el-table-column v-if="field.component === 'label'" :prop="field.id" :label="field.label"
-                               :width="field.width * zoomLevel / 100" :fixed="field.fixed">
+              <el-table-column 
+                :prop="field.name" 
+                :label="field.label"
+                :width="field.width * zoomLevel / 100" 
+                :fixed="field.fixed">
                 <template #default="{ row }">
-                  <div class="cell-content">
-                    <span :style="row.style">{{ getValueByPath(row, field.id) }}</span>
+                  <!-- 
+                    NOTE: 这里的逻辑需要随着数据结构的改变而重构。
+                    暂时保留最简单的显示和输入。
+                  -->
+                  <div v-if="field.component === 'input' && row.type === 'basic'" class="cell-content">
+                    <el-input 
+                      v-model.number="row.values[field.id]"
+                      @blur="handleInputBlur(row, field.id)" 
+                      @keyup.enter="handleInputBlur(row, field.id)" />
+                  </div>
+                  <div v-else class="cell-content">
+                    <span :style="row.style">{{ row.values[field.id] }}</span>
                   </div>
                 </template>
-              </el-table-column>
-
-              <!-- Handle display columns -->
-              <el-table-column v-else-if="field.component === 'display'" :label="field.label"
-                               :width="field.width * zoomLevel / 100">
-                <template #default="{ row }">
-                  <div class="cell-content">
-                    <span :class="getDifferenceRateClass(row, field.id)">{{ getDisplayValue(row, field) }}</span>
-                  </div>
-                </template>
-              </el-table-column>
-
-              <!-- Handle grouped columns (monthly data) -->
-              <el-table-column v-else-if="field.component === 'group'" :label="field.label">
-                <el-table-column v-for="month in field.months" :key="month.key" :label="month.label">
-                  <el-table-column v-for="subCol in field.subColumns" :key="subCol.id" :label="subCol.label"
-                                   :prop="`${field.id}.${month.key}.${subCol.id}`"
-                                   :width="subCol.width * zoomLevel / 100">
-                    <template #default="{ row }">
-                      <el-tooltip :content="errors[`${row.id}-${month.key}-${subCol.id}`]?.message"
-                                  :disabled="!errors[`${row.id}-${month.key}-${subCol.id}`]"
-                                  placement="top" effect="dark">
-                        <div v-if="(subCol.id === 'plan' && row.type === 'basic') || (subCol.id === 'samePeriod' && row.samePeriodEditable)"
-                             @click="startEdit(row, month.key, subCol.id)" class="cell-content">
-                          <el-input v-if="isEditing(row.id, month.key, subCol.id)"
-                                    v-model.number="row.monthlyData[month.key][subCol.id]"
-                                    @blur="finishEdit()" @keyup.enter="finishEdit()" />
-                          <span v-else>{{ row.monthlyData[month.key][subCol.id] }}</span>
-                        </div>
-                        <div v-else class="cell-content">
-                          {{ getValueByPath(row, `${field.id}.${month.key}.${subCol.id}`) }}
-                        </div>
-                      </el-tooltip>
-                    </template>
-                  </el-table-column>
-                </el-table-column>
               </el-table-column>
             </template>
           </el-table>
@@ -112,12 +88,7 @@ import { useProjectStore } from '@/stores/projectStore';
 import { Close, Loading } from '@element-plus/icons-vue';
 import * as XLSX from 'xlsx';
 import { getDefaultValidation } from '@/projects/heating_plan_2025-2026/validation.js';
-
-// --- Utilities ---
-const getValueByPath = (obj, path) => {
-  if (!path) return null;
-  return path.split('.').reduce((acc, part) => acc && acc[part], obj);
-};
+import { validationRules } from '@/utils/validator.js';
 
 // --- Store and Routing ---
 const route = useRoute();
@@ -130,7 +101,6 @@ const errors = ref({});
 const explanations = ref({});
 const isErrorPanelVisible = ref(false);
 const panelWidth = ref(300);
-const editingCell = ref(null);
 const zoomLevel = ref(100);
 
 // --- Computed Properties ---
@@ -153,168 +123,168 @@ const zoomStyle = computed(() => {
   };
 });
 
-const getRowById = (id) => tableData.value.find(r => r.id === id);
-
 const hasHardErrors = computed(() => Object.values(errors.value).some(e => e && e.type === 'A'));
 const softErrorsForDisplay = computed(() => Object.entries(errors.value).filter(([, error]) => error.type === 'B'));
 
-// --- Core Logic: Initialization, Calculation, Validation ---
+// --- Core Logic: Initialization & Formula Engine ---
 
 const initializeTableData = () => {
   if (!reportTemplate.value || !fieldConfig.value) return;
 
-  const monthlyGroup = fieldConfig.value.find(f => f.component === 'group');
-  const months = monthlyGroup ? monthlyGroup.months : [];
+  const data = reportTemplate.value.map(metric => {
+    const rowData = {
+      metricId: metric.id,
+      style: metric.style,
+      type: metric.type, // Pass metric type to row
+      validation: metric.validation, // Pass personalized validation to row
+      values: {},
+    };
 
-  tableData.value = (reportTemplate.value || []).map(item => {
-    const monthlyData = {};
-    months.forEach(month => {
-      monthlyData[month.key] = { plan: 0, samePeriod: 0 };
+    fieldConfig.value.forEach(field => {
+      if (field.name === 'name') {
+        rowData.values[field.id] = metric.name;
+      } else if (field.name === 'unit') {
+        rowData.values[field.id] = metric.unit;
+      } else if (field.type === 'basic') {
+        rowData.values[field.id] = 0; // Default value for inputs
+      }
     });
-    const plainItem = JSON.parse(JSON.stringify(item));
-    return { ...plainItem, monthlyData, totals: { plan: 0, samePeriod: 0, diffRate: 0 } };
+    return rowData;
   });
 
-  updateAllCalculations();
+  tableData.value = data;
+  calculateAll();
 };
 
-const updateAllCalculations = () => {
+const calculateAll = () => {
   if (tableData.value.length === 0) return;
 
-  const monthlyGroup = fieldConfig.value.find(f => f.component === 'group');
-  const months = monthlyGroup ? monthlyGroup.months : [];
+  const getRowByMetricId = (metricId) => tableData.value.find(r => r.metricId === metricId);
 
-  for (let i = 0; i < 5; i++) {
-    tableData.value.forEach(row => {
-      if (row.type === 'calculated' && row.formula) {
-        months.forEach(month => {
-          const formulaEvaluator = (field) => {
-            return row.formula.replace(/VAL\((\d+)\)/g, (match, p1) => {
-              return getRowById(parseInt(p1))?.monthlyData[month.key]?.[field] || 0;
-            });
-          };
+  const calculatedFields = [
+    ...reportTemplate.value.filter(f => f.type === 'calculated' && f.formula),
+    ...fieldConfig.value.filter(f => f.type === 'calculated' && f.formula)
+  ].sort((a, b) => (a.id < 1000 ? 0 : 1) - (b.id < 1000 ? 0 : 1)); // Process row-level formulas first
+
+  for (let i = 0; i < 10; i++) {
+    calculatedFields.forEach(field => {
+      const formula = field.formula;
+      if (!formula) return;
+
+      const isRowLevelFormula = field.id < 1000;
+      
+      if (isRowLevelFormula) {
+        const targetRow = getRowByMetricId(field.id);
+        if (!targetRow) return;
+
+        const valResolver = (metricId) => {
+          const sourceRow = getRowByMetricId(metricId);
+          const firstInputCol = fieldConfig.value.find(fc => fc.component === 'input');
+          return sourceRow ? (sourceRow.values[firstInputCol.id] || 0) : 0;
+        };
+        try {
+          const funcBody = formula.replace(/VAL\((\d+)\)/g, (match, id) => `valResolver(${id})`);
+          const result = new Function('valResolver', `return ${funcBody}`)(valResolver);
+          targetRow.values[field.id] = parseFloat(result.toFixed(2));
+        } catch (e) {}
+
+      } else { // Column-level formula (e.g., totals)
+        tableData.value.forEach(row => {
+          const valResolver = (columnId) => row.values[columnId] || 0;
           try {
-            row.monthlyData[month.key].plan = parseFloat(new Function(`return ${formulaEvaluator('plan')}`)().toFixed(2));
-            row.monthlyData[month.key].samePeriod = parseFloat(new Function(`return ${formulaEvaluator('samePeriod')}`)().toFixed(2));
-          } catch (e) {
-            console.error(`Error calculating formula for row ${row.id}, month ${month.key}:`, e);
-          }
+            const funcBody = formula.replace(/VAL\((\d+)\)/g, (match, id) => `valResolver(${id})`);
+            const result = new Function('valResolver', `return ${funcBody}`)(valResolver);
+            row.values[field.id] = parseFloat(result.toFixed(2));
+          } catch (e) {}
         });
       }
     });
   }
-
-  tableData.value.forEach(row => {
-    row.totals.plan = months.reduce((acc, month) => acc + Number(row.monthlyData[month.key].plan || 0), 0);
-    row.totals.samePeriod = months.reduce((acc, month) => acc + Number(row.monthlyData[month.key].samePeriod || 0), 0);
-  });
-
-  runHardValidation();
+  runValidation({ level: 'hard' });
 };
 
-const runHardValidation = () => {
-  const newErrors = { ...errors.value };
-  // Clear existing hard errors
-  Object.keys(newErrors).forEach(key => {
-    if (newErrors[key].type === 'A') {
-      delete newErrors[key];
-    }
-  });
+// --- NEW Validation Logic ---
+const runValidation = ({ level = 'hard' } = {}) => {
+  const newErrors = {};
 
-  const monthlyGroup = fieldConfig.value.find(f => f.component === 'group');
-  const months = monthlyGroup ? monthlyGroup.months : [];
+  // Clear previous errors based on validation level
+  if (level === 'all') {
+    Object.assign(newErrors, errors.value);
+  } else {
+    Object.entries(errors.value).forEach(([key, err]) => {
+      if (err.type !== 'A') newErrors[key] = err; // Keep soft errors
+    });
+  }
 
   tableData.value.forEach(row => {
-    const metricValidation = row.validation || {};
     const defaultValidation = getDefaultValidation(row.type);
     const finalValidation = {
-        hard: metricValidation.hard !== undefined ? metricValidation.hard : defaultValidation.hard,
-        soft: metricValidation.soft !== undefined ? metricValidation.soft : defaultValidation.soft,
+      hard: row.validation?.hard ?? defaultValidation.hard,
+      soft: row.validation?.soft ?? defaultValidation.soft,
     };
 
-    if (row.type === 'basic' && finalValidation.hard) {
-      months.forEach(month => {
-        const value = row.monthlyData[month.key].plan;
-        const key = `${row.id}-${month.key}-plan`;
-        for (const rule of finalValidation.hard) {
-          let isValid = true;
-          if (rule.rule === 'isNumber') {
-            isValid = value === null || (String(value).trim() !== '' && !isNaN(Number(value)));
+    // Hard Validations
+    if (finalValidation.hard) {
+      fieldConfig.value.forEach(field => {
+        if (field.type !== 'basic' || field.component !== 'input') return;
+        
+        const value = row.values[field.id];
+        const key = `${row.metricId}-${field.id}`;
+        let hasError = false;
+        finalValidation.hard.forEach(ruleDef => {
+          const ruleFunc = validationRules[ruleDef.rule];
+          if (ruleFunc && !ruleFunc(value)) {
+            newErrors[key] = { type: 'A', message: ruleDef.message };
+            hasError = true;
           }
-          if (rule.rule === 'notEmpty') {
-            isValid = value !== null && String(value).trim() !== '';
+        });
+        if (!hasError && newErrors[key]?.type === 'A') {
+          delete newErrors[key];
+        }
+      });
+    }
+
+    // Soft Validations (only run on 'all' level)
+    if (level === 'all' && finalValidation.soft) {
+      finalValidation.soft.forEach((ruleDef, index) => {
+        const key = `${row.metricId}-soft-${index}`;
+        let hasError = false;
+        if (ruleDef.rule === 'comparison') {
+          const fieldA = fieldConfig.value.find(f => f.name === ruleDef.fieldA);
+          const fieldB = fieldConfig.value.find(f => f.name === ruleDef.fieldB);
+          if (!fieldA || !fieldB) return;
+
+          const valueA = row.values[fieldA.id];
+          const valueB = row.values[fieldB.id];
+
+          const ruleFunc = validationRules[ruleDef.rule];
+          if (ruleFunc && !ruleFunc(valueA, ruleDef.operator, valueB)) {
+            newErrors[key] = { type: 'B', message: ruleDef.message };
+            hasError = true;
           }
-          if (!isValid) {
-            newErrors[key] = { type: 'A', message: rule.message };
-            break;
-          }
+        }
+        if (!hasError && newErrors[key]?.type === 'B') {
+          delete newErrors[key];
         }
       });
     }
   });
+
   errors.value = newErrors;
+  if (level === 'all' && softErrorsForDisplay.value.length > 0) {
+    isErrorPanelVisible.value = true;
+  }
 };
 
-const runSoftValidation = () => {
-    const newErrors = { ...errors.value };
-    // Clear existing soft errors
-    Object.keys(newErrors).forEach(key => {
-        if (newErrors[key].type === 'B') {
-            delete newErrors[key];
-        }
-    });
-
-    tableData.value.forEach(row => {
-        const metricValidation = row.validation || {};
-        const defaultValidation = getDefaultValidation(row.type);
-        const finalValidation = {
-            hard: metricValidation.hard !== undefined ? metricValidation.hard : defaultValidation.hard,
-            soft: metricValidation.soft !== undefined ? metricValidation.soft : defaultValidation.soft,
-        };
-
-        if (finalValidation.soft) {
-            finalValidation.soft.forEach((rule, index) => {
-                if (rule.rule === 'comparison') {
-                    const valA = getValueByPath(row, rule.fieldA);
-                    const valB = getValueByPath(row, rule.fieldB);
-                    let isSoftValid = true;
-                    if (typeof valA === 'number' && typeof valB === 'number') {
-                        switch (rule.operator) {
-                            case '<=': isSoftValid = valA <= valB; break;
-                            case '>=': isSoftValid = valA >= valB; break;
-                            case '<': isSoftValid = valA < valB; break;
-                            case '>': isSoftValid = valA > valB; break;
-                            case '==': isSoftValid = valA == valB; break;
-                        }
-                    }
-                    const key = `${row.id}-soft-${index}`;
-                    if (!isSoftValid) {
-                        newErrors[key] = { type: 'B', message: rule.message };
-                    }
-                }
-            });
-        }
-    });
-    errors.value = newErrors;
-    if (softErrorsForDisplay.value.length > 0) {
-        isErrorPanelVisible.value = true;
-    }
-};
 
 // --- Watchers ---
 watch(reportTemplate, initializeTableData, { deep: true, immediate: true });
 
+const handleInputBlur = (row, fieldId) => {
+  calculateAll();
+};
+
 // --- UI Event Handlers ---
-const isEditing = (rowId, monthKey) => editingCell.value === `${rowId}-${monthKey}`;
-const startEdit = (row, monthKey) => {
-  if (row.type !== 'calculated') {
-    editingCell.value = `${row.id}-${monthKey}`;
-  }
-};
-const finishEdit = () => {
-  editingCell.value = null;
-  updateAllCalculations();
-};
 
 const startResize = (event) => {
   event.preventDefault();
@@ -326,103 +296,61 @@ const startResize = (event) => {
 };
 
 // --- Display & Class Logic ---
-const getDisplayValue = (row, field) => {
-  if (field.id === 'totals.diffRate') {
-    if (row.totals.samePeriod === 0) return 'N/A';
-    const rate = ((row.totals.plan - row.totals.samePeriod) / row.totals.samePeriod) * 100;
-    return `${rate.toFixed(2)}%`;
-  }
-  return getValueByPath(row, field.id);
-};
-
-const getDifferenceRateClass = (row, fieldId) => {
-  if (fieldId === 'totals.diffRate') {
-    return row.totals.plan < row.totals.samePeriod ? 'text-danger' : 'text-success';
-  }
-  return '';
-};
 
 const getCellClass = ({ row, column }) => {
-  const prop = column.property;
-  if (!prop) return;
+  const field = fieldConfig.value.find(f => f.name === column.property);
+  if (!field) return '';
 
-  const parts = prop.split('.');
-  if (parts[0] === 'monthlyData') {
-    const key = `${row.id}-${parts[1]}-${parts[2]}`;
-    if (errors.value[key]?.type === 'A') {
-      return 'is-error';
-    }
+  // First, check for errors, as they have the highest priority.
+  const key = `${row.metricId}-${field.id}`;
+  if (errors.value[key]?.type === 'A') {
+    return 'is-error';
   }
 
-  if (row.type === 'calculated') {
-    return 'is-calculated';
+  // Apply shadow if the ROW is calculated OR if the COLUMN is not an input field.
+  if (row.type === 'calculated' || field.component !== 'input') {
+    return 'is-readonly-shadow';
   }
+
+  // Otherwise, no special class.
   return '';
 };
 
 const getErrorLabel = (key) => {
     const parts = key.split('-');
-    const rowId = parseInt(parts[0]);
-    const row = getRowById(rowId);
+    const metricId = parseInt(parts[0]);
+    const fieldId = parseInt(parts[1]);
+
+    const row = tableData.value.find(r => r.metricId === metricId);
+    
     if (!row) return '未知错误';
 
     if (parts[1] === 'soft') {
-        return `${row.name} (汇总)`;
+        return `${row.values[1001]} (汇总)`; // 1001 is the ID for 'name'
     }
 
-    const monthKey = parts[1];
-    const monthlyGroup = fieldConfig.value.find(f => f.component === 'group');
-    const month = monthlyGroup ? monthlyGroup.months.find(m => m.key === monthKey) : null;
-    return `${row.name} - ${month?.label || ''}`;
+    const field = fieldConfig.value.find(f => f.id === fieldId);
+    if (!field) return '未知错误';
+    
+    return `${row.values[1001]} - ${field.label}`;
 };
 
 // --- Actions (Save, Load, Submit, Export) ---
 const handleSave = () => {
-  const monthlyGroup = fieldConfig.value.find(f => f.component === 'group');
-  const months = monthlyGroup ? monthlyGroup.months : [];
-  const draftData = {};
-  tableData.value.forEach(row => {
-    if (row.type === 'basic') {
-      draftData[row.id] = {};
-      months.forEach(month => {
-        draftData[row.id][month.key] = row.monthlyData[month.key].plan;
-      });
-    }
-  });
-  localStorage.setItem(`data-draft-${route.params.id}`, JSON.stringify(draftData));
-  ElMessage.success('草稿已暂存');
+  ElMessage.info('功能正在重构中');
 };
 
 const handleLoadDraft = () => {
-  const savedData = localStorage.getItem(`data-draft-${route.params.id}`);
-  if (!savedData) {
-    ElMessage.warning('没有找到可用的暂存数据');
-    return;
-  }
-  const draftData = JSON.parse(savedData);
-  tableData.value.forEach(row => {
-    if (draftData[row.id]) {
-      const monthlyGroup = fieldConfig.value.find(f => f.component === 'group');
-      const months = monthlyGroup ? monthlyGroup.months : [];
-      months.forEach(month => {
-        if (draftData[row.id][month.key] !== undefined) {
-          row.monthlyData[month.key].plan = draftData[row.id][month.key];
-        }
-      });
-    }
-  });
-  updateAllCalculations();
-  ElMessage.success('暂存数据已成功拉取');
+  ElMessage.info('功能正在重构中');
 };
 
 const handleSubmit = () => {
-  runHardValidation();
+  runValidation({ level: 'all' });
   if (hasHardErrors.value) {
     ElMessage.error('提交失败，请修正所有红色错误后再试。');
     return;
   }
   
-  runSoftValidation();
   if (softErrorsForDisplay.value.length > 0) {
     isErrorPanelVisible.value = true;
     const allExplained = softErrorsForDisplay.value.every(([key]) => explanations.value[key]?.trim());
@@ -437,92 +365,20 @@ const handleSubmit = () => {
 };
 
 const handleExport = () => {
-  const header = [];
-  const columnMapping = [];
-  fieldConfig.value.forEach(field => {
-    if (field.component === 'group') {
-      field.months.forEach(month => {
-        field.subColumns.forEach(subCol => {
-          header.push(`${month.label}-${subCol.label}`);
-          columnMapping.push({ ...subCol, monthKey: month.key, groupId: field.id });
-        });
-      });
-    } else {
-      header.push(field.label);
-      columnMapping.push(field);
-    }
-  });
-
-  const data = [header];
-  const rowIdToRowIndex = new Map();
-  tableData.value.forEach((row, index) => { rowIdToRowIndex.set(row.id, index + 2); });
-
-  tableData.value.forEach((row, rowIndex) => {
-    const r = rowIndex + 2;
-    const rowData = [];
-    columnMapping.forEach((col, colIndex) => {
-      if (col.groupId === 'monthlyData') {
-        const path = `${col.groupId}.${col.monthKey}.${col.id}`;
-        rowData[colIndex] = getValueByPath(row, path);
-      } else {
-        rowData[colIndex] = getValueByPath(row, col.id);
-      }
-    });
-    data.push(rowData);
-  });
-
-  const worksheet = XLSX.utils.aoa_to_sheet(data);
-
-  // Re-add formulas
-  tableData.value.forEach((row, rowIndex) => {
-      const r = rowIndex + 2;
-      if (row.type === 'calculated' && row.formula) {
-          columnMapping.forEach((col, colIndex) => {
-              if (col.groupId === 'monthlyData') {
-                  const excelFormula = row.formula.replace(/VAL\((\d+)\)/g, (m, p1) => {
-                      const targetRowIndex = rowIdToRowIndex.get(parseInt(p1));
-                      return `${XLSX.utils.encode_col(colIndex)}${targetRowIndex}`;
-                  });
-                  worksheet[XLSX.utils.encode_cell({r: r-1, c: colIndex})] = { t: 'n', f: excelFormula };
-              }
-          });
-      }
-      // Add total formulas
-      const planTotalCol = columnMapping.findIndex(c => c.id === 'totals.plan');
-      if (planTotalCol !== -1) {
-          const monthPlanCells = columnMapping.map((c, i) => ({...c, index: i})).filter(c => c.groupId === 'monthlyData' && c.id === 'plan').map(c => `${XLSX.utils.encode_col(c.index)}${r}`).join(',');
-          worksheet[XLSX.utils.encode_cell({r: r-1, c: planTotalCol})] = { t: 'n', f: `SUM(${monthPlanCells})` };
-      }
-      const samePeriodTotalCol = columnMapping.findIndex(c => c.id === 'totals.samePeriod');
-      if (samePeriodTotalCol !== -1) {
-          const monthSamePeriodCells = columnMapping.map((c, i) => ({...c, index: i})).filter(c => c.groupId === 'monthlyData' && c.id === 'samePeriod').map(c => `${XLSX.utils.encode_col(c.index)}${r}`).join(',');
-          worksheet[XLSX.utils.encode_cell({r: r-1, c: samePeriodTotalCol})] = { t: 'n', f: `SUM(${monthSamePeriodCells})` };
-      }
-      const diffRateCol = columnMapping.findIndex(c => c.id === 'totals.diffRate');
-       if (diffRateCol !== -1) {
-          const planTotalRef = XLSX.utils.encode_cell({r: r-1, c: planTotalCol});
-          const samePeriodTotalRef = XLSX.utils.encode_cell({r: r-1, c: samePeriodTotalCol});
-          worksheet[XLSX.utils.encode_cell({r: r-1, c: diffRateCol})] = { t: 'n', f: `IF(${samePeriodTotalRef}=0, "N/A", (${planTotalRef}-${samePeriodTotalRef})/${samePeriodTotalRef})`, z: '0.00%' };
-      }
-  });
-
-  const workbook = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
-  XLSX.writeFile(workbook, `${pageTitle.value}.xlsx`);
-  ElMessage.success('导出成功！');
+  ElMessage.info('功能正在重构中');
 };
 
 </script>
 
 <style>
 .el-table { border-left: 1px solid #ebeef5; border-top: 1px solid #ebeef5; }
-:deep(.el-input__inner) { text-align: center; border: none; padding: 0 2px; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.el-table .el-input__inner { text-align: center; }
 :deep(.el-input__wrapper) { padding: 0; box-shadow: none !important; }
 .el-table th.el-table__cell, .el-table td.el-table__cell { border-right: 1px solid #ebeef5; border-bottom: 1px solid #ebeef5; font-size: var(--table-font-size, 14px); padding: var(--table-cell-vertical-padding, 12px) 0; }
 .el-table th.el-table__cell { background-color: #fafafa; }
 .is-error .cell-content { box-shadow: 0 0 0 1px #f56c6c inset !important; border-radius: 4px; }
 .is-warning .el-input__wrapper, .is-warning .cell-content { box-shadow: 0 0 0 1px #e6a23c inset !important; border-radius: 4px; }
-.is-calculated { background-color: #f0f2f5; color: #909399; cursor: not-allowed; }
+.is-readonly-shadow { background-color: #fafafa; box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.05); }
 .loading-indicator, .no-data-message { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; font-size: 16px; color: #606266; }
 .loading-indicator .el-icon { margin-bottom: 10px; }
 </style>
