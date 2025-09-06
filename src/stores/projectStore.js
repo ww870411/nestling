@@ -35,12 +35,9 @@ export const useProjectStore = defineStore('project', {
           this.menuData = Array.isArray(config.menuData)
             ? config.menuData
             : (config.menuData && Array.isArray(config.menuData.value) ? config.menuData.value : []);
-          this.reportTemplate = Array.isArray(config.reportTemplate)
-            ? config.reportTemplate
-            : (config.reportTemplate && Array.isArray(config.reportTemplate.value) ? config.reportTemplate.value : []);
-          this.fieldConfig = Array.isArray(config.fieldConfig)
-            ? config.fieldConfig
-            : (config.fieldConfig && Array.isArray(config.fieldConfig.value) ? config.fieldConfig.value : []);
+          // reportTemplate and fieldConfig are now part of the menuData structure
+          this.reportTemplate = []; // Clear or handle as needed
+          this.fieldConfig = []; // Clear or handle as needed
           this.systemMessages = config.systemMessages || null;
           localStorage.setItem('currentProjectId', projectId);
           return true;

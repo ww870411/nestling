@@ -1,4 +1,4 @@
-// template.js
+// templates/subsidiaryTemplate.js
 
 /**
  * 新版字段配置 (fieldConfig)
@@ -79,7 +79,7 @@ export const fieldConfig = [
   { id: 2008, name: 'monthlyData.january.samePeriod', label: '1月-同期', type: 'basic', component: 'display', width: 110 },
   // 2月
   { id: 2009, name: 'monthlyData.february.plan', label: '2月-计划', type: 'basic', component: 'input', width: 110 },
-  { id: 2010, name: 'monthlyData.february.samePeriod', label: '2月-同期', type: 'basic', component: 'display', width: 110 },
+  { id: 2010, name: 'monthlyData.february.samePeriod', label: '12月-同期', type: 'basic', component: 'display', width: 110 },
   // 3月
   { id: 2011, name: 'monthlyData.march.plan', label: '3月-计划', type: 'basic', component: 'input', width: 110 },
   { id: 2012, name: 'monthlyData.march.samePeriod', label: '3月-同期', type: 'basic', component: 'display', width: 110 },

@@ -8,11 +8,11 @@ export const loadProjectConfig = async (projectId) => {
   try {
     const configModule = await import(`./${projectId}/config.js`);
     const menuModule = await import(`./${projectId}/menu.js`);
-    const templateModule = await import(`./${projectId}/template.js`);
+    // const templateModule = await import(`./${projectId}/template.js`); // DEPRECATED: Template is now part of menu.js
     return {
       menuData: menuModule.menuData,
-      reportTemplate: templateModule.reportTemplate,
-      fieldConfig: templateModule.fieldConfig,
+      // reportTemplate: templateModule.reportTemplate, // DEPRECATED
+      // fieldConfig: templateModule.fieldConfig, // DEPRECATED
       systemMessages: configModule.systemMessages,
     };
   } catch (error) {

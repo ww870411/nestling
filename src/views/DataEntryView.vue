@@ -94,7 +94,7 @@ import { isCellWritable } from '@/projects/heating_plan_2025-2026/tableRules.js'
 // --- Store and Routing ---
 const route = useRoute();
 const projectStore = useProjectStore();
-const { menuData, reportTemplate, fieldConfig } = storeToRefs(projectStore);
+const { menuData } = storeToRefs(projectStore);
 
 // --- Component State ---
 const tableData = ref([]);
@@ -103,6 +103,21 @@ const explanations = ref({});
 const isErrorPanelVisible = ref(false);
 const panelWidth = ref(300);
 const zoomLevel = ref(100);
+
+// --- Dynamically load table configuration ---
+const currentTableConfig = computed(() => {
+  const tableId = route.params.id;
+  if (!menuData.value || !tableId) return null;
+  for (const group of menuData.value) {
+    const table = group.tables.find(t => t.id === tableId);
+    if (table) return table.template;
+  }
+  return null;
+});
+
+const reportTemplate = computed(() => currentTableConfig.value?.reportTemplate || []);
+const fieldConfig = computed(() => currentTableConfig.value?.fieldConfig || []);
+
 
 // --- Computed Properties ---
 const pageTitle = computed(() => {
@@ -288,6 +303,10 @@ const runValidation = ({ level = 'hard' } = {}) => {
 
 // --- Watchers ---
 watch(reportTemplate, initializeTableData, { deep: true, immediate: true });
+
+watch(() => route.params.id, () => {
+  initializeTableData();
+}, { immediate: true });
 
 const handleInputBlur = (row, fieldId) => {
   calculateAll();
