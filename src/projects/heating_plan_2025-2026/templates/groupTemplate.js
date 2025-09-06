@@ -178,7 +178,9 @@ export const reportTemplate = [
   { id: 108, category: '经济指标', name: '购电单价', unit: '元/kWh', type: 'calculated', formula: 'VAL(107)/VAL(68)', style: { fontWeight: 'bold' }, samePeriodEditable: false, requiredProperties: { businessModel: ['independent'] } },
   { id: 109, category: '经济指标', name: '水成本', unit: '万元', type: 'basic', formula: null, style: { fontWeight: 'normal' }, samePeriodEditable: false, requiredProperties: { businessModel: ['independent'] } },
   { id: 110, category: '经济指标', name: '水单价', unit: '元/吨', type: 'calculated', formula: 'VAL(109)*10000/VAL(40)', style: { fontWeight: 'bold' }, samePeriodEditable: false, requiredProperties: { businessModel: ['independent'] } },
-  { id: 111, category: '经济指标', name: '劳务费', unit: '万元', type: 'basic', formula: null, style: { fontWeight: 'normal' }, samePeriodEditable: false, requiredProperties: { businessModel: ['independent'] } },
-  { id: 112, category: '经济指标', name: '抢修费', unit: '万元', type: 'basic', formula: null, style: { fontWeight: 'normal' }, samePeriodEditable: true, requiredProperties: { businessModel: ['independent'] } },
-  { id: 113, category: '经济指标', name: '毛利', unit: '万元', type: 'calculated', formula: 'VAL(94)-VAL(103)-VAL(105)-VAL(107)-VAL(109)-VAL(111)-VAL(112)', style: { fontWeight: 'bold' }, samePeriodEditable: false, requiredProperties: { businessModel: ['independent'] } },
+  { id: 111, category: '经济指标', name: '天然气成本', unit: '万元', type: 'basic', formula: null, style: { fontWeight: 'normal' }, samePeriodEditable: false, requiredProperties: { fuelType: ['natural_gas'] } },
+  { id: 112, category: '经济指标', name: '购天然气单价', unit: '元/吨', type: 'calculated', formula: 'VAL(111)*10000/VAL(60)', style: { fontWeight: 'bold' }, samePeriodEditable: false, requiredProperties: { fuelType: ['natural_gas'] } },
+  { id: 113, category: '经济指标', name: '劳务费', unit: '万元', type: 'basic', formula: null, style: { fontWeight: 'normal' }, samePeriodEditable: false, requiredProperties: { businessModel: ['independent'] } },
+  { id: 114, category: '经济指标', name: '抢修费', unit: '万元', type: 'basic', formula: null, style: { fontWeight: 'normal' }, samePeriodEditable: true, requiredProperties: { businessModel: ['independent'] } },
+  { id: 115, category: '经济指标', name: '毛利', unit: '万元', type: 'calculated', formula: 'VAL(94)-VAL(103)-VAL(105)-VAL(107)-VAL(109)-VAL(111)-VAL(113)-VAL(114)', style: { fontWeight: 'bold' }, samePeriodEditable: false, requiredProperties: { businessModel: ['independent'] } },
 ];

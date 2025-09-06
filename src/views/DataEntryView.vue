@@ -398,9 +398,14 @@ const startResize = (event) => {
 
 const getCellStyle = (row, field) => {
   const state = getCellState(row, field, currentTableProperties);
-  if (state === 'READONLY_CALCULATED' || row.type === 'calculated') {
+
+  // 仅在数值列应用加粗样式
+  const isValueColumn = field.component !== 'label'; 
+
+  if (isValueColumn && (state === 'READONLY_CALCULATED' || row.type === 'calculated')) {
     return { ...row.style, fontWeight: 'bold' };
   }
+  
   return row.style;
 };
 
