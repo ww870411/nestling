@@ -7,53 +7,56 @@
 // ====================================================================
 
 /**
- * 定义特定指标的可写规则。
- * 键是指标ID (metricId)，值是一个函数，该函数接收表格的 properties 对象并返回布尔值。
- * @type {Object.<number, function(TableProperties): boolean>}
+ * 判断一个单元格的可写状态
+ * @param {object} row - 当前行的数据对象
+ * @param {object} field - 当前列的配置对象
+ * @param {object} tableProperties - 当前表格的属性对象
+ * @returns {'WRITABLE' | 'READONLY_CALCULATED' | 'READONLY_DISPLAY'} - 返回单元格的状态
  */
-const writabilityRules = {
-  // 示例: 指标6 (发电量) 仅在生产方式为 '热电联产' 的表中可写
-  // 6: (props) => props.productionMethod.includes('thermoelectric'),
-  
-  // 在这里添加您需要的规则...
-};
-
-
-/**
- * 判断一个单元格是否可写。
- * @param {object} row - 当前行的数据对象 (包含 metricId, type, samePeriodEditable)
- * @param {object} field - 当前列的配置对象 (包含 component, name)
- * @param {object} tableProperties - 当前表格的属性对象 (来自 menu.js)
- * @returns {boolean}
- */
-export const isCellWritable = (row, field, tableProperties) => {
+export const getCellState = (row, field, tableProperties) => {
   if (!row || !field) {
-    return false;
+    return 'READONLY_DISPLAY';
   }
 
-  // 优先规则 1: display类型的列永远不可写
+  // 规则1: display类型的列永远不可写 (最高优先级)
   if (field.component === 'display') {
-    return false;
+    return 'READONLY_DISPLAY';
   }
 
-  // 优先规则 2: 检查是否存在基于业务属性的特殊规则
-  const specificRule = writabilityRules[row.metricId];
-  if (specificRule) {
-    // 如果有特殊规则，则根据规则和表格属性来判断
-    return specificRule(tableProperties || {});
+  // 规则2: 模板中预定义的计算行，永远是计算状态 (高优先级)
+  if (row.type === 'calculated') {
+    return 'READONLY_CALCULATED';
   }
 
-  // 默认规则 3: 常规输入单元格 (基础行 & input列)
-  if (row.type === 'basic' && field.component === 'input') {
-    return true;
+  const required = row.requiredProperties;
+
+  // 规则3: 检查行内定义的 requiredProperties
+  if (required && Object.keys(required).length > 0) {
+    const props = tableProperties || {};
+    for (const key in required) {
+      const requiredValues = required[key];
+      const tableValues = props[key] || [];
+      if (requiredValues.length > 0 && tableValues.length === 0) {
+        return 'READONLY_CALCULATED'; // Should be calculated from other tables
+      }
+      const match = requiredValues.some(val => tableValues.includes(val));
+      if (!match) {
+        return 'READONLY_CALCULATED'; // Should be calculated from other tables
+      }
+    }
   }
 
-  // 默认规则 4: 特殊情况 - 同期值可编辑
+  // 规则4: 默认可写情况
+  if (field.component === 'input') {
+    return 'WRITABLE';
+  }
+
+  // 规则5: 特殊情况 - 同期值可编辑
   if (row.samePeriodEditable && field.name && field.name.endsWith('.samePeriod')) {
-    return true;
+    return 'WRITABLE';
   }
 
-  return false;
+  return 'READONLY_DISPLAY';
 };
 
 

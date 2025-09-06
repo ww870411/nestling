@@ -25,14 +25,14 @@
                   :width="childField.width * zoomLevel / 100"
                   :fixed="childField.fixed">
                   <template #default="{ row }">
-                    <div v-if="isCellWritable(row, childField, currentTableProperties)" class="cell-content">
+                    <div v-if="getCellState(row, childField, currentTableProperties) === 'WRITABLE'" class="cell-content">
                       <el-input 
                         v-model.number="row.values[childField.id]"
                         @blur="handleInputBlur(row, childField.id)" 
                         @keyup.enter="handleInputBlur(row, childField.id)" />
                     </div>
                     <div v-else class="cell-content">
-                      <span :style="row.style">{{ row.values[childField.id] }}</span>
+                      <span :style="getCellStyle(row, childField)">{{ row.values[childField.id] }}</span>
                     </div>
                   </template>
                 </el-table-column>
@@ -45,14 +45,14 @@
                 :width="field.width * zoomLevel / 100" 
                 :fixed="field.fixed">
                 <template #default="{ row }">
-                  <div v-if="isCellWritable(row, field, currentTableProperties)" class="cell-content">
+                  <div v-if="getCellState(row, field, currentTableProperties) === 'WRITABLE'" class="cell-content">
                     <el-input 
                       v-model.number="row.values[field.id]"
                       @blur="handleInputBlur(row, field.id)" 
                       @keyup.enter="handleInputBlur(row, field.id)" />
                   </div>
                   <div v-else class="cell-content">
-                    <span :style="row.style">{{ row.values[field.id] }}</span>
+                    <span :style="getCellStyle(row, field)">{{ row.values[field.id] }}</span>
                   </div>
                 </template>
               </el-table-column>
@@ -108,7 +108,7 @@ import { Close, Loading } from '@element-plus/icons-vue';
 import * as XLSX from 'xlsx';
 import { getDefaultValidation } from '@/projects/heating_plan_2025-2026/tableRules.js';
 import { validationRules } from '@/utils/validator.js';
-import { isCellWritable } from '@/projects/heating_plan_2025-2026/tableRules.js';
+import { getCellState } from '@/projects/heating_plan_2025-2026/tableRules.js';
 
 // --- Store and Routing ---
 const route = useRoute();
@@ -218,6 +218,7 @@ const initializeTableData = () => {
       type: metric.type, // Pass metric type to row
       validation: metric.validation, // Pass personalized validation to row
       samePeriodEditable: metric.samePeriodEditable, // Pass editable flag to row
+      requiredProperties: metric.requiredProperties, // Pass required properties to row
       values: {},
     };
 
@@ -242,45 +243,51 @@ const calculateAll = () => {
 
   const getRowByMetricId = (metricId) => tableData.value.find(r => r.metricId === metricId);
 
-  const calculatedFields = [
-    ...reportTemplate.value.filter(f => f.type === 'calculated' && f.formula),
-    ...fieldConfig.value.filter(f => f.type === 'calculated' && f.formula)
-  ].sort((a, b) => (a.id < 1000 ? 0 : 1) - (b.id < 1000 ? 0 : 1)); // Process row-level formulas first
+  // --- 行内计算 (Row-level formulas) ---
+  const rowCalculatedFields = reportTemplate.value.filter(f => f.type === 'calculated' && f.formula);
+  rowCalculatedFields.forEach(field => {
+    const targetRow = getRowByMetricId(field.id);
+    if (!targetRow) return;
 
-  for (let i = 0; i < 10; i++) {
-    calculatedFields.forEach(field => {
-      const formula = field.formula;
-      if (!formula) return;
+    const valResolver = (metricId) => {
+      const sourceRow = getRowByMetricId(metricId);
+      // For row-level formulas, we assume they depend on the main input columns.
+      // This might need to be more robust if formulas can span across different column types.
+      const firstInputCol = fieldConfig.value.find(fc => fc.component === 'input');
+      return sourceRow && firstInputCol ? (sourceRow.values[firstInputCol.id] || 0) : 0;
+    };
 
-      const isRowLevelFormula = field.id < 1000;
+    try {
+      const funcBody = field.formula.replace(/VAL\((\d+)\)/g, (match, id) => `valResolver(${id})`);
+      const result = new Function('valResolver', `return ${funcBody}`)(valResolver);
       
-      if (isRowLevelFormula) {
-        const targetRow = getRowByMetricId(field.id);
-        if (!targetRow) return;
+      // Apply the result to all writable columns in the calculated row
+      fieldConfig.value.forEach(col => {
+        if (getCellState(targetRow, col, currentTableProperties) === 'WRITABLE') {
+            targetRow.values[col.id] = parseFloat(result.toFixed(2));
+        }
+      });
 
-        const valResolver = (metricId) => {
-          const sourceRow = getRowByMetricId(metricId);
-          const firstInputCol = fieldConfig.value.find(fc => fc.component === 'input');
-          return sourceRow ? (sourceRow.values[firstInputCol.id] || 0) : 0;
-        };
-        try {
-          const funcBody = formula.replace(/VAL\((\d+)\)/g, (match, id) => `valResolver(${id})`);
-          const result = new Function('valResolver', `return ${funcBody}`)(valResolver);
-          targetRow.values[field.id] = parseFloat(result.toFixed(2));
-        } catch (e) {}
+    } catch (e) {
+      console.error(`Error calculating row formula for metric ${field.id}:`, e);
+    }
+  });
 
-      } else { // Column-level formula (e.g., totals)
-        tableData.value.forEach(row => {
-          const valResolver = (columnId) => row.values[columnId] || 0;
-          try {
-            const funcBody = formula.replace(/VAL\((\d+)\)/g, (match, id) => `valResolver(${id})`);
-            const result = new Function('valResolver', `return ${funcBody}`)(valResolver);
-            row.values[field.id] = parseFloat(result.toFixed(2));
-          } catch (e) {}
-        });
+  // --- 列内计算 (Column-level formulas) ---
+  const colCalculatedFields = fieldConfig.value.filter(f => f.type === 'calculated' && f.formula);
+  tableData.value.forEach(row => {
+    colCalculatedFields.forEach(field => {
+      const valResolver = (columnId) => row.values[columnId] || 0;
+      try {
+        const funcBody = field.formula.replace(/VAL\((\d+)\)/g, (match, id) => `valResolver(${id})`);
+        const result = new Function('valResolver', `return ${funcBody}`)(valResolver);
+        row.values[field.id] = parseFloat(result.toFixed(2));
+      } catch (e) {
+        console.error(`Error calculating column formula for field ${field.id} in row ${row.metricId}:`, e);
       }
     });
-  }
+  });
+
   runValidation({ level: 'hard' });
 };
 
@@ -389,6 +396,14 @@ const startResize = (event) => {
 
 // --- Display & Class Logic ---
 
+const getCellStyle = (row, field) => {
+  const state = getCellState(row, field, currentTableProperties);
+  if (state === 'READONLY_CALCULATED' || row.type === 'calculated') {
+    return { ...row.style, fontWeight: 'bold' };
+  }
+  return row.style;
+};
+
 const getCellClass = ({ row, column }) => {
   // Search in the original flat config, as it's simpler and contains all fields.
   const field = fieldConfig.value.find(f => f.name === column.property);
@@ -399,7 +414,7 @@ const getCellClass = ({ row, column }) => {
     return 'is-error';
   }
 
-  if (!isCellWritable(row, field, currentTableProperties)) {
+  if (getCellState(row, field, currentTableProperties) !== 'WRITABLE') {
     return 'is-readonly-shadow';
   }
   
