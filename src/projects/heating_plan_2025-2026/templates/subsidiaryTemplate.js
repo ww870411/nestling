@@ -193,7 +193,7 @@ export const reportTemplate = [
   {
     id: 11,
     category: '产量',
-    name: '4.低温水供热量',
+    name: '4.燃煤锅炉房供热量',
     unit: 'GJ',
     type: 'basic',
     formula: null,
@@ -303,7 +303,7 @@ export const reportTemplate = [
   {
     id: 22,
     category: '销量',
-    name: '4.低温水供热面积',
+    name: '4.燃煤锅炉房供热面积',
     unit: '㎡',
     type: 'basic',
     formula: null,

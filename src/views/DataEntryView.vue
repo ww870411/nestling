@@ -25,7 +25,7 @@
                   :width="childField.width * zoomLevel / 100"
                   :fixed="childField.fixed">
                   <template #default="{ row }">
-                    <div v-if="isCellWritable(row, childField)" class="cell-content">
+                    <div v-if="isCellWritable(row, childField, currentTableProperties)" class="cell-content">
                       <el-input 
                         v-model.number="row.values[childField.id]"
                         @blur="handleInputBlur(row, childField.id)" 
@@ -45,7 +45,7 @@
                 :width="field.width * zoomLevel / 100" 
                 :fixed="field.fixed">
                 <template #default="{ row }">
-                  <div v-if="isCellWritable(row, field)" class="cell-content">
+                  <div v-if="isCellWritable(row, field, currentTableProperties)" class="cell-content">
                     <el-input 
                       v-model.number="row.values[field.id]"
                       @blur="handleInputBlur(row, field.id)" 
@@ -136,6 +136,16 @@ const currentTableConfig = computed(() => {
 
 const reportTemplate = computed(() => currentTableConfig.value?.reportTemplate || []);
 const fieldConfig = computed(() => currentTableConfig.value?.fieldConfig || []);
+
+const currentTableProperties = computed(() => {
+  const tableId = route.params.id;
+  if (!menuData.value || !tableId) return {};
+  for (const group of menuData.value) {
+    const table = group.tables.find(t => t.id === tableId);
+    if (table) return table.properties || {};
+  }
+  return {};
+});
 
 const processedFieldConfig = computed(() => {
   if (!fieldConfig.value) return [];
@@ -389,7 +399,7 @@ const getCellClass = ({ row, column }) => {
     return 'is-error';
   }
 
-  if (!isCellWritable(row, field)) {
+  if (!isCellWritable(row, field, currentTableProperties)) {
     return 'is-readonly-shadow';
   }
   
