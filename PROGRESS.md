@@ -177,3 +177,35 @@
     *   之前的导航守卫只检查了用户是否登录和项目是否加载，但没有检查用户是否有权访问通过 URL 直接输入的具体报表 ID，导致存在权限漏洞。
 *   **实现效果:**
     *   现在，当用户尝试直接访问某个报表页面时，系统会根据其登录角色和 `authStore` 中定义的 `accessibleUnits` 列表，判断其是否有权访问该报表所属的单位。如果无权访问，则会重定向到 `/dashboard` 页面，有效堵塞了权限漏洞。
+
+---
+
+### 2025-09-06 12:00:00 (UTC+8)
+
+*   **模块:** `router`, `views`, `layouts` (核心路由系统)
+*   **修改内容:**
+    1.  **架构升级:** 重构了 `src/router/index.js`，将项目ID (`projectId`) 整合进URL结构中。现在的URL格式为 `/project/:projectId/dashboard` 或 `/project/:projectId/data-entry/:tableId`。
+    2.  **架构升级:** 极大地增强了 `router.beforeEach` 导航守卫。它现在会直接从URL参数中解析 `projectId` 来加载项目配置，彻底移除了之前对 `localStorage` 的依赖，使路由行为更加健壮和无状态。
+    3.  **代码重构:** 更新了 `src/views/ProjectSelectionView.vue`，使其在选择项目后跳转到新的、包含 `projectId` 的URL。
+    4.  **代码重构:** 更新了 `src/layouts/MainLayout.vue`，使其能从当前URL中动态获取 `projectId`，并为侧边栏菜单生成正确的、包含项目上下文的链接。
+*   **修改原因:**
+    *   旧的URL结构 (`/data-entry/:id`) 没有包含项目上下文，导致在多项目场景下URL存在歧义，并且在刷新页面时严重依赖 `localStorage` 中的隐式状态，系统鲁棒性差。
+*   **实现效果:**
+    *   **URL清晰化:** URL现在能准确反映应用的完整状态（项目+报表），方便分享和调试。
+    *   **健壮性提升:** 即使清空浏览器缓存，只要URL正确，应用就能恢复到正确的状态。
+    *   **为多项目扩展铺平道路:** 新的路由结构从根本上解决了多项目导航的问题，为未来扩展新项目奠定了坚实的基础。
+
+---
+
+### 2025-09-06 12:05:00 (UTC+8)
+
+*   **模块:** `views` (UI/视图层)
+*   **修改内容:**
+    1.  **Bug修复:** 修复了因路由重构导致的导航失效问题。具体包括：
+        *   在 `DataEntryView.vue` 中，将获取路由参数的方式从 `route.params.id` 修正为 `route.params.tableId`。
+        *   在 `DashboardView.vue` 中，更新了“进入”按钮的跳转逻辑，使其生成符合新路由结构的URL (`/project/:projectId/data-entry/:tableId`)。
+    2.  **Bug修复:** 修复了在 `DashboardView.vue` 中因修改代码引入的 `Identifier 'projectStore' has already been declared` 的编译错误。
+*   **修改原因:**
+    *   在上一轮路由重构中，未能同步更新所有使用到路由参数和导航跳转的地方，导致了功能性BUG和编译错误。
+*   **实现效果:**
+    *   恢复了应用的正常导航功能。现在从仪表盘和侧边栏都能正确跳转到数据填报页面。

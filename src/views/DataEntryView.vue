@@ -125,7 +125,7 @@ const zoomLevel = ref(100);
 
 // --- Dynamically load table configuration ---
 const currentTableConfig = computed(() => {
-  const tableId = route.params.id;
+  const tableId = route.params.tableId;
   if (!menuData.value || !tableId) return null;
   for (const group of menuData.value) {
     const table = group.tables.find(t => t.id === tableId);
@@ -138,7 +138,7 @@ const reportTemplate = computed(() => currentTableConfig.value?.reportTemplate |
 const fieldConfig = computed(() => currentTableConfig.value?.fieldConfig || []);
 
 const currentTableProperties = computed(() => {
-  const tableId = route.params.id;
+  const tableId = route.params.tableId;
   if (!menuData.value || !tableId) return {};
   for (const group of menuData.value) {
     const table = group.tables.find(t => t.id === tableId);
@@ -185,7 +185,7 @@ const processedFieldConfig = computed(() => {
 
 // --- Computed Properties ---
 const pageTitle = computed(() => {
-  const tableId = route.params.id;
+  const tableId = route.params.tableId;
   if (!menuData.value) return '数据填报';
   for (const group of menuData.value) {
     const table = group.tables.find(t => t.id === tableId);
@@ -375,7 +375,7 @@ const runValidation = ({ level = 'hard' } = {}) => {
 // --- Watchers ---
 watch(reportTemplate, initializeTableData, { deep: true, immediate: true });
 
-watch(() => route.params.id, () => {
+watch(() => route.params.tableId, () => {
   initializeTableData();
 }, { immediate: true });
 
@@ -457,16 +457,16 @@ const handleSave = () => {
       }
     });
   });
-  localStorage.setItem(`data-draft-${route.params.id}`, JSON.stringify(draftData));
+  localStorage.setItem(`data-draft-${route.params.tableId}`, JSON.stringify(draftData));
   
   // Set status for dashboard
-  localStorage.setItem(`status-${route.params.id}`, 'saved');
+  localStorage.setItem(`status-${route.params.tableId}`, 'saved');
 
   ElMessage.success('草稿已暂存');
 };
 
 const handleLoadDraft = () => {
-  const savedData = localStorage.getItem(`data-draft-${route.params.id}`);
+  const savedData = localStorage.getItem(`data-draft-${route.params.tableId}`);
   if (!savedData) {
     ElMessage.warning('没有找到可用的暂存数据');
     return;
@@ -500,8 +500,8 @@ const handleSubmit = () => {
   }
 
   // Set status and submission time for dashboard
-  localStorage.setItem(`status-${route.params.id}`, 'submitted');
-  localStorage.setItem(`submittedAt-${route.params.id}`, new Date().toISOString());
+  localStorage.setItem(`status-${route.params.tableId}`, 'submitted');
+  localStorage.setItem(`submittedAt-${route.params.tableId}`, new Date().toISOString());
 
   ElMessage.success('提交成功！');
   isErrorPanelVisible.value = false;

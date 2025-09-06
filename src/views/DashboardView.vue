@@ -42,13 +42,14 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router'; // 引入 useRoute
 import { storeToRefs } from 'pinia';
 import { useProjectStore } from '@/stores/projectStore';
 import { useAuthStore } from '@/stores/authStore';
 import { dashboardConfig } from '@/projects/heating_plan_2025-2026/dashboardData.js';
 
 const router = useRouter();
+const route = useRoute(); // 使用 useRoute
 const projectStore = useProjectStore();
 const authStore = useAuthStore();
 
@@ -113,7 +114,8 @@ const formatDateTime = (isoString) => {
 };
 
 const goToReport = (reportId) => {
-  router.push(`/data-entry/${reportId}`);
+  const projectId = route.params.projectId;
+  router.push({ name: 'data-entry', params: { projectId, tableId: reportId } });
 };
 </script>
 

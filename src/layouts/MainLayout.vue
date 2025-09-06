@@ -15,7 +15,7 @@
           router
         >
           <!-- Menu items are the same -->
-          <el-menu-item index="/dashboard">
+          <el-menu-item :index="dashboardPath">
             <el-icon><HomeFilled /></el-icon>
             <span>首页</span>
           </el-menu-item>
@@ -27,7 +27,7 @@
             <el-menu-item 
               v-for="table in group.tables" 
               :key="table.id" 
-              :index="`/data-entry/${table.id}`" 
+              :index="`/project/${currentProjectId}/data-entry/${table.id}`" 
               :class="getStatusClass(table.id)"
             >
               {{ table.name }}
@@ -59,18 +59,25 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router'; // 引入 useRoute
 import { storeToRefs } from 'pinia';
 import { useProjectStore } from '@/stores/projectStore';
 import { useAuthStore } from '@/stores/authStore';
 import { HomeFilled, Grid } from '@element-plus/icons-vue';
 
 const router = useRouter();
+const route = useRoute(); // 使用 useRoute
 const projectStore = useProjectStore();
 const authStore = useAuthStore();
 
 const { menuData, isProjectLoaded, systemMessages } = storeToRefs(projectStore);
 const { accessibleUnits } = storeToRefs(authStore);
+
+// 从路由参数中获取当前项目ID
+const currentProjectId = computed(() => route.params.projectId);
+
+// 为模板动态生成首页链接
+const dashboardPath = computed(() => `/project/${currentProjectId.value}/dashboard`);
 
 const reportStatuses = ref({});
 const isSidebarCollapsed = ref(false);

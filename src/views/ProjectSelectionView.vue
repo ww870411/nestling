@@ -39,7 +39,7 @@ const selectProject = async (projectId) => {
   loading.value = false;
 
   if (success) {
-    router.push('/dashboard');
+    router.push({ name: 'dashboard', params: { projectId } });
   } else {
     ElMessage.error('项目加载失败，请检查配置或联系管理员。');
   }

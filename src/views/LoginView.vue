@@ -87,7 +87,7 @@ const handleLogin = () => {
       setTimeout(() => {
         if (loginSuccess) {
           ElMessage.success('登录成功');
-          router.push({ path: '/' });
+          router.push({ name: 'projects' });
         } else {
           ElMessage.error('用户名或密码错误');
         }

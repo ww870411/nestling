@@ -21,10 +21,10 @@ const routes = [
     meta: { requiresAuth: true }
   },
   {
-    path: '/',
+    path: '/project/:projectId',
     component: MainLayout,
-    redirect: '/dashboard',
     meta: { requiresAuth: true, requiresProject: true },
+    redirect: to => ({ name: 'dashboard', params: { projectId: to.params.projectId } }),
     children: [
       {
         path: 'dashboard',
@@ -32,11 +32,16 @@ const routes = [
         component: DashboardView
       },
       {
-        path: 'data-entry/:id',
+        path: 'data-entry/:tableId',
         name: 'data-entry',
         component: DataEntryView
       }
     ]
+  },
+  // 将根路径重定向到项目选择页
+  {
+    path: '/',
+    redirect: '/projects'
   }
 ];
 
@@ -49,38 +54,43 @@ router.beforeEach(async (to, from, next) => {
   const projectStore = useProjectStore();
   const authStore = useAuthStore();
 
-  // 尝试从localStorage恢复登录状态
+  // 1. 恢复登录状态
   if (!authStore.isAuthenticated) {
     authStore.tryAutoLogin();
   }
-
   const isAuthenticated = authStore.isAuthenticated;
 
-  // 尝试从localStorage加载项目配置
-  if (isAuthenticated && !projectStore.isProjectLoaded && localStorage.getItem('currentProjectId')) {
-    await projectStore.loadPersistedProject();
+  // 2. 检查需要认证的路由
+  if (to.meta.requiresAuth && !isAuthenticated) {
+    return next({ name: 'login', query: { redirect: to.fullPath } });
   }
 
-  const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
-
-  // 1. 检查是否需要认证
-  if (requiresAuth && !isAuthenticated) {
-    return next({ name: 'login' });
-  }
-
-  // 2. 检查是否已登录就不要去登录页
+  // 3. 已登录用户访问登录页，重定向到项目选择页
   if (to.name === 'login' && isAuthenticated) {
     return next({ name: 'projects' });
   }
 
-  // 3. 检查是否需要项目但未加载
-  if (to.meta.requiresProject && !projectStore.isProjectLoaded) {
-    return next({ name: 'projects' });
-  }
+  // 4. 核心逻辑：处理需要项目上下文的路由
+  if (to.meta.requiresProject) {
+    const projectId = to.params.projectId;
+    if (!projectId) {
+      // 如果URL中没有项目ID，则重定向到项目选择页
+      return next({ name: 'projects' });
+    }
 
-  // 4. 核心权限校验：检查用户是否有权访问此报表
+    // 如果请求的项目ID与当前加载的项目不一致，则加载新项目
+    if (projectStore.currentProjectId !== projectId) {
+      const success = await projectStore.loadProject(projectId);
+      if (!success) {
+        // 如果项目加载失败（例如，项目ID无效），重定向到项目选择页
+        return next({ name: 'projects' });
+      }
+    }
+  }
+  
+  // 5. 报表权限校验
   if (to.name === 'data-entry') {
-    const tableId = to.params.id;
+    const tableId = to.params.tableId;
     const menuData = projectStore.menuData;
     const accessibleUnits = new Set(authStore.accessibleUnits);
 
@@ -94,9 +104,9 @@ router.beforeEach(async (to, from, next) => {
     }
 
     if (!targetUnit || !accessibleUnits.has(targetUnit)) {
-      // 如果找不到报表，或者报表所属的单位不在用户的可访问列表内
       console.warn(`权限拒绝: 用户尝试访问ID为 ${tableId} 的报表, 但无权访问 ${targetUnit} 单位。`);
-      return next({ name: 'dashboard' }); // 重定向到首页
+      // 重定向到当前项目的 dashboard
+      return next({ name: 'dashboard', params: { projectId: to.params.projectId } });
     }
   }
 
