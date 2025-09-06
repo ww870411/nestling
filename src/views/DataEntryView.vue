@@ -84,7 +84,7 @@
       <div class="table-controls">
         <label style="margin-right: 10px; font-size: 14px; color: #606266;">表格缩放:</label>
         <el-radio-group v-model="zoomLevel" size="small">
-          <el-radio-button :label="50">50%</el-radio-button>
+          
           <el-radio-button :label="75">75%</el-radio-button>
           <el-radio-button :label="100">100%</el-radio-button>
         </el-radio-group>
