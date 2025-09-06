@@ -15,17 +15,36 @@
           <el-table :data="tableData" :cell-class-name="getCellClass" border row-key="id" style="width: 100%"
                     :header-cell-style="{ textAlign: 'center' }"
                     :cell-style="{ textAlign: 'center' }" height="100%">
-            <template v-for="field in fieldConfig" :key="field.id">
-              <el-table-column 
+            <template v-for="field in processedFieldConfig" :key="field.id">
+              <!-- If it's a group with children -->
+              <el-table-column v-if="field.children && field.children.length > 0"
+                :label="field.label">
+                <el-table-column v-for="childField in field.children" :key="childField.id"
+                  :prop="childField.name"
+                  :label="childField.label"
+                  :width="childField.width * zoomLevel / 100"
+                  :fixed="childField.fixed">
+                  <template #default="{ row }">
+                    <div v-if="isCellWritable(row, childField)" class="cell-content">
+                      <el-input 
+                        v-model.number="row.values[childField.id]"
+                        @blur="handleInputBlur(row, childField.id)" 
+                        @keyup.enter="handleInputBlur(row, childField.id)" />
+                    </div>
+                    <div v-else class="cell-content">
+                      <span :style="row.style">{{ row.values[childField.id] }}</span>
+                    </div>
+                  </template>
+                </el-table-column>
+              </el-table-column>
+
+              <!-- If it's a regular, top-level column -->
+              <el-table-column v-else
                 :prop="field.name" 
                 :label="field.label"
                 :width="field.width * zoomLevel / 100" 
                 :fixed="field.fixed">
                 <template #default="{ row }">
-                  <!-- 
-                    NOTE: 这里的逻辑需要随着数据结构的改变而重构。
-                    暂时保留最简单的显示和输入。
-                  -->
                   <div v-if="isCellWritable(row, field)" class="cell-content">
                     <el-input 
                       v-model.number="row.values[field.id]"
@@ -117,6 +136,41 @@ const currentTableConfig = computed(() => {
 
 const reportTemplate = computed(() => currentTableConfig.value?.reportTemplate || []);
 const fieldConfig = computed(() => currentTableConfig.value?.fieldConfig || []);
+
+const processedFieldConfig = computed(() => {
+  if (!fieldConfig.value) return [];
+
+  const result = [];
+  const groups = new Map();
+
+  fieldConfig.value.forEach(field => {
+    if (field.label.includes('-')) {
+      const [groupName, ...childLabelParts] = field.label.split('-');
+      const childLabel = childLabelParts.join('-');
+
+      if (!groups.has(groupName)) {
+        const newGroup = {
+          label: groupName,
+          children: [],
+          // A group doesn't have a single ID, so we can generate one for the key
+          id: `group-${groupName}`, 
+        };
+        groups.set(groupName, newGroup);
+        result.push(newGroup);
+      }
+
+      groups.get(groupName).children.push({
+        ...field,
+        label: childLabel, // Use the child part of the label
+      });
+
+    } else {
+      result.push(field);
+    }
+  });
+
+  return result;
+});
 
 
 // --- Computed Properties ---
@@ -326,6 +380,7 @@ const startResize = (event) => {
 // --- Display & Class Logic ---
 
 const getCellClass = ({ row, column }) => {
+  // Search in the original flat config, as it's simpler and contains all fields.
   const field = fieldConfig.value.find(f => f.name === column.property);
   if (!field) return '';
 
