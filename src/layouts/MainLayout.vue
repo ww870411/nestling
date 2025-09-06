@@ -19,7 +19,7 @@
             <el-icon><HomeFilled /></el-icon>
             <span>首页</span>
           </el-menu-item>
-          <el-sub-menu v-for="group in menuData" :key="group.name" :index="group.name">
+          <el-sub-menu v-for="group in filteredMenuData" :key="group.name" :index="group.name">
             <template #title>
               <el-icon><Grid /></el-icon>
               <span>{{ group.name }}</span>
@@ -43,7 +43,8 @@
           <div @click="toggleSidebar" class="collapse-icon">
             {{ isSidebarCollapsed ? '>>' : '<<' }}
           </div>
-          <span>欢迎使用</span>
+          <span v-if="authStore.user"><b>{{ authStore.user.username }}</b>, 欢迎使用</span>
+          <span v-else>欢迎使用</span>
         </div>
         <div class="header-right">
           <el-button type="danger" plain @click="handleLogout">退出登录</el-button>
@@ -57,19 +58,29 @@
 </template>
 
 <script setup>
-// Script is the same as before
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { useProjectStore } from '@/stores/projectStore';
+import { useAuthStore } from '@/stores/authStore';
 import { HomeFilled, Grid } from '@element-plus/icons-vue';
 
 const router = useRouter();
 const projectStore = useProjectStore();
-const { menuData, isProjectLoaded, currentProjectName, systemMessages } = storeToRefs(projectStore);
+const authStore = useAuthStore();
+
+const { menuData, isProjectLoaded, systemMessages } = storeToRefs(projectStore);
+const { accessibleUnits } = storeToRefs(authStore);
 
 const reportStatuses = ref({});
 const isSidebarCollapsed = ref(false);
+
+// 根据当前用户的权限过滤菜单
+const filteredMenuData = computed(() => {
+  if (!menuData.value) return [];
+  const allowedUnits = new Set(accessibleUnits.value);
+  return menuData.value.filter(group => allowedUnits.has(group.name));
+});
 
 const toggleSidebar = () => {
   isSidebarCollapsed.value = !isSidebarCollapsed.value;
@@ -104,7 +115,7 @@ const getStatusClass = (reportId) => {
 };
 
 const handleLogout = () => {
-  localStorage.removeItem('authenticated');
+  authStore.logout();
   projectStore.clearProject();
   router.push('/login');
 };

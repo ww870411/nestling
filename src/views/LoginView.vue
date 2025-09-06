@@ -57,19 +57,21 @@
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { useAuthStore } from '@/stores/authStore';
+import { ElMessage } from 'element-plus';
 
 const router = useRouter();
+const authStore = useAuthStore();
 
 const loginForm = ref({
-  username: 'admin',
-  password: '123456',
-  captcha: ''
+  username: '',
+  password: '',
+  captcha: '' // 验证码逻辑暂时保留UI，但不参与实际验证
 });
 
 const loginRules = ref({
   username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
-  password: [{ required: true, message: '请输入密码', trigger: 'blur' }],
-  captcha: [{ required: true, message: '请输入验证码', trigger: 'blur' }]
+  password: [{ required: true, message: '请输入密码', trigger: 'blur' }]
 });
 
 const loading = ref(false);
@@ -79,14 +81,19 @@ const handleLogin = () => {
   loginFormRef.value.validate(valid => {
     if (valid) {
       loading.value = true;
+      // 使用 authStore 进行登录
+      const loginSuccess = authStore.login(loginForm.value.username, loginForm.value.password);
+
       setTimeout(() => {
-        console.log('登录成功');
-        localStorage.setItem('authenticated', 'true');
-        router.push({ path: '/' });
+        if (loginSuccess) {
+          ElMessage.success('登录成功');
+          router.push({ path: '/' });
+        } else {
+          ElMessage.error('用户名或密码错误');
+        }
         loading.value = false;
       }, 500);
     } else {
-      console.log('表单校验失败');
       return false;
     }
   });

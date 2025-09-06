@@ -45,25 +45,32 @@ import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { useProjectStore } from '@/stores/projectStore';
+import { useAuthStore } from '@/stores/authStore';
 import { dashboardConfig } from '@/projects/heating_plan_2025-2026/dashboardData.js';
 
 const router = useRouter();
 const projectStore = useProjectStore();
+const authStore = useAuthStore();
+
 const { menuData } = storeToRefs(projectStore);
+const { accessibleUnits } = storeToRefs(authStore);
 
 const config = ref(dashboardConfig);
 const reportInfo = ref({});
 
-// 将菜单数据和状态数据结合
+// 将菜单数据和状态数据结合，并根据权限过滤
 const allReports = computed(() => {
-  return menuData.value.flatMap(group => 
-    group.tables.map(table => ({
-      ...table,
-      groupName: group.name,
-      status: reportInfo.value[table.id]?.status || 'new',
-      submittedAt: reportInfo.value[table.id]?.submittedAt || null
-    }))
-  );
+  const allowedUnits = new Set(accessibleUnits.value);
+  return menuData.value
+    .filter(group => allowedUnits.has(group.name)) // 应用权限过滤
+    .flatMap(group => 
+      group.tables.map(table => ({
+        ...table,
+        groupName: group.name,
+        status: reportInfo.value[table.id]?.status || 'new',
+        submittedAt: reportInfo.value[table.id]?.submittedAt || null
+      }))
+    );
 });
 
 // 从 localStorage 更新状态
