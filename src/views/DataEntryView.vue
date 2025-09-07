@@ -80,6 +80,7 @@
     <div class="footer-actions">
       <div>
         <el-button @click="handleExport">导出至本地</el-button>
+        <el-button @click="handleShowExplanations">解释说明</el-button>
       </div>
       <div class="table-controls">
         <label style="margin-right: 10px; font-size: 14px; color: #606266;">表格缩放:</label>
@@ -96,6 +97,20 @@
       </div>
     </div>
   </div>
+
+  <!-- 解释说明展示对话框 -->
+  <el-dialog v-model="isExplanationsDialogVisible" title="已提交的解释说明" width="50%">
+    <el-table :data="submittedExplanations" border style="width: 100%">
+      <el-table-column prop="label" label="指标位置" width="220"></el-table-column>
+      <el-table-column prop="message" label="错误原因" width="200"></el-table-column>
+      <el-table-column prop="content" label="说明内容"></el-table-column>
+    </el-table>
+    <template #footer>
+      <span class="dialog-footer">
+        <el-button @click="isExplanationsDialogVisible = false">关闭</el-button>
+      </span>
+    </template>
+  </el-dialog>
 </template>
 
 <script setup>
@@ -107,6 +122,7 @@ import { useProjectStore } from '@/stores/projectStore';
 import { Close, Loading } from '@element-plus/icons-vue';
 import * as XLSX from 'xlsx';
 import { validationSchemes, getCellState } from '@/projects/heating_plan_2025-2026/tableRules.js';
+import { validationRules } from '@/utils/validator.js';
 
 // --- Store and Routing ---
 const route = useRoute();
@@ -120,6 +136,10 @@ const explanations = ref({});
 const isErrorPanelVisible = ref(false);
 const panelWidth = ref(300);
 const zoomLevel = ref(100);
+
+// --- Explanations Feature State ---
+const isExplanationsDialogVisible = ref(false);
+const submittedExplanations = ref([]);
 
 // --- Dynamically load table configuration ---
 const currentTableConfig = computed(() => {
@@ -466,6 +486,33 @@ const getErrorLabel = (key) => {
     return `${row.values[1001]} - ${field.label}`;
 };
 
+/**
+ * 新功能: 显示已提交的解释说明
+ * 从 localStorage 加载数据，并准备用于对话框显示
+ */
+const handleShowExplanations = () => {
+  const savedExplanations = localStorage.getItem(`explanations-${route.params.tableId}`);
+  if (!savedExplanations) {
+    ElMessage.info('当前报表没有已保存的解释说明。');
+    return;
+  }
+  
+  const parsedExplanations = JSON.parse(savedExplanations);
+  if (Object.keys(parsedExplanations).length === 0) {
+    ElMessage.info('当前报表没有已保存的解释说明。');
+    return;
+  }
+
+  const explanationsList = Object.entries(parsedExplanations).map(([key, data]) => ({
+    label: getErrorLabel(key),
+    message: data.message, // 读取保存的错误信息
+    content: data.content,
+  }));
+
+  submittedExplanations.value = explanationsList;
+  isExplanationsDialogVisible.value = true;
+};
+
 // --- Actions (Save, Load, Submit, Export) ---
 const handleSave = () => {
   const draftData = {};
@@ -513,16 +560,30 @@ const handleSubmit = () => {
   
   if (softErrorsForDisplay.value.length > 0) {
     isErrorPanelVisible.value = true;
-    const allExplained = softErrorsForDisplay.value.every(([key]) => explanations.value[key]?.trim());
+    const allExplained = softErrorsForDisplay.value.every(([key]) => explanations.value[key]?.trim().length >= 10);
     if (!allExplained) {
-        ElMessage.warning('检测到软性错误/警告，请填写所有说明后再提交。');
+        ElMessage.warning('检测到软性错误/警告，请为所有项目填写不少于10个字的说明后再提交。');
         return;
     }
   }
 
-  // Set status and submission time for dashboard
+  // --- 数据持久化 ---
+  // 1. 保存状态和提交时间
   localStorage.setItem(`status-${route.params.tableId}`, 'submitted');
   localStorage.setItem(`submittedAt-${route.params.tableId}`, new Date().toISOString());
+
+  // 2. 保存与软性错误相关的解释说明
+  const explanationsToSave = {};
+  softErrorsForDisplay.value.forEach(([key, error]) => {
+    if (explanations.value[key]) {
+      explanationsToSave[key] = {
+        content: explanations.value[key],
+        message: error.message, // 保存错误信息
+      };
+    }
+  });
+  localStorage.setItem(`explanations-${route.params.tableId}`, JSON.stringify(explanationsToSave));
+
 
   ElMessage.success('提交成功！');
   isErrorPanelVisible.value = false;
