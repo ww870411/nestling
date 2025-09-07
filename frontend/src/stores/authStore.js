@@ -1,43 +1,90 @@
 import { defineStore } from 'pinia';
+
+// The `users` import is temporarily needed for the `regional_admin` role logic.
+// This should be replaced by a backend mechanism for managing unit lists.
 import { users } from '@/auth';
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
     isAuthenticated: false,
-    user: null, // 存放完整的用户对象
+    user: null, // This will now store the user object from the backend
+    token: null,
   }),
 
   getters: {
-    // 根据角色和单位，计算出该用户有权访问的单位列表
+    // This getter is now fully functional with the updated backend User model.
     accessibleUnits() {
       if (!this.user) return [];
 
-      if (this.user.globalRole === 'super_admin') {
-        // 超级管理员可以访问所有单位
+      if (this.user.global_role === 'super_admin') {
+        // Super admin can access all units. We get this list from the mock data for now.
         return users.map(u => u.unit);
       }
 
-      if (this.user.globalRole === 'regional_admin') {
-        // 主城区管理员可以访问特定单位
+      if (this.user.global_role === 'regional_admin') {
+        // Regional admin can access a specific set of units.
         return ['主城区', '北海热电厂', '香海热电厂', '供热公司'];
       }
 
-      // 普通用户只能访问自己的单位
+      // Normal users can only access their own unit.
       return [this.user.unit];
     },
   },
 
   actions: {
-    login(username, password) {
-      const foundUser = users.find(u => u.username === username && u.password === password);
+    async login(username, password) {
+      const formData = new FormData();
+      formData.append('username', username);
+      formData.append('password', password);
 
-      if (foundUser) {
-        this.isAuthenticated = true;
-        this.user = foundUser;
-        // 将用户信息存入localStorage，用于持久化登录
-        localStorage.setItem('user', JSON.stringify(foundUser));
-        return true;
-      } else {
+      try {
+        const response = await fetch('http://localhost:8000/api/v1/token', {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          this.token = data.access_token;
+          localStorage.setItem('accessToken', data.access_token);
+          
+          // After getting the token, fetch the user details
+          return await this.fetchUser();
+        } else {
+          this.logout();
+          return false;
+        }
+      } catch (error) {
+        console.error('Login failed:', error);
+        this.logout();
+        return false;
+      }
+    },
+
+    async fetchUser() {
+      if (!this.token) {
+        return false;
+      }
+      try {
+        const response = await fetch('http://localhost:8000/api/v1/users/me', {
+          headers: {
+            'Authorization': `Bearer ${this.token}`,
+          },
+        });
+
+        if (response.ok) {
+          const userData = await response.json();
+          this.isAuthenticated = true;
+          this.user = userData;
+          // Also save user to localStorage for persistence across page reloads
+          localStorage.setItem('user', JSON.stringify(userData));
+          return true;
+        } else {
+          this.logout();
+          return false;
+        }
+      } catch (error) {
+        console.error('Fetching user failed:', error);
         this.logout();
         return false;
       }
@@ -46,15 +93,24 @@ export const useAuthStore = defineStore('auth', {
     logout() {
       this.isAuthenticated = false;
       this.user = null;
+      this.token = null;
+      localStorage.removeItem('accessToken');
       localStorage.removeItem('user');
     },
 
-    // 应用启动时，尝试从localStorage恢复登录状态
-    tryAutoLogin() {
-      const storedUser = localStorage.getItem('user');
-      if (storedUser) {
-        this.isAuthenticated = true;
-        this.user = JSON.parse(storedUser);
+    async tryAutoLogin() {
+      const storedToken = localStorage.getItem('accessToken');
+      if (storedToken) {
+        this.token = storedToken;
+        // If token exists, try to fetch user data
+        await this.fetchUser();
+      } else {
+        // Fallback for older sessions, try to load user from localStorage directly
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+          this.user = JSON.parse(storedUser);
+          this.isAuthenticated = true;
+        }
       }
     },
   },
