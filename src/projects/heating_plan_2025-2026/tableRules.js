@@ -64,69 +64,67 @@ export const getCellState = (row, field, tableProperties) => {
 
 /**
  * =====================================================
- *                  校验规则语法文档
+ *                  校验规则库
  * =====================================================
  * 
- * 校验配置是一个包含 `hard` 和 `soft` 两个数组的对象。
- * - `hard`: 硬性校验，不通过则无法提交。
- * - `soft`: 软性校验，不通过会弹出提示，但允许填写说明后提交。
+ * 本文件定义了所有可复用的校验方案(Scheme)。
+ * 每个方案包含针对不同指标类型(`basic`, `calculated`)的规则。
  * 
  * --- 规则详情 ---
  * 
- * 每个校验规则本身是一个对象，包含一个或多个属性：
- * 
  * 1. `rule: 'isNumber'`
  *    - 作用: 检查值是否为有效数字。
- *    - 示例: `{ rule: 'isNumber', message: '必须为数字格式' }`
  * 
  * 2. `rule: 'notEmpty'`
- *    - 作用: 检查值是否不为空（null, undefined, 或只包含空格的字符串）。
- *    - 示例: `{ rule: 'notEmpty', message: '此项为必填项，不能为空' }`
+ *    - 作用: 检查值是否不为空。
  * 
  * 3. `rule: 'comparison'`
- *    - 作用: 比较一行中的两个字段值。
+ *    - 作用: 比较一行中的两个字段值，支持对第二个值进行系数和偏移量调整。
  *    - 需要以下额外属性:
- *      - `fieldA` (string | number): 第一个字段的标识，可以是数字ID (如 1003) 或字段名 (如 'totals.plan')。
+ *      - `fieldA` (string | number): 第一个字段的标识。
  *      - `fieldB` (string | number): 第二个字段的标识。
- *      - `operator` (string): 比较操作符。当前程序支持以下值:
- *        - '<=' (小于等于)
- *        - '>=' (大于等于)
- *        - '<'  (小于)
- *        - '>'  (大于)
- *        - '==' (等于)
- *    - 示例:
+ *      - `operator` (string): 比较操作符 ('<=', '>=', '<', '>', '==')。
+ *      - `factor` (number, 可选): 一个可选的乘法系数。
+ *      - `offset` (number, 可选): 一个可选的加减偏移量。
+ *    - 注意: 会先计算乘法(`factor`)，再计算加法(`offset`)。
+ *    - 示例 1 (简单比较):
  *      `{ rule: 'comparison', fieldA: 'totals.plan', operator: '<=', fieldB: 'totals.samePeriod', message: '本期计划不应超过同期完成' }`
+ *    - 示例 2 (系数比较):
+ *      `{ rule: 'comparison', fieldA: 'totals.plan', operator: '>=', fieldB: 'totals.samePeriod', factor: 0.95, message: '本期计划较同期完成减少不应超过5%' }`
+ *    - 示例 3 (偏移量比较):
+ *      `{ rule: 'comparison', fieldA: 'totals.plan', operator: '<=', fieldB: 'totals.samePeriod', offset: 100, message: '本期计划不应超过同期完成值+100' }`
  */
-
-const defaultBasicValidation = {
-  hard: [
-    { rule: 'isNumber', message: '必须为数字格式' },
-    { rule: 'notEmpty', message: '此项为必填项，不能为空' }
-  ],
-  soft: [
-    {
-      rule: 'comparison',
-      fieldA: 'totals.plan', // 可使用名称 'totals.plan' 或 ID 1003
-      operator: '<=',
-      fieldB: 'totals.samePeriod', // 可使用名称 'totals.samePeriod' 或 ID 1004
-      message: '本期计划不应超过同期完成'
-    }
-  ]
+const defaultScheme = {
+  basic: {
+    hard: [
+      { rule: 'isNumber', message: '必须为数字格式' },
+      { rule: 'notEmpty', message: '此项为必填项，不能为空' }
+    ],
+    soft: [
+      {
+        rule: 'comparison',
+        fieldA: 'totals.plan',
+        operator: '<=',
+        fieldB: 'totals.samePeriod',
+        message: '本期计划不应超过同期完成'
+      }
+    ]
+  },
+  calculated: {
+    hard: [], // Calculated fields have no direct input to validate
+    soft: [
+      {
+        rule: 'comparison',
+        fieldA: 'totals.plan',
+        operator: '<=',
+        fieldB: 'totals.samePeriod',
+        message: '本期计划不应超过同期完成'
+      }
+    ]
+  }
 };
 
-const defaultCalculatedValidation = {
-  hard: [], // Calculated fields have no direct input to validate
-  soft: [
-    {
-      rule: 'comparison',
-      fieldA: 'totals.plan',
-      operator: '<=',
-      fieldB: 'totals.samePeriod',
-      message: '本期计划不应超过同期完成'
-    }
-  ]
-};
-
-export const getDefaultValidation = (indicatorType) => {
-  return indicatorType === 'basic' ? defaultBasicValidation : defaultCalculatedValidation;
+// 未来可在这里添加更多方案, 例如 'strict', 'relaxed' 等
+export const validationSchemes = {
+  'default': defaultScheme,
 };

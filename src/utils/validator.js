@@ -23,22 +23,35 @@ export const validationRules = {
   },
 
   /**
-   * 比较两个值
+   * 比较两个值，支持乘以系数和增加偏移量
    * @param {*} valueA 
    * @param {string} operator 
    * @param {*} valueB 
+   * @param {number} [factor] - 可选的乘法系数
+   * @param {number} [offset] - 可选的加减偏移量
    * @returns {boolean}
    */
-  comparison: (valueA, operator, valueB) => {
+  comparison: (valueA, operator, valueB, factor, offset) => {
     if (typeof valueA !== 'number' || typeof valueB !== 'number') {
       return true; // Cannot compare non-numbers
     }
+    
+    let comparisonValue = valueB;
+    // Apply factor first (multiplication)
+    if (factor !== undefined && typeof factor === 'number') {
+      comparisonValue *= factor;
+    }
+    // Then apply offset (addition/subtraction)
+    if (offset !== undefined && typeof offset === 'number') {
+      comparisonValue += offset;
+    }
+
     switch (operator) {
-      case '<=': return valueA <= valueB;
-      case '>=': return valueA >= valueB;
-      case '<': return valueA < valueB;
-      case '>': return valueA > valueB;
-      case '==': return valueA == valueB;
+      case '<=': return valueA <= comparisonValue;
+      case '>=': return valueA >= comparisonValue;
+      case '<': return valueA < comparisonValue;
+      case '>': return valueA > comparisonValue;
+      case '==': return valueA == comparisonValue;
       default: return true;
     }
   }

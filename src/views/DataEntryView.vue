@@ -106,9 +106,7 @@ import { storeToRefs } from 'pinia';
 import { useProjectStore } from '@/stores/projectStore';
 import { Close, Loading } from '@element-plus/icons-vue';
 import * as XLSX from 'xlsx';
-import { getDefaultValidation } from '@/projects/heating_plan_2025-2026/tableRules.js';
-import { validationRules } from '@/utils/validator.js';
-import { getCellState } from '@/projects/heating_plan_2025-2026/tableRules.js';
+import { validationSchemes, getCellState } from '@/projects/heating_plan_2025-2026/tableRules.js';
 
 // --- Store and Routing ---
 const route = useRoute();
@@ -129,22 +127,16 @@ const currentTableConfig = computed(() => {
   if (!menuData.value || !tableId) return null;
   for (const group of menuData.value) {
     const table = group.tables.find(t => t.id === tableId);
-    if (table) return table.template;
+    if (table) return table; // Return the whole table object
   }
   return null;
 });
 
-const reportTemplate = computed(() => currentTableConfig.value?.reportTemplate || []);
-const fieldConfig = computed(() => currentTableConfig.value?.fieldConfig || []);
+const reportTemplate = computed(() => currentTableConfig.value?.template?.reportTemplate || []);
+const fieldConfig = computed(() => currentTableConfig.value?.template?.fieldConfig || []);
 
 const currentTableProperties = computed(() => {
-  const tableId = route.params.tableId;
-  if (!menuData.value || !tableId) return {};
-  for (const group of menuData.value) {
-    const table = group.tables.find(t => t.id === tableId);
-    if (table) return table.properties || {};
-  }
-  return {};
+  return currentTableConfig.value?.properties || {};
 });
 
 const processedFieldConfig = computed(() => {
@@ -295,6 +287,17 @@ const calculateAll = () => {
 const runValidation = ({ level = 'hard' } = {}) => {
   const newErrors = {};
 
+  // 1. Determine the validation scheme and overrides from menu.js config
+  const schemeName = currentTableConfig.value?.validationScheme || 'default';
+  const baseScheme = validationSchemes[schemeName] || validationSchemes['default'];
+  const overrides = currentTableConfig.value?.validationOverrides || {};
+
+  // If validation is explicitly disabled for the whole table, stop here.
+  if (currentTableConfig.value?.validation === null) {
+    errors.value = {};
+    return;
+  }
+
   const findFieldByIdentifier = (identifier) => {
     if (typeof identifier === 'number') {
       return fieldConfig.value.find(f => f.id === identifier);
@@ -312,11 +315,17 @@ const runValidation = ({ level = 'hard' } = {}) => {
   }
 
   tableData.value.forEach(row => {
-    const defaultValidation = getDefaultValidation(row.type);
-    const finalValidation = {
-      hard: row.validation?.hard ?? defaultValidation.hard,
-      soft: row.validation?.soft ?? defaultValidation.soft,
-    };
+    const metricId = row.metricId;
+    const overrideRule = overrides[metricId];
+
+    // 2. Check for metric-specific override rules
+    if (overrideRule === null) {
+      // Validation is disabled for this metric
+      return; 
+    }
+
+    const baseRules = baseScheme[row.type] || {};
+    const finalValidation = overrideRule ? { ...baseRules, ...overrideRule } : baseRules;
 
     // Hard Validations
     if (finalValidation.hard) {
@@ -324,13 +333,25 @@ const runValidation = ({ level = 'hard' } = {}) => {
         if (field.type !== 'basic' || field.component !== 'input') return;
         
         const value = row.values[field.id];
-        const key = `${row.metricId}-${field.id}`;
+        const key = `${metricId}-${field.id}`;
         let hasError = false;
         finalValidation.hard.forEach(ruleDef => {
           const ruleFunc = validationRules[ruleDef.rule];
-          if (ruleFunc && !ruleFunc(value)) {
-            newErrors[key] = { type: 'A', message: ruleDef.message };
-            hasError = true;
+          if (ruleDef.rule === 'comparison') {
+            const fieldA = findFieldByIdentifier(ruleDef.fieldA);
+            const fieldB = findFieldByIdentifier(ruleDef.fieldB);
+            if (!fieldA || !fieldB) return;
+            const valueA = row.values[fieldA.id];
+            const valueB = row.values[fieldB.id];
+            if (ruleFunc && !ruleFunc(valueA, ruleDef.operator, valueB, ruleDef.factor, ruleDef.offset)) {
+              newErrors[key] = { type: 'A', message: ruleDef.message };
+              hasError = true;
+            }
+          } else {
+            if (ruleFunc && !ruleFunc(value)) {
+              newErrors[key] = { type: 'A', message: ruleDef.message };
+              hasError = true;
+            }
           }
         });
         if (!hasError && newErrors[key]?.type === 'A') {
@@ -342,7 +363,7 @@ const runValidation = ({ level = 'hard' } = {}) => {
     // Soft Validations (only run on 'all' level)
     if (level === 'all' && finalValidation.soft) {
       finalValidation.soft.forEach((ruleDef, index) => {
-        const key = `${row.metricId}-soft-${index}`;
+        const key = `${metricId}-soft-${index}`;
         let hasError = false;
         if (ruleDef.rule === 'comparison') {
           const fieldA = findFieldByIdentifier(ruleDef.fieldA);
@@ -353,7 +374,7 @@ const runValidation = ({ level = 'hard' } = {}) => {
           const valueB = row.values[fieldB.id];
 
           const ruleFunc = validationRules[ruleDef.rule];
-          if (ruleFunc && !ruleFunc(valueA, ruleDef.operator, valueB)) {
+          if (ruleFunc && !ruleFunc(valueA, ruleDef.operator, valueB, ruleDef.factor, ruleDef.offset)) {
             newErrors[key] = { type: 'B', message: ruleDef.message };
             hasError = true;
           }
