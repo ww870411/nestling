@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List
 
 # --- Token Schemas ---
 
@@ -31,3 +31,39 @@ class User(BaseModel):
 
     class Config:
         orm_mode = True # This allows the model to be created from an ORM object
+
+# --- Template Schemas ---
+
+class TemplateField(BaseModel):
+    field_id: int
+    name: str
+    label: str
+    type: str
+    component: str
+    width: Optional[int] = None
+    fixed: Optional[Any] = None # Allow boolean or other types
+    formula: Optional[str] = None
+
+    class Config:
+        orm_mode = True
+
+class TemplateMetric(BaseModel):
+    metric_id: int
+    category: str
+    name: str
+    unit: Optional[str] = None
+    type: str
+    formula: Optional[str] = None
+    style: Optional[Dict[str, Any]] = None
+    same_period_editable: Optional[Any] = None # Allow boolean or other types
+    required_properties: Optional[Dict[str, Any]] = None
+
+    class Config:
+        orm_mode = True
+
+class ReportTemplate(BaseModel):
+    metrics: List[TemplateMetric]
+    fields: List[TemplateField]
+
+    class Config:
+        orm_mode = True

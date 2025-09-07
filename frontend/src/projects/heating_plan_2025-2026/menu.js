@@ -28,8 +28,6 @@
  *    - 作用: 一个“总开关”，如果设置为 `null`，则该报表将禁用所有校验，忽略 `validationScheme` 和 `validationOverrides`。
  *    - 示例: `validation: null`
  */
-import * as groupTemplate from './templates/groupTemplate.js';
-import * as subsidiaryTemplate from './templates/subsidiaryTemplate.js';
 
 /**
  * @typedef {Object} TableProperties
@@ -42,11 +40,10 @@ export const menuData = [
   {
     name: '集团公司',
     tables: [
-      { id: '0', name: '0 集团分单位汇总表', template: groupTemplate },
+      { id: '0', name: '0 集团分单位汇总表' },
       { 
         id: '1', 
         name: '1 集团汇总表', 
-        template: subsidiaryTemplate, 
         properties: { productionMethod: ['thermoelectric','heating_company','boiler_room'], fuelType: ['coal','natural_gas','purchased_heat'], businessModel: ['independent'] },
         validationOverrides: {
           '1': null, '2': null, '3': null, '4': null, '5': null, // 禁用1-5号指标的校验
@@ -63,7 +60,6 @@ export const menuData = [
       { 
         id: '2', 
         name: '2 主城区汇总表', 
-        template: subsidiaryTemplate, 
         properties: { productionMethod: ['thermoelectric','heating_company','boiler_room'], fuelType: ['coal','natural_gas'], businessModel: ['independent'] },
         validationOverrides: {
           '1': null, '2': null, '3': null, '4': null, '5': null,
@@ -78,7 +74,6 @@ export const menuData = [
       { 
         id: '3', 
         name: '3 北海汇总表', 
-        template: subsidiaryTemplate, 
         properties: { productionMethod: ['thermoelectric','boiler_room'], fuelType: ['coal','natural_gas'], businessModel: ['independent'] },
         validationOverrides: {
           '1': null, '2': null, '3': null, '4': null, '5': null,
@@ -88,7 +83,6 @@ export const menuData = [
       { 
         id: '4', 
         name: '4 北海热电厂(热电联产)表', 
-        template: subsidiaryTemplate, 
         properties: { productionMethod: ['thermoelectric'], fuelType: ['coal'], businessModel: ['non_independent'] },
         validationOverrides: {
           '1': null, '2': null, '3': null, '4': null, '5': null,
@@ -98,7 +92,6 @@ export const menuData = [
       { 
         id: '5', 
         name: '5 北海热电厂(水炉)表', 
-        template: subsidiaryTemplate, 
         properties: { productionMethod: ['boiler_room'], fuelType: ['coal'], businessModel: ['non_independent'] },
         validationOverrides: {
           '1': null, '2': null, '3': null, '4': null, '5': null,
@@ -108,7 +101,6 @@ export const menuData = [
       { 
         id: '6', 
         name: '6 北海热电厂(天然气炉)表', 
-        template: subsidiaryTemplate, 
         properties: { productionMethod: ['boiler_room'], fuelType: ['natural_gas'], businessModel: ['non_independent'] },
         validationOverrides: {
           '1': null, '2': null, '3': null, '4': null, '5': null,
@@ -123,7 +115,6 @@ export const menuData = [
       { 
         id: '7', 
         name: '7 香海热电厂表', 
-        template: subsidiaryTemplate, 
         properties: { productionMethod: ['thermoelectric'], fuelType: ['coal','natural_gas'], businessModel: ['independent'] },
         validationOverrides: {
           '1': null, '2': null, '3': null, '4': null, '5': null,
@@ -138,7 +129,6 @@ export const menuData = [
       { 
         id: '8', 
         name: '8 供热公司表', 
-        template: subsidiaryTemplate, 
         properties: { productionMethod: ['heating_company'], fuelType: [], businessModel: ['independent'] },
         validationOverrides: {
           '1': null, '2': null, '3': null, '4': null, '5': null,
@@ -148,7 +138,6 @@ export const menuData = [
       { 
         id: '9', 
         name: '9 主城区电锅炉表', 
-        template: subsidiaryTemplate, 
         properties: { productionMethod: ['boiler_room'], fuelType: ['electric'], businessModel: ['non_independent'] },
         validationOverrides: {
           '1': null, '2': null, '3': null, '4': null, '5': null,
@@ -163,7 +152,6 @@ export const menuData = [
       { 
         id: '10', 
         name: '10 金州热电表', 
-        template: subsidiaryTemplate, 
         properties: { productionMethod: ['thermoelectric','heating_company'], fuelType: ['coal'], businessModel: ['independent'] },
         validationOverrides: {
           '1': null, '2': null, '3': null, '4': null, '5': null,
@@ -178,7 +166,6 @@ export const menuData = [
       { 
         id: '11', 
         name: '11 北方热电表', 
-        template: subsidiaryTemplate, 
         properties: { productionMethod: ['thermoelectric','heating_company'], fuelType: ['coal'], businessModel: ['independent'] },
         validationOverrides: {
           '1': null, '2': null, '3': null, '4': null, '5': null,
@@ -193,7 +180,6 @@ export const menuData = [
       { 
         id: '12', 
         name: '12 金普热电表', 
-        template: subsidiaryTemplate, 
         properties: { productionMethod: ['heating_company','boiler_room'], fuelType: ['coal'], businessModel: ['independent'] },
         validationOverrides: {
           '1': null, '2': null, '3': null, '4': null, '5': null,
@@ -208,7 +194,6 @@ export const menuData = [
       { 
         id: '13', 
         name: '13 庄河环海表', 
-        template: subsidiaryTemplate, 
         properties: { productionMethod: ['heating_company','boiler_room'], fuelType: ['coal','purchased_heat'], businessModel: ['independent'] },
         validationOverrides: {
           '1': null, '2': null, '3': null, '4': null, '5': null,
@@ -223,7 +208,6 @@ export const menuData = [
       { 
         id: '14', 
         name: '14 研究院表', 
-        template: subsidiaryTemplate, 
         properties: { productionMethod: ['heating_company','boiler_room'], fuelType: ['electric'], businessModel: ['independent'] },
         validationOverrides: {
           '1': null, '2': null, '3': null, '4': null, '5': null,

@@ -1,95 +1,68 @@
 import logging
 from sqlalchemy.orm import Session
-
 from . import models, schemas, auth
 from .database import SessionLocal, engine
+from .template_data import projects_data, report_definitions_data, all_template_metrics, all_template_fields, initial_users
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Data from auth.js
-initial_users = [
-  {
-    "username": 'group_admin',
-    "password": 'password',
-    "unit": '集团公司',
-    "global_role": 'super_admin',
-  },
-  {
-    "username": 'downtown_admin',
-    "password": 'password',
-    "unit": '主城区',
-    "global_role": 'regional_admin',
-  },
-  {
-    "username": 'beihai_filler',
-    "password": 'password',
-    "unit": '北海热电厂',
-    "roles_by_project": {
-      'heating_plan_2025-2026': 'filler',
-    },
-  },
-  {
-    "username": 'xianghai_filler',
-    "password": 'password',
-    "unit": '香海热电厂',
-    "roles_by_project": {
-      'heating_plan_2025-2026': 'filler',
-    },
-  },
-  {
-    "username": 'gongre_filler',
-    "password": 'password',
-    "unit": '供热公司',
-    "roles_by_project": {
-      'heating_plan_2025-2026': 'filler',
-    },
-  },
-  {
-    "username": 'jinzhou_filler',
-    "password": 'password',
-    "unit": '金州热电',
-    "roles_by_project": {
-      'heating_plan_2025-2026': 'filler',
-    },
-  },
-  {
-    "username": 'beifang_filler',
-    "password": 'password',
-    "unit": '北方热电',
-    "roles_by_project": {
-      'heating_plan_2025-2026': 'filler',
-    },
-  },
-  {
-    "username": 'jinpu_filler',
-    "password": 'password',
-    "unit": '金普热电',
-    "roles_by_project": {
-      'heating_plan_2025-2026': 'filler',
-    },
-  },
-  {
-    "username": 'zhuanghe_filler',
-    "password": 'password',
-    "unit": '庄河热电',
-    "roles_by_project": {
-      'heating_plan_2025-2026': 'filler',
-    },
-  },
-  {
-    "username": 'yanjiuyuan_filler',
-    "password": 'password',
-    "unit": '研究院',
-    "roles_by_project": {
-      'heating_plan_2025-2026': 'filler',
-    },
-  },
-]
-
 def seed_db():
     db = SessionLocal()
     try:
+        # 1. Seed Projects
+        for proj_data in projects_data:
+            project = db.query(models.Project).filter(models.Project.id == proj_data["id"]).first()
+            if not project:
+                logger.info(f"Creating project: {proj_data['name']}")
+                db_project = models.Project(**proj_data)
+                db.add(db_project)
+            else:
+                logger.info(f"Project {proj_data['name']} already exists.")
+        db.commit()
+
+        # 2. Seed Report Definitions
+        for definition_data in report_definitions_data:
+            definition = db.query(models.ReportDefinition).filter(models.ReportDefinition.id == definition_data["id"]).first()
+            if not definition:
+                logger.info(f"Creating report definition: {definition_data['name']}")
+                db_definition = models.ReportDefinition(**definition_data)
+                db.add(db_definition)
+            else:
+                logger.info(f"Report definition {definition_data['name']} already exists.")
+        db.commit()
+
+        # 3. Seed Template Fields
+        for field_data in all_template_fields:
+            field = db.query(models.TemplateField).filter(
+                models.TemplateField.field_id == field_data["field_id"],
+                models.TemplateField.template_name == field_data["template_name"],
+                models.TemplateField.project_id == field_data["project_id"]
+            ).first()
+            if not field:
+                # Log sparingly here as there are many fields
+                db_field = models.TemplateField(**field_data)
+                db.add(db_field)
+        logger.info("Seeding template fields...")
+        db.commit()
+        logger.info("Template fields seeded.")
+
+        # 4. Seed Template Metrics
+        for metric_data in all_template_metrics:
+            metric = db.query(models.TemplateMetric).filter(
+                models.TemplateMetric.metric_id == metric_data["metric_id"],
+                models.TemplateMetric.template_name == metric_data["template_name"],
+                models.TemplateMetric.project_id == metric_data["project_id"]
+            ).first()
+            if not metric:
+                # Log sparingly here as there are many metrics
+                db_metric = models.TemplateMetric(**metric_data)
+                db.add(db_metric)
+        logger.info("Seeding template metrics...")
+        db.commit()
+        logger.info("Template metrics seeded.")
+
+        # 5. Seed Users
         for user_data in initial_users:
             user = db.query(models.User).filter(models.User.username == user_data["username"]).first()
             if not user:
@@ -121,7 +94,7 @@ def seed_db():
 
 if __name__ == "__main__":
     logger.info("Initializing database seed...")
-    # Make sure all tables are created before seeding
+    # This is handled by Alembic now, but keeping it doesn't hurt for standalone runs.
     models.Base.metadata.create_all(bind=engine)
     seed_db()
     logger.info("Database seeding finished.")

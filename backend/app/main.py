@@ -3,12 +3,13 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from fastapi.middleware.cors import CORSMiddleware
 from datetime import timedelta
+from typing import List
 
 from . import models, schemas, auth
 from .database import SessionLocal, engine
 
 # Create all database tables on startup
-models.Base.metadata.create_all(bind=engine)
+# models.Base.metadata.create_all(bind=engine) # This is now handled by Alembic
 
 app = FastAPI()
 
@@ -79,3 +80,31 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     db.refresh(db_user)
     
     return db_user
+
+@app.get("/api/reports/{report_id}/template", response_model=schemas.ReportTemplate)
+def get_report_template(report_id: str, db: Session = Depends(get_db)):
+    # 1. Find the report definition
+    report_def = db.query(models.ReportDefinition).filter(models.ReportDefinition.id == report_id).first()
+    if not report_def:
+        raise HTTPException(status_code=404, detail="Report definition not found")
+
+    # 2. Get the template name and project id from the definition
+    template_name = report_def.template_name
+    project_id = report_def.project_id
+
+    # 3. Query for all fields and metrics associated with that template and project
+    fields = db.query(models.TemplateField).filter(
+        models.TemplateField.template_name == template_name,
+        models.TemplateField.project_id == project_id
+    ).order_by(models.TemplateField.field_id).all()
+
+    metrics = db.query(models.TemplateMetric).filter(
+        models.TemplateMetric.template_name == template_name,
+        models.TemplateMetric.project_id == project_id
+    ).order_by(models.TemplateMetric.metric_id).all()
+
+    if not fields or not metrics:
+        raise HTTPException(status_code=404, detail="Template data not found for this report")
+
+    # 4. Return the structured data
+    return {"metrics": metrics, "fields": fields}
