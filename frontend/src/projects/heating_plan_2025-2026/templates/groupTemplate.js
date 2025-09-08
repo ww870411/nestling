@@ -24,47 +24,47 @@ export const fieldConfig = [
   // --- 集团全口径 (ID: 1003-1005) ---
   { id: 1003, name: 'group.plan', label: '集团全口径-本期计划', type: 'basic', component: 'display', width: 140 },
   { id: 1004, name: 'group.samePeriod', label: '集团全口径-同期完成', type: 'basic', component: 'display', width: 140 },
-  { id: 1005, name: 'group.diffRate', label: '集团全口径-差异率', type: 'basic', component: 'display', width: 140 },
+  { id: 1005, name: 'group.diffRate', label: '集团全口径-差异率', type: 'basic', component: 'display', width: 140, displayFormat: { type: 'percentage', places: 2 } },
 
   // --- 主城区 (ID: 1006-1008) ---
   { id: 1006, name: 'downtown.plan', label: '主城区-本期计划', type: 'basic', component: 'display', width: 120 },
   { id: 1007, name: 'downtown.samePeriod', label: '主城区-同期完成', type: 'basic', component: 'display', width: 120 },
-  { id: 1008, name: 'downtown.diffRate', label: '主城区-差异率', type: 'basic', component: 'display', width: 120 },
+  { id: 1008, name: 'downtown.diffRate', label: '主城区-差异率', type: 'basic', component: 'display', width: 120, displayFormat: { type: 'percentage', places: 2 } },
 
   // --- 北海汇总 (ID: 1009-1011) ---
   { id: 1009, name: 'beihai.plan', label: '北海汇总-本期计划', type: 'basic', component: 'display', width: 120 },
   { id: 1010, name: 'beihai.samePeriod', label: '北海汇总-同期完成', type: 'basic', component: 'display', width: 120 },
-  { id: 1011, name: 'beihai.diffRate', label: '北海汇总-差异率', type: 'basic', component: 'display', width: 120 },
+  { id: 1011, name: 'beihai.diffRate', label: '北海汇总-差异率', type: 'basic', component: 'display', width: 120, displayFormat: { type: 'percentage', places: 2 } },
 
   // --- 香海 (ID: 1012-1014) ---
   { id: 1012, name: 'xianghai.plan', label: '香海-本期计划', type: 'basic', component: 'display', width: 120 },
   { id: 1013, name: 'xianghai.samePeriod', label: '香海-同期完成', type: 'basic', component: 'display', width: 120 },
-  { id: 1014, name: 'xianghai.diffRate', label: '香海-差异率', type: 'basic', component: 'display', width: 120 },
+  { id: 1014, name: 'xianghai.diffRate', label: '香海-差异率', type: 'basic', component: 'display', width: 120, displayFormat: { type: 'percentage', places: 2 } },
 
   // --- 金州 (ID: 1015-1017) ---
   { id: 1015, name: 'jinzhou.plan', label: '金州-本期计划', type: 'basic', component: 'display', width: 120 },
   { id: 1016, name: 'jinzhou.samePeriod', label: '金州-同期完成', type: 'basic', component: 'display', width: 120 },
-  { id: 1017, name: 'jinzhou.diffRate', label: '金州-差异率', type: 'basic', component: 'display', width: 120 },
+  { id: 1017, name: 'jinzhou.diffRate', label: '金州-差异率', type: 'basic', component: 'display', width: 120, displayFormat: { type: 'percentage', places: 2 } },
 
   // --- 北方 (ID: 1018-1020) ---
   { id: 1018, name: 'beifang.plan', label: '北方-本期计划', type: 'basic', component: 'display', width: 120 },
   { id: 1019, name: 'beifang.samePeriod', label: '北方-同期完成', type: 'basic', component: 'display', width: 120 },
-  { id: 1020, name: 'beifang.diffRate', label: '北方-差异率', type: 'basic', component: 'display', width: 120 },
+  { id: 1020, name: 'beifang.diffRate', label: '北方-差异率', type: 'basic', component: 'display', width: 120, displayFormat: { type: 'percentage', places: 2 } },
 
   // --- 金普 (ID: 1021-1023) ---
   { id: 1021, name: 'jinpu.plan', label: '金普-本期计划', type: 'basic', component: 'display', width: 120 },
   { id: 1022, name: 'jinpu.samePeriod', label: '金普-同期完成', type: 'basic', component: 'display', width: 120 },
-  { id: 1023, name: 'jinpu.diffRate', label: '金普-差异率', type: 'basic', component: 'display', width: 120 },
+  { id: 1023, name: 'jinpu.diffRate', label: '金普-差异率', type: 'basic', component: 'display', width: 120, displayFormat: { type: 'percentage', places: 2 } },
 
   // --- 庄河 (ID: 1024-1026) ---
   { id: 1024, name: 'zhuanghe.plan', label: '庄河-本期计划', type: 'basic', component: 'display', width: 120 },
   { id: 1025, name: 'zhuanghe.samePeriod', label: '庄河-同期完成', type: 'basic', component: 'display', width: 120 },
-  { id: 1026, name: 'zhuanghe.diffRate', label: '庄河-差异率', type: 'basic', component: 'display', width: 120 },
+  { id: 1026, name: 'zhuanghe.diffRate', label: '庄河-差异率', type: 'basic', component: 'display', width: 120, displayFormat: { type: 'percentage', places: 2 } },
 
   // --- 研究院 (ID: 1027-1029) ---
   { id: 1027, name: 'research.plan', label: '研究院-本期计划', type: 'basic', component: 'display', width: 120 },
   { id: 1028, name: 'research.samePeriod', label: '研究院-同期完成', type: 'basic', component: 'display', width: 120 },
-  { id: 1029, name: 'research.diffRate', label: '研究院-差异率', type: 'basic', component: 'display', width: 120 },
+  { id: 1029, name: 'research.diffRate', label: '研究院-差异率', type: 'basic', component: 'display', width: 120, displayFormat: { type: 'percentage', places: 2 } },
 ];
 
 export const reportTemplate = [
@@ -142,15 +142,15 @@ export const reportTemplate = [
   { id: 72, category: '主要物料消耗量', name: '4.电锅炉/热泵外购电量', unit: '万kWh', type: 'basic', formula: null, style: { fontWeight: 'normal' }, samePeriodEditable: false, requiredProperties: { fuelType: ['electric'] } },
   { id: 73, category: '主要物料消耗量', name: '脱硫脱销耗水量', unit: '吨', type: 'basic', formula: null, style: { fontWeight: 'normal' }, samePeriodEditable: false, requiredProperties: {} },
   { id: 74, category: '主要物料消耗量', name: '脱硫脱硝耗电量', unit: '万kWh', type: 'basic', formula: null, style: { fontWeight: 'normal' }, samePeriodEditable: false, requiredProperties: {} },
-  { id: 75, category: '比率', name: '生产产出率', unit: '%', type: 'calculated', formula: '(VAL(7)+VAL(13)*36)/29.308/VAL(28)', style: { fontWeight: 'bold' }, samePeriodEditable: false, requiredProperties: {} },
-  { id: 76, category: '比率', name: '综合产出率', unit: '%', type: 'calculated', formula: '(VAL(13)*36+VAL(14)*2.952+VAL(24)+VAL(61))/29.308/VAL(28)', style: { fontWeight: 'bold' }, samePeriodEditable: false, requiredProperties: {} },
-  { id: 77, category: '比率', name: '全厂热效率', unit: '%', type: 'calculated', formula: '(VAL(7)+VAL(13)*36)/(VAL(28)*29.308)', style: { fontWeight: 'bold' }, samePeriodEditable: false, requiredProperties: {} },
-  { id: 78, category: '比率', name: '热电比', unit: '%', type: 'calculated', formula: 'VAL(7)/(VAL(13)*36)', style: { fontWeight: 'bold' }, samePeriodEditable: false, requiredProperties: { productionMethod: ['thermoelectric'] } },
-  { id: 79, category: '比率', name: '热分摊比', unit: '%', type: 'calculated', formula: 'VAL(32)/VAL(28)', style: { fontWeight: 'bold' }, samePeriodEditable: false, requiredProperties: { productionMethod: ['thermoelectric'] } },
-  { id: 80, category: '比率', name: '发电设备利用率', unit: '%', type: 'calculated', formula: 'VAL(6)/VAL(3)/3744', style: { fontWeight: 'bold' }, samePeriodEditable: false, requiredProperties: { productionMethod: ['thermoelectric'] } },
-  { id: 81, category: '比率', name: '供热设备利用率', unit: '%', type: 'calculated', formula: 'VAL(7)*1000/(VAL(4)+VAL(5))/13478400', style: { fontWeight: 'bold' }, samePeriodEditable: false, requiredProperties: {} },
-  { id: 82, category: '单耗', name: '综合厂用电率', unit: '%', type: 'calculated', formula: 'VAL(63)/VAL(6)', style: { fontWeight: 'bold' }, samePeriodEditable: false, requiredProperties: { productionMethod: ['thermoelectric'] } },
-  { id: 83, category: '单耗', name: '发电厂用电率', unit: '%', type: 'calculated', formula: 'VAL(66)/VAL(6)', style: { fontWeight: 'bold' }, samePeriodEditable: false, requiredProperties: { productionMethod: ['thermoelectric'] } },
+  { id: 75, category: '比率', name: '生产产出率', unit: '%', displayFormat: { type: 'percentage', places: 2 },type: 'calculated', formula: '(VAL(7)+VAL(13)*36)/29.308/VAL(28)', style: { fontWeight: 'bold' }, samePeriodEditable: false, requiredProperties: {} },
+  { id: 76, category: '比率', name: '综合产出率', unit: '%', displayFormat: { type: 'percentage', places: 2 },type: 'calculated', formula: '(VAL(13)*36+VAL(14)*2.952+VAL(24)+VAL(61))/29.308/VAL(28)', style: { fontWeight: 'bold' }, samePeriodEditable: false, requiredProperties: {} },
+  { id: 77, category: '比率', name: '全厂热效率', unit: '%', displayFormat: { type: 'percentage', places: 2 },type: 'calculated', formula: '(VAL(7)+VAL(13)*36)/(VAL(28)*29.308)', style: { fontWeight: 'bold' }, samePeriodEditable: false, requiredProperties: {} },
+  { id: 78, category: '比率', name: '热电比', unit: '%', displayFormat: { type: 'percentage', places: 2 },type: 'calculated', formula: 'VAL(7)/(VAL(13)*36)', style: { fontWeight: 'bold' }, samePeriodEditable: false, requiredProperties: { productionMethod: ['thermoelectric'] } },
+  { id: 79, category: '比率', name: '热分摊比', unit: '%', displayFormat: { type: 'percentage', places: 2 },type: 'calculated', formula: 'VAL(32)/VAL(28)', style: { fontWeight: 'bold' }, samePeriodEditable: false, requiredProperties: { productionMethod: ['thermoelectric'] } },
+  { id: 80, category: '比率', name: '发电设备利用率', unit: '%',displayFormat: { type: 'percentage', places: 2 }, type: 'calculated', formula: 'VAL(6)/VAL(3)/3744', style: { fontWeight: 'bold' }, samePeriodEditable: false, requiredProperties: { productionMethod: ['thermoelectric'] } },
+  { id: 81, category: '比率', name: '供热设备利用率', unit: '%', displayFormat: { type: 'percentage', places: 2 },type: 'calculated', formula: 'VAL(7)*1000/(VAL(4)+VAL(5))/13478400', style: { fontWeight: 'bold' }, samePeriodEditable: false, requiredProperties: {} },
+  { id: 82, category: '单耗', name: '综合厂用电率', unit: '%', displayFormat: { type: 'percentage', places: 2 },type: 'calculated', formula: 'VAL(63)/VAL(6)', style: { fontWeight: 'bold' }, samePeriodEditable: false, requiredProperties: { productionMethod: ['thermoelectric'] } },
+  { id: 83, category: '单耗', name: '发电厂用电率', unit: '%', displayFormat: { type: 'percentage', places: 2 },type: 'calculated', formula: 'VAL(66)/VAL(6)', style: { fontWeight: 'bold' }, samePeriodEditable: false, requiredProperties: { productionMethod: ['thermoelectric'] } },
   { id: 84, category: '单耗', name: '供热厂用电率', unit: 'kWh/GJ', type: 'calculated', formula: 'VAL(67)*10000/VAL(7)', style: { fontWeight: 'bold' }, samePeriodEditable: false, requiredProperties: { productionMethod: ['thermoelectric'] } },
   { id: 85, category: '单耗', name: '发电标准煤耗率', unit: 'g/kWh', type: 'calculated', formula: 'VAL(29)*100/VAL(6)', style: { fontWeight: 'bold' }, samePeriodEditable: false, requiredProperties: { productionMethod: ['thermoelectric'] } },
   { id: 86, category: '单耗', name: '供电标准煤耗率', unit: 'g/kWh', type: 'calculated', formula: 'VAL(29)*100/(VAL(6)-VAL(66))', style: { fontWeight: 'bold' }, samePeriodEditable: false, requiredProperties: { productionMethod: ['thermoelectric'] } },
@@ -184,3 +184,5 @@ export const reportTemplate = [
   { id: 114, category: '经济指标', name: '抢修费', unit: '万元', type: 'basic', formula: null, style: { fontWeight: 'normal' }, samePeriodEditable: true, requiredProperties: { businessModel: ['independent'] } },
   { id: 115, category: '经济指标', name: '毛利', unit: '万元', type: 'calculated', formula: 'VAL(94)-VAL(103)-VAL(105)-VAL(107)-VAL(109)-VAL(111)-VAL(113)-VAL(114)', style: { fontWeight: 'bold' }, samePeriodEditable: false, requiredProperties: { businessModel: ['independent'] } },
 ];
+
+export const globalDisplayFormat =  { type: 'decimal', places: 2 };

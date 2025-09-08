@@ -60,6 +60,7 @@ export const fieldConfig = [
     type: 'calculated',
     component: 'display',
     width: 100,
+    displayFormat: { type: 'percentage', places: 2 },
     // 公式: (本期计划 - 同期完成) / 同期完成
     formula: '(VAL(1003)-VAL(1004))/VAL(1004)',
   },
@@ -164,15 +165,15 @@ export const reportTemplate = [
   { id: 72, category: '主要物料消耗量', name: '4.电锅炉/热泵外购电量', unit: '万kWh', type: 'basic', formula: null, style: { fontWeight: 'normal' }, samePeriodEditable: false, requiredProperties: { fuelType: ['electric'] } },
   { id: 73, category: '主要物料消耗量', name: '脱硫脱销耗水量', unit: '吨', type: 'basic', formula: null, style: { fontWeight: 'normal' }, samePeriodEditable: false, requiredProperties: {} },
   { id: 74, category: '主要物料消耗量', name: '脱硫脱硝耗电量', unit: '万kWh', type: 'basic', formula: null, style: { fontWeight: 'normal' }, samePeriodEditable: false, requiredProperties: {} },
-  { id: 75, category: '比率', name: '生产产出率', unit: '%', type: 'calculated', formula: '(VAL(7)+VAL(13)*36)/29.308/VAL(28)', style: { fontWeight: 'bold' }, samePeriodEditable: false, requiredProperties: {} },
-  { id: 76, category: '比率', name: '综合产出率', unit: '%', type: 'calculated', formula: '(VAL(13)*36+VAL(14)*2.952+VAL(24)+VAL(61))/29.308/VAL(28)', style: { fontWeight: 'bold' }, samePeriodEditable: false, requiredProperties: {} },
-  { id: 77, category: '比率', name: '全厂热效率', unit: '%', type: 'calculated', formula: '(VAL(7)+VAL(13)*36)/(VAL(28)*29.308)', style: { fontWeight: 'bold' }, samePeriodEditable: false, requiredProperties: {} },
-  { id: 78, category: '比率', name: '热电比', unit: '%', type: 'calculated', formula: 'VAL(7)/(VAL(13)*36)', style: { fontWeight: 'bold' }, samePeriodEditable: false, requiredProperties: { productionMethod: ['thermoelectric'] } },
-  { id: 79, category: '比率', name: '热分摊比', unit: '%', type: 'calculated', formula: 'VAL(32)/VAL(28)', style: { fontWeight: 'bold' }, samePeriodEditable: false, requiredProperties: { productionMethod: ['thermoelectric'] } },
-  { id: 80, category: '比率', name: '发电设备利用率', unit: '%', type: 'calculated', formula: 'VAL(6)/VAL(3)/3744', style: { fontWeight: 'bold' }, samePeriodEditable: false, requiredProperties: { productionMethod: ['thermoelectric'] } },
-  { id: 81, category: '比率', name: '供热设备利用率', unit: '%', type: 'calculated', formula: 'VAL(7)*1000/(VAL(4)+VAL(5))/13478400', style: { fontWeight: 'bold' }, samePeriodEditable: false, requiredProperties: {} },
-  { id: 82, category: '单耗', name: '综合厂用电率', unit: '%', type: 'calculated', formula: 'VAL(63)/VAL(6)', style: { fontWeight: 'bold' }, samePeriodEditable: false, requiredProperties: { productionMethod: ['thermoelectric'] } },
-  { id: 83, category: '单耗', name: '发电厂用电率', unit: '%', type: 'calculated', formula: 'VAL(66)/VAL(6)', style: { fontWeight: 'bold' }, samePeriodEditable: false, requiredProperties: { productionMethod: ['thermoelectric'] } },
+  { id: 75, category: '比率', name: '生产产出率', unit: '%', displayFormat: { type: 'percentage', places: 2 },type: 'calculated', formula: '(VAL(7)+VAL(13)*36)/29.308/VAL(28)', style: { fontWeight: 'bold' }, samePeriodEditable: false, requiredProperties: {} },
+  { id: 76, category: '比率', name: '综合产出率', unit: '%', displayFormat: { type: 'percentage', places: 2 },type: 'calculated', formula: '(VAL(13)*36+VAL(14)*2.952+VAL(24)+VAL(61))/29.308/VAL(28)', style: { fontWeight: 'bold' }, samePeriodEditable: false, requiredProperties: {} },
+  { id: 77, category: '比率', name: '全厂热效率', unit: '%', displayFormat: { type: 'percentage', places: 2 },type: 'calculated', formula: '(VAL(7)+VAL(13)*36)/(VAL(28)*29.308)', style: { fontWeight: 'bold' }, samePeriodEditable: false, requiredProperties: {} },
+  { id: 78, category: '比率', name: '热电比', unit: '%', displayFormat: { type: 'percentage', places: 2 },type: 'calculated', formula: 'VAL(7)/(VAL(13)*36)', style: { fontWeight: 'bold' }, samePeriodEditable: false, requiredProperties: { productionMethod: ['thermoelectric'] } },
+  { id: 79, category: '比率', name: '热分摊比', unit: '%', displayFormat: { type: 'percentage', places: 2 },type: 'calculated', formula: 'VAL(32)/VAL(28)', style: { fontWeight: 'bold' }, samePeriodEditable: false, requiredProperties: { productionMethod: ['thermoelectric'] } },
+  { id: 80, category: '比率', name: '发电设备利用率', unit: '%',displayFormat: { type: 'percentage', places: 2 }, type: 'calculated', formula: 'VAL(6)/VAL(3)/3744', style: { fontWeight: 'bold' }, samePeriodEditable: false, requiredProperties: { productionMethod: ['thermoelectric'] } },
+  { id: 81, category: '比率', name: '供热设备利用率', unit: '%', displayFormat: { type: 'percentage', places: 2 },type: 'calculated', formula: 'VAL(7)*1000/(VAL(4)+VAL(5))/13478400', style: { fontWeight: 'bold' }, samePeriodEditable: false, requiredProperties: {} },
+  { id: 82, category: '单耗', name: '综合厂用电率', unit: '%', displayFormat: { type: 'percentage', places: 2 },type: 'calculated', formula: 'VAL(63)/VAL(6)', style: { fontWeight: 'bold' }, samePeriodEditable: false, requiredProperties: { productionMethod: ['thermoelectric'] } },
+  { id: 83, category: '单耗', name: '发电厂用电率', unit: '%', displayFormat: { type: 'percentage', places: 2 },type: 'calculated', formula: 'VAL(66)/VAL(6)', style: { fontWeight: 'bold' }, samePeriodEditable: false, requiredProperties: { productionMethod: ['thermoelectric'] } },
   { id: 84, category: '单耗', name: '供热厂用电率', unit: 'kWh/GJ', type: 'calculated', formula: 'VAL(67)*10000/VAL(7)', style: { fontWeight: 'bold' }, samePeriodEditable: false, requiredProperties: { productionMethod: ['thermoelectric'] } },
   { id: 85, category: '单耗', name: '发电标准煤耗率', unit: 'g/kWh', type: 'calculated', formula: 'VAL(29)*100/VAL(6)', style: { fontWeight: 'bold' }, samePeriodEditable: false, requiredProperties: { productionMethod: ['thermoelectric'] } },
   { id: 86, category: '单耗', name: '供电标准煤耗率', unit: 'g/kWh', type: 'calculated', formula: 'VAL(29)*100/(VAL(6)-VAL(66))', style: { fontWeight: 'bold' }, samePeriodEditable: false, requiredProperties: { productionMethod: ['thermoelectric'] } },
@@ -206,3 +207,5 @@ export const reportTemplate = [
   { id: 114, category: '经济指标', name: '抢修费', unit: '万元', type: 'basic', formula: null, style: { fontWeight: 'normal' }, samePeriodEditable: true, requiredProperties: { businessModel: ['independent'] } },
   { id: 115, category: '经济指标', name: '毛利', unit: '万元', type: 'calculated', formula: 'VAL(94)-VAL(103)-VAL(105)-VAL(107)-VAL(109)-VAL(111)-VAL(113)-VAL(114)', style: { fontWeight: 'bold' }, samePeriodEditable: false, requiredProperties: { businessModel: ['independent'] } },
 ];
+
+export const globalDisplayFormat =  { type: 'decimal', places: 2 };

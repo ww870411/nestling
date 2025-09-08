@@ -27,12 +27,12 @@
                   <template #default="{ row }">
                     <div v-if="getCellState(row, childField, currentTableProperties) === 'WRITABLE'" class="cell-content">
                       <el-input 
-                        v-model.number="row.values[childField.id]"
+                        v-model="row.values[childField.id]"
                         @blur="handleInputBlur(row, childField.id)" 
                         @keyup.enter="handleInputBlur(row, childField.id)" />
                     </div>
                     <div v-else class="cell-content">
-                      <span :style="getCellStyle(row, childField)">{{ row.values[childField.id] }}</span>
+                      <span :style="getCellStyle(row, childField)">{{ getFormattedValue(row, childField) }}</span>
                     </div>
                   </template>
                 </el-table-column>
@@ -47,12 +47,12 @@
                 <template #default="{ row }">
                   <div v-if="getCellState(row, field, currentTableProperties) === 'WRITABLE'" class="cell-content">
                     <el-input 
-                      v-model.number="row.values[field.id]"
+                      v-model="row.values[field.id]"
                       @blur="handleInputBlur(row, field.id)" 
                       @keyup.enter="handleInputBlur(row, field.id)" />
                   </div>
                   <div v-else class="cell-content">
-                    <span :style="getCellStyle(row, field)">{{ row.values[field.id] }}</span>
+                    <span :style="getCellStyle(row, field)">{{ getFormattedValue(row, field) }}</span>
                   </div>
                 </template>
               </el-table-column>
@@ -123,6 +123,7 @@ import { Close, Loading } from '@element-plus/icons-vue';
 import * as XLSX from 'xlsx';
 import { validationSchemes, getCellState } from '@/projects/heating_plan_2025-2026/tableRules.js';
 import { validationRules } from '@/utils/validator.js';
+import { formatValue } from '@/utils/formatter.js';
 
 import { useAuthStore } from '@/stores/authStore';
 
@@ -203,6 +204,23 @@ const processedFieldConfig = computed(() => {
   return result;
 });
 
+const globalDisplayFormat = computed(() => currentTableConfig.value?.template?.globalDisplayFormat || null);
+
+const getFormattedValue = (row, field) => {
+  const value = row.values[field.id];
+  if (field.component === 'label') {
+      return value;
+  }
+  const fieldFormat = field.displayFormat;
+  const metric = reportTemplate.value.find(m => m.id === row.metricId);
+  const metricFormat = metric?.displayFormat;
+  const globalFormat = globalDisplayFormat.value;
+
+  const formatToApply = fieldFormat || metricFormat || globalFormat;
+
+  return formatValue(value, formatToApply);
+};
+
 
 // --- Computed Properties ---
 const pageTitle = computed(() => {
@@ -275,7 +293,8 @@ const calculateAll = () => {
       // For row-level formulas, we assume they depend on the main input columns.
       // This might need to be more robust if formulas can span across different column types.
       const firstInputCol = fieldConfig.value.find(fc => fc.component === 'input');
-      return sourceRow && firstInputCol ? (sourceRow.values[firstInputCol.id] || 0) : 0;
+      const rawValue = sourceRow && firstInputCol ? sourceRow.values[firstInputCol.id] : 0;
+      return parseFloat(rawValue) || 0;
     };
 
     try {
@@ -298,7 +317,7 @@ const calculateAll = () => {
   const colCalculatedFields = fieldConfig.value.filter(f => f.type === 'calculated' && f.formula);
   tableData.value.forEach(row => {
     colCalculatedFields.forEach(field => {
-      const valResolver = (columnId) => row.values[columnId] || 0;
+      const valResolver = (columnId) => parseFloat(row.values[columnId]) || 0;
       try {
         const funcBody = field.formula.replace(/VAL\((\d+)\)/g, (match, id) => `valResolver(${id})`);
         const result = new Function('valResolver', `return ${funcBody}`)(valResolver);
