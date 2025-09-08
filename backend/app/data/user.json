@@ -1,0 +1,84 @@
+﻿{
+"users": [
+	{
+		"id" : 1,
+		"username" : "group_admin",
+		"hashed_password" : "$2b$12$aut5EnGp7y1o1rObZmAw4O8MJPJZeEjW8UM5aWqTqIBCK3I4RbzKu",
+		"unit" : "闆嗗洟鍏徃",
+		"global_role" : "super_admin",
+		"roles_by_project" : "null"
+	},
+	{
+		"id" : 2,
+		"username" : "downtown_admin",
+		"hashed_password" : "$2b$12$JVMExzkEsTwTRq0iowuPVunsIVvzbQfUv\/AuUeveGxiy\/.Hwa3bPW",
+		"unit" : "涓诲煄鍖?,
+		"global_role" : "regional_admin",
+		"roles_by_project" : "null"
+	},
+	{
+		"id" : 3,
+		"username" : "beihai_filler",
+		"hashed_password" : "$2b$12$FIZCBqqZ\/hNNTLwb38QNB.DSemKXCJDbRjyFe3xEbu1I3v4litA2y",
+		"unit" : "鍖楁捣鐑數",
+		"global_role" : null,
+		"roles_by_project" : "{\"heating_plan_2025-2026\": \"filler\"}"
+	},
+	{
+		"id" : 4,
+		"username" : "xianghai_filler",
+		"hashed_password" : "$2b$12$EVScOC5Qf5USuPBiiHdeE.Q1RRI14s5r5viWeBTNL.YciB9935d5i",
+		"unit" : "棣欐捣鐑數",
+		"global_role" : null,
+		"roles_by_project" : "{\"heating_plan_2025-2026\": \"filler\"}"
+	},
+	{
+		"id" : 5,
+		"username" : "gongre_filler",
+		"hashed_password" : "$2b$12$v4aUQkyVwceyDhymyfgOXeYeB0rCn\/NDqZBgqlaOqkTxDIRVBrhyW",
+		"unit" : "渚涚儹鍏徃",
+		"global_role" : null,
+		"roles_by_project" : "{\"heating_plan_2025-2026\": \"filler\"}"
+	},
+	{
+		"id" : 6,
+		"username" : "jinzhou_filler",
+		"hashed_password" : "$2b$12$WUbKfjOxw6AAsEWcgHPANuDzQvdYdA4R6Hjlvj7xnaaNmc\/fWGROe",
+		"unit" : "閲戝窞鐑數",
+		"global_role" : null,
+		"roles_by_project" : "{\"heating_plan_2025-2026\": \"filler\"}"
+	},
+	{
+		"id" : 7,
+		"username" : "beifang_filler",
+		"hashed_password" : "$2b$12$vrwiupavIZg6F.m3h4xhPubvS9QDmyFvHH48ieF5KVDbpgG2bv2vC",
+		"unit" : "鍖楁柟鐑數",
+		"global_role" : null,
+		"roles_by_project" : "{\"heating_plan_2025-2026\": \"filler\"}"
+	},
+	{
+		"id" : 8,
+		"username" : "jinpu_filler",
+		"hashed_password" : "$2b$12$gtvWhEtJCaXxkiIzsaiIb.htUjk.TkjTduHRuTtj\/hM\/RKf0AB2eW",
+		"unit" : "閲戞櫘鐑數",
+		"global_role" : null,
+		"roles_by_project" : "{\"heating_plan_2025-2026\": \"filler\"}"
+	},
+	{
+		"id" : 9,
+		"username" : "zhuanghe_filler",
+		"hashed_password" : "$2b$12$fObQThw8dElOESYefrVtPONqefEYKwMHWdp8wcvIUmN3AHr2Tmue.",
+		"unit" : "搴勬渤鐑數",
+		"global_role" : null,
+		"roles_by_project" : "{\"heating_plan_2025-2026\": \"filler\"}"
+	},
+	{
+		"id" : 10,
+		"username" : "yanjiuyuan_filler",
+		"hashed_password" : "$2b$12$4hyh78GvjL09qNHdKFcNG.cXDib4Qf.PzPLQ1UGMf88Rvn6eAiI7m",
+		"unit" : "鐮旂┒闄?,
+		"global_role" : null,
+		"roles_by_project" : "{\"heating_plan_2025-2026\": \"filler\"}"
+	}
+]}
+

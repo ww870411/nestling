@@ -27,25 +27,18 @@ services:
     environment:
       - DATABASE_URL=postgresql://user:password@db/nestling_db
     depends_on:
-      db:
-        condition: service_healthy
-    command: sh -c "python -m app.seed && uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
+      - db
 
   db:
     image: postgres:13
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     environment:
-      - POSTGRES_USER=user
-      - POSTGRES_PASSWORD=password
+      - POSTGRES_USER=ww870411
+      - POSTGRES_PASSWORD=w870411w
       - POSTGRES_DB=nestling_db
     ports:
       - "5432:5432"
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U user -d nestling_db"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
 
 volumes:
   postgres_data:

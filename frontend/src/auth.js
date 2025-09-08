@@ -33,64 +33,48 @@ export const users = [
     username: 'beihai_filler',
     password: 'password',
     unit: '北海热电厂',
-    rolesByProject: {
-      'heating_plan_2025-2026': 'filler',
-    },
+    globalRole: 'filler'
   },
   {
     username: 'xianghai_filler',
     password: 'password',
     unit: '香海热电厂',
-    rolesByProject: {
-      'heating_plan_2025-2026': 'filler',
-    },
+    globalRole: 'filler'
   },
   {
     username: 'gongre_filler',
     password: 'password',
     unit: '供热公司',
-    rolesByProject: {
-      'heating_plan_2025-2026': 'filler',
-    },
+    globalRole: 'filler'
   },
   {
     username: 'jinzhou_filler',
     password: 'password',
     unit: '金州热电',
-    rolesByProject: {
-      'heating_plan_2025-2026': 'filler',
-    },
+    globalRole: 'filler'
   },
   {
     username: 'beifang_filler',
     password: 'password',
     unit: '北方热电',
-    rolesByProject: {
-      'heating_plan_2025-2026': 'filler',
-    },
+    globalRole: 'filler'
   },
   {
     username: 'jinpu_filler',
     password: 'password',
     unit: '金普热电',
-    rolesByProject: {
-      'heating_plan_2025-2026': 'filler',
-    },
+    globalRole: 'filler'
   },
   {
     username: 'zhuanghe_filler',
     password: 'password',
     unit: '庄河热电',
-    rolesByProject: {
-      'heating_plan_2025-2026': 'filler',
-    },
+    globalRole: 'filler'
   },
   {
     username: 'yanjiuyuan_filler',
     password: 'password',
     unit: '研究院',
-    rolesByProject: {
-      'heating_plan_2025-2026': 'filler',
-    },
+    globalRole: 'filler'
   },
 ];
