@@ -91,6 +91,7 @@
         </el-radio-group>
       </div>
       <div>
+        <el-button @click="handleLoadFromServer" :icon="Download">加载数据</el-button>
         <el-button v-if="currentTableActions.save" @click="handleSave">暂存</el-button>
         <el-button v-if="currentTableActions.save" @click="handleLoadDraft">取回暂存</el-button>
         <el-button v-if="currentTableActions.submit" type="primary" :disabled="hasHardErrors" @click="handleSubmit">提交</el-button>
@@ -119,7 +120,7 @@ import { useRoute } from 'vue-router';
 import { ElMessage } from 'element-plus';
 import { storeToRefs } from 'pinia';
 import { useProjectStore } from '@/stores/projectStore';
-import { Close, Loading } from '@element-plus/icons-vue';
+import { Close, Loading, Download } from '@element-plus/icons-vue'; // Import Download icon
 import * as XLSX from 'xlsx';
 import { validationSchemes, getCellState } from '@/projects/heating_plan_2025-2026/tableRules.js';
 import { validationRules } from '@/utils/validator.js';
@@ -752,6 +753,57 @@ const handleExport = () => {
   XLSX.writeFile(workbook, `${pageTitle.value}.xlsx`);
   ElMessage.success('导出成功！');
 };
+
+// --- NEW: Load data from server ---
+const handleLoadFromServer = async () => {
+  const tableName = pageTitle.value;
+  if (!tableName) {
+    ElMessage.error('无法获取当前表格名称。');
+    return;
+  }
+
+  try {
+    const response = await fetch(`/api/data/table/${encodeURIComponent(tableName)}`);
+
+    if (response.status === 404) {
+      ElMessage.info('服务器上未找到该表格的已存数据。');
+      return;
+    }
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.detail || 'Failed to load data from server');
+    }
+
+    const loadedPayload = await response.json();
+
+    // --- Transform and apply loaded data ---
+    const loadedDataMap = new Map(loadedPayload.tableData.map(m => [m.metricId, m]));
+
+    tableData.value.forEach(localRow => {
+      const loadedMetric = loadedDataMap.get(localRow.metricId);
+      if (loadedMetric) {
+        // Create a map of the loaded values for efficient lookup
+        const loadedValuesMap = new Map(loadedMetric.values.map(v => [v.fieldId, v.value]));
+        // Update the local row's values, preserving the reactive object
+        Object.keys(localRow.values).forEach(fieldId => {
+          const numericFieldId = parseInt(fieldId);
+          if (loadedValuesMap.has(numericFieldId)) {
+            localRow.values[numericFieldId] = loadedValuesMap.get(numericFieldId);
+          }
+        });
+      }
+    });
+
+    calculateAll(); // Recalculate formulas and validations
+    ElMessage.success('服务器数据加载成功！');
+
+  } catch (error) {
+    console.error('Error loading data from server:', error);
+    ElMessage.error(`从服务器加载数据失败: ${error.message}`);
+  }
+};
+
 
 </script>
 
