@@ -1,5 +1,10 @@
 {
-    "submittedAt": "2025-09-08T08:45:20.688Z",
+    "submittedAt": "2025-09-08T11:43:57.959Z",
+    "table": {
+        "id": "4",
+        "name": "4 北海热电厂(热电联产)表",
+        "template": "subsidiaryTemplate"
+    },
     "submittedBy": {
         "username": "group_admin",
         "unit": "集团公司",
@@ -632,12 +637,7 @@
                     "fieldId": 1003,
                     "fieldName": "totals.plan",
                     "fieldLabel": "本期计划",
-                    "value": 222,
-                    "explanation": {
-                        "ruleKey": "6-soft-0",
-                        "message": "本期计划不应超过同期完成",
-                        "content": "原因: 本期计划不应超过同期完成"
-                    }
+                    "value": 0
                 },
                 {
                     "fieldId": 1004,
@@ -655,7 +655,7 @@
                     "fieldId": 2001,
                     "fieldName": "monthlyData.october.plan",
                     "fieldLabel": "10月-计划",
-                    "value": 222
+                    "value": 0
                 },
                 {
                     "fieldId": 2002,

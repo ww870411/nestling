@@ -616,6 +616,11 @@ const handleSubmit = async () => {
 
   const payload = {
     submittedAt: new Date().toISOString(),
+    table: {
+      id: currentTableConfig.value?.id,
+      name: currentTableConfig.value?.name,
+      template: currentTableConfig.value?.templateName,
+    },
     submittedBy: authStore.user, // 添加提交者信息
     tableData: processedData,
   };
