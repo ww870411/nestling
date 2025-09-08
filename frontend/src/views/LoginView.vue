@@ -78,21 +78,22 @@ const loading = ref(false);
 const loginFormRef = ref(null);
 
 const handleLogin = () => {
-  loginFormRef.value.validate(valid => {
+  loginFormRef.value.validate(async (valid) => {
     if (valid) {
       loading.value = true;
-      // 使用 authStore 进行登录
-      const loginSuccess = authStore.login(loginForm.value.username, loginForm.value.password);
-
-      setTimeout(() => {
+      try {
+        const loginSuccess = await authStore.login(loginForm.value.username, loginForm.value.password);
         if (loginSuccess) {
           ElMessage.success('登录成功');
           router.push({ name: 'projects' });
         } else {
           ElMessage.error('用户名或密码错误');
         }
+      } catch (error) {
+        ElMessage.error('登录请求失败，请稍后再试。');
+      } finally {
         loading.value = false;
-      }, 500);
+      }
     } else {
       return false;
     }

@@ -1,43 +1,63 @@
 import { defineStore } from 'pinia';
-import { users } from '@/auth';
+
+// The full list of units is temporarily hardcoded here for the 'super_admin' role.
+// In a real-world scenario, this list should be fetched from a dedicated API endpoint.
+const ALL_UNITS = [
+  '集团公司', '主城区', '北海热电厂', '香海热电厂', '供热公司', 
+  '金州热电', '北方热电', '金普热电', '庄河热电', '研究院'
+];
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
     isAuthenticated: false,
-    user: null, // 存放完整的用户对象
+    user: null, // Stores the complete user object from the backend
   }),
 
   getters: {
-    // 根据角色和单位，计算出该用户有权访问的单位列表
-    accessibleUnits() {
-      if (!this.user) return [];
+    // Calculates the list of units accessible to the user based on their role and unit.
+    accessibleUnits(state) {
+      if (!state.user) return [];
 
-      if (this.user.globalRole === 'super_admin') {
-        // 超级管理员可以访问所有单位
-        return users.map(u => u.unit);
+      switch (state.user.globalRole) {
+        case 'super_admin':
+          // Super admin can access all units.
+          return ALL_UNITS;
+        case 'regional_admin':
+          // Downtown admin can access a specific set of units.
+          return ['主城区', '北海热电厂', '香海热电厂', '供热公司'];
+        default:
+          // Regular users can only access their own unit.
+          return [state.user.unit];
       }
-
-      if (this.user.globalRole === 'regional_admin') {
-        // 主城区管理员可以访问特定单位
-        return ['主城区', '北海热电厂', '香海热电厂', '供热公司'];
-      }
-
-      // 普通用户只能访问自己的单位
-      return [this.user.unit];
     },
   },
 
   actions: {
-    login(username, password) {
-      const foundUser = users.find(u => u.username === username && u.password === password);
+    async login(username, password) {
+      try {
+        // Use Vite's env variable for the API base URL
+        const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+        const response = await fetch(`${apiBaseUrl}/login`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ username, password }),
+        });
 
-      if (foundUser) {
-        this.isAuthenticated = true;
-        this.user = foundUser;
-        // 将用户信息存入localStorage，用于持久化登录
-        localStorage.setItem('user', JSON.stringify(foundUser));
-        return true;
-      } else {
+        if (response.ok) {
+          const data = await response.json();
+          this.isAuthenticated = true;
+          this.user = data.user;
+          // Persist user information in localStorage for auto-login
+          localStorage.setItem('user', JSON.stringify(data.user));
+          return true;
+        } else {
+          this.logout();
+          return false;
+        }
+      } catch (error) {
+        console.error('Login request failed:', error);
         this.logout();
         return false;
       }
@@ -49,7 +69,7 @@ export const useAuthStore = defineStore('auth', {
       localStorage.removeItem('user');
     },
 
-    // 应用启动时，尝试从localStorage恢复登录状态
+    // Tries to restore login state from localStorage when the app starts
     tryAutoLogin() {
       const storedUser = localStorage.getItem('user');
       if (storedUser) {
