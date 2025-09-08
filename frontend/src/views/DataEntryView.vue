@@ -398,7 +398,8 @@ const runValidation = ({ level = 'hard' } = {}) => {
 
           const ruleFunc = validationRules[ruleDef.rule];
           if (ruleFunc && !ruleFunc(valueA, ruleDef.operator, valueB, ruleDef.factor, ruleDef.offset)) {
-            newErrors[key] = { type: 'B', message: ruleDef.message };
+            // Associate the error with the primary field (fieldA)
+            newErrors[key] = { type: 'B', message: ruleDef.message, fieldId: fieldA.id };
             hasError = true;
           }
         }
@@ -585,16 +586,21 @@ const handleSubmit = async () => {
       };
     });
 
-    // 2. 查找并整合与当前行相关的解释说明
-    const rowExplanations = [];
+    // 2. 查找软性错误，并将解释说明附加到对应的单元格上
     softErrorsForDisplay.value.forEach(([key, error]) => {
       const metricId = parseInt(key.split('-')[0]);
+      // Check if the error belongs to the current row and has an explanation
       if (metricId === row.metricId && explanations.value[key]) {
-        rowExplanations.push({
-          ruleKey: key,
-          message: error.message,
-          content: explanations.value[key]
-        });
+        // Find the target cell in processedValues using the fieldId from the error object
+        const targetCell = processedValues.find(cell => cell.fieldId === error.fieldId);
+        if (targetCell) {
+          // Attach the explanation to the specific cell
+          targetCell.explanation = {
+            ruleKey: key,
+            message: error.message,
+            content: explanations.value[key]
+          };
+        }
       }
     });
 
@@ -604,10 +610,6 @@ const handleSubmit = async () => {
       type: row.type,
       values: processedValues,
     };
-
-    if (rowExplanations.length > 0) {
-      newRow.explanations = rowExplanations;
-    }
 
     return newRow;
   });

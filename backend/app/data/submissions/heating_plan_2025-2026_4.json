@@ -1,5 +1,5 @@
 {
-    "submittedAt": "2025-09-08T08:39:12.105Z",
+    "submittedAt": "2025-09-08T08:45:20.688Z",
     "submittedBy": {
         "username": "group_admin",
         "unit": "集团公司",
@@ -632,7 +632,12 @@
                     "fieldId": 1003,
                     "fieldName": "totals.plan",
                     "fieldLabel": "本期计划",
-                    "value": 222
+                    "value": 222,
+                    "explanation": {
+                        "ruleKey": "6-soft-0",
+                        "message": "本期计划不应超过同期完成",
+                        "content": "原因: 本期计划不应超过同期完成"
+                    }
                 },
                 {
                     "fieldId": 1004,
@@ -729,13 +734,6 @@
                     "fieldName": "monthlyData.april.samePeriod",
                     "fieldLabel": "4月-同期",
                     "value": 0
-                }
-            ],
-            "explanations": [
-                {
-                    "ruleKey": "6-soft-0",
-                    "message": "本期计划不应超过同期完成",
-                    "content": " 本期计划不应超过同期完成111"
                 }
             ]
         },
