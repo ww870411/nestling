@@ -35,9 +35,7 @@ export const useAuthStore = defineStore('auth', {
   actions: {
     async login(username, password) {
       try {
-        // Use Vite's env variable for the API base URL
-        const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
-        const response = await fetch(`${apiBaseUrl}/login`, {
+        const response = await fetch(`/api/login`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

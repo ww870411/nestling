@@ -124,9 +124,12 @@ import * as XLSX from 'xlsx';
 import { validationSchemes, getCellState } from '@/projects/heating_plan_2025-2026/tableRules.js';
 import { validationRules } from '@/utils/validator.js';
 
+import { useAuthStore } from '@/stores/authStore';
+
 // --- Store and Routing ---
 const route = useRoute();
 const projectStore = useProjectStore();
+const authStore = useAuthStore(); // Get auth store
 const { menuData } = storeToRefs(projectStore);
 
 // --- Component State ---
@@ -551,7 +554,7 @@ const handleLoadDraft = () => {
   ElMessage.success('暂存数据已成功拉取');
 };
 
-const handleSubmit = () => {
+const handleSubmit = async () => {
   runValidation({ level: 'all' });
   if (hasHardErrors.value) {
     ElMessage.error('提交失败，请修正所有红色错误后再试。');
@@ -567,26 +570,93 @@ const handleSubmit = () => {
     }
   }
 
-  // --- 数据持久化 ---
-  // 1. 保存状态和提交时间
-  localStorage.setItem(`status-${route.params.tableId}`, 'submitted');
-  localStorage.setItem(`submittedAt-${route.params.tableId}`, new Date().toISOString());
+  // --- 组织要发送到后端的数据 ---
+  const processedData = tableData.value.map(row => {
+    const metricInfo = reportTemplate.value.find(m => m.id === row.metricId);
 
-  // 2. 保存与软性错误相关的解释说明
-  const explanationsToSave = {};
-  softErrorsForDisplay.value.forEach(([key, error]) => {
-    if (explanations.value[key]) {
-      explanationsToSave[key] = {
-        content: explanations.value[key],
-        message: error.message, // 保存错误信息
+    // 1. 转换 values 对象为数组，并加入字段的上下文信息
+    const processedValues = Object.entries(row.values).map(([fieldId, value]) => {
+      const fieldInfo = fieldConfig.value.find(f => f.id === parseInt(fieldId));
+      return {
+        fieldId: parseInt(fieldId),
+        fieldName: fieldInfo ? fieldInfo.name : 'unknown',
+        fieldLabel: fieldInfo ? fieldInfo.label : 'unknown',
+        value: value,
       };
+    });
+
+    // 2. 查找并整合与当前行相关的解释说明
+    const rowExplanations = [];
+    softErrorsForDisplay.value.forEach(([key, error]) => {
+      const metricId = parseInt(key.split('-')[0]);
+      if (metricId === row.metricId && explanations.value[key]) {
+        rowExplanations.push({
+          ruleKey: key,
+          message: error.message,
+          content: explanations.value[key]
+        });
+      }
+    });
+
+    const newRow = {
+      metricId: row.metricId,
+      metricName: metricInfo ? metricInfo.name : 'unknown',
+      type: row.type,
+      values: processedValues,
+    };
+
+    if (rowExplanations.length > 0) {
+      newRow.explanations = rowExplanations;
     }
+
+    return newRow;
   });
-  localStorage.setItem(`explanations-${route.params.tableId}`, JSON.stringify(explanationsToSave));
 
+  const payload = {
+    submittedAt: new Date().toISOString(),
+    submittedBy: authStore.user, // 添加提交者信息
+    tableData: processedData,
+  };
 
-  ElMessage.success('提交成功！');
-  isErrorPanelVisible.value = false;
+  // --- 发送数据到后端 ---
+  try {
+    const projectId = route.params.projectId;
+    const tableId = route.params.tableId;
+
+    const response = await fetch(`/api/project/${projectId}/table/${tableId}/submit`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.detail || 'Backend submission failed');
+    }
+    
+    // --- 后端成功接收后，更新前端状态 (保留localStorage逻辑) ---
+    const explanationsToSave = {};
+    softErrorsForDisplay.value.forEach(([key, error]) => {
+      if (explanations.value[key]) {
+        explanationsToSave[key] = {
+          content: explanations.value[key],
+          message: error.message,
+        };
+      }
+    });
+
+    localStorage.setItem(`status-${route.params.tableId}`, 'submitted');
+    localStorage.setItem(`submittedAt-${route.params.tableId}`, payload.submittedAt);
+    localStorage.setItem(`explanations-${route.params.tableId}`, JSON.stringify(explanationsToSave));
+
+    ElMessage.success('数据已成功提交至服务器！');
+    isErrorPanelVisible.value = false;
+
+  } catch (error) {
+    console.error('Submission error:', error);
+    ElMessage.error(`数据提交至后端失败: ${error.message}`);
+    return;
+  }
 };
 
 const handleExport = () => {

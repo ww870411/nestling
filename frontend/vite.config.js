@@ -27,5 +27,15 @@ export default defineConfig({
   server: {
     host: '0.0.0.0',
     port: 5173,
+    proxy: {
+      // 字符串简写写法
+      // '/foo': 'http://localhost:4567',
+      // 选项写法
+      '/api': {
+        target: 'http://backend:8000',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, '')
+      },
+    }
   },
 })
