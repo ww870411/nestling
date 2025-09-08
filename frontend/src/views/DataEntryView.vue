@@ -91,9 +91,9 @@
         </el-radio-group>
       </div>
       <div>
-        <el-button @click="handleSave">暂存</el-button>
-        <el-button @click="handleLoadDraft">取回暂存</el-button>
-        <el-button type="primary" :disabled="hasHardErrors" @click="handleSubmit">提交</el-button>
+        <el-button v-if="currentTableActions.save" @click="handleSave">暂存</el-button>
+        <el-button v-if="currentTableActions.save" @click="handleLoadDraft">取回暂存</el-button>
+        <el-button v-if="currentTableActions.submit" type="primary" :disabled="hasHardErrors" @click="handleSubmit">提交</el-button>
       </div>
     </div>
   </div>
@@ -160,6 +160,12 @@ const fieldConfig = computed(() => currentTableConfig.value?.template?.fieldConf
 
 const currentTableProperties = computed(() => {
   return currentTableConfig.value?.properties || {};
+});
+
+const currentTableActions = computed(() => {
+  const defaults = { submit: true, save: true };
+  const configActions = currentTableConfig.value?.actions;
+  return { ...defaults, ...configActions };
 });
 
 const processedFieldConfig = computed(() => {
@@ -747,7 +753,7 @@ const handleExport = () => {
 .data-entry-container { display: flex; flex-direction: column; height: 100%; padding: 20px; box-sizing: border-box; }
 .page-title { flex-shrink: 0; text-align: center; margin: 5px 0; font-size: 18px; }
 .content-wrapper { flex-grow: 1; display: flex; overflow: hidden; }
-.main-content { flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; }
+.main-content { flex-grow: 1; display: flex; flex-direction: row; overflow: hidden; }
 .table-controls { display: flex; align-items: center; }
 .table-wrapper { flex-grow: 1; overflow: hidden; min-height: 0; }
 .error-panel { position: relative; flex-shrink: 0; margin-left: 20px; border: 1px solid #ebeef5; border-radius: 4px; padding: 15px; display: flex; flex-direction: column; }
