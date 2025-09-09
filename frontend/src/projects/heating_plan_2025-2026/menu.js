@@ -10,7 +10,7 @@ export const menuData = [
   {
     name: '集团公司',
     tables: [
-      { id: '0', name: '0 集团分单位汇总表', template: groupTemplate, templateName: 'groupTemplate', type: 'summary', subsidiaries: [], aggregationExclusions: [] },
+      { id: '0', name: '0 集团分单位汇总表', template: groupTemplate, templateName: 'groupTemplate', type: 'summary', subsidiaries: [], aggregationExclusions: [], actions: { submit: false, save: false } },
       { 
         id: '1', 
         name: '1 集团汇总表', 
@@ -20,6 +20,7 @@ export const menuData = [
         subsidiaries: ['2', '9', '10', '11', '12', '13', '14'],
         aggregationExclusions: [],
         properties: { productionMethod: ['thermoelectric','heating_company','boiler_room'], fuelType: ['coal','natural_gas','purchased_heat'], businessModel: ['independent'] },
+        actions: { submit: false, save: false },
       },
     ]
   },

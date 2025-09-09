@@ -308,12 +308,10 @@ const _fetchDataFromServer = async (silent = false) => {
     }
 
     const data = await response.json();
-    // Use submitted data first, fallback to temp
     const payload = data.submit || data.temp;
 
     if (payload) {
       _applyPayloadToTable(payload);
-      if (!silent) ElMessage.success('数据已成功加载！');
     } else {
       if (!silent) ElMessage.info('服务器上没有找到该表格的已提交数据。');
     }
@@ -904,7 +902,7 @@ const handleExport = () => {
 .is-warning .el-input__wrapper, .is-warning .cell-content { box-shadow: 0 0 0 1px #e6a23c inset !important; border-radius: 4px; }
 .is-readonly-shadow { background-color: #fafafa; box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.05); }
 .is-readonly-aggregated { background-color: #f0f9eb; }
-.loading-indicator, .no-data-message { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; font-size: 16px; color: #606266; }
+.loading-indicator, .no-data-message { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; width: 100%; font-size: 16px; color: #606266; }
 .loading-indicator .el-icon { margin-bottom: 10px; }
 </style>
 

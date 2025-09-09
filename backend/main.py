@@ -22,12 +22,11 @@ AUTH_FILE = "app/data/auth.json"
 SUBMISSIONS_DIR = Path("app/data/submissions")
 SUBMISSIONS_DIR.mkdir(parents=True, exist_ok=True)
 
-# Mirrored from frontend/src/projects/heating_plan_2025-2026/menu.js
 MENU_DATA = [
   {
     "name": "集团公司",
     "tables": [
-      { "id": "0", "name": "0 集团分单位汇总表", "templateName": "groupTemplate", "type": "summary", "subsidiaries": [], "aggregationExclusions": [] },
+      { "id": "0", "name": "0 集团分单位汇总表", "templateName": "groupTemplate", "type": "summary", "subsidiaries": [], "aggregationExclusions": [], "actions": { "submit": False, "save": False } },
       { 
         "id": "1", 
         "name": "1 集团汇总表", 
@@ -35,6 +34,7 @@ MENU_DATA = [
         "type": "summary",
         "subsidiaries": ["2", "9", "10", "11", "12", "13", "14"],
         "aggregationExclusions": [],
+        "actions": { "submit": False, "save": False },
       },
     ]
   },
@@ -150,12 +150,12 @@ async def save_draft(project_id: str, table_id: str, payload: dict = Body(...)):
     _update_data_file(file_path, "temp", payload)
     return {"message": f"Draft for table ID '{table_id}' saved successfully."}
 
-@app.get("/data/table/{table_id}")
-async def get_table_data(table_id: str):
+async def get_table_data_recursive(table_id: str):
     table_config = ALL_TABLES.get(table_id)
     if not table_config:
-        raise HTTPException(status_code=404, detail="Table configuration not found.")
+        return {}
 
+    # Base Case: If not a summary table, read the file directly.
     if table_config.get("type") != "summary" or not table_config.get("subsidiaries"):
         file_path = SUBMISSIONS_DIR / f"{table_id}.json"
         if not file_path.exists():
@@ -166,18 +166,15 @@ async def get_table_data(table_id: str):
         except Exception:
             return {}
 
+    # Recursive Step: It's a summary table.
     aggregated_payload = None
     subsidiary_ids = table_config.get("subsidiaries", [])
     exclusion_set = set(table_config.get("aggregationExclusions", []))
 
     for sub_id in subsidiary_ids:
-        sub_file_path = SUBMISSIONS_DIR / f"{sub_id}.json"
-        if not sub_file_path.exists():
-            continue
-
         try:
-            with open(sub_file_path, "r", encoding="utf-8") as f:
-                sub_content = json.load(f)
+            # RECURSIVE CALL to handle nested summaries
+            sub_content = await get_table_data_recursive(sub_id)
             
             sub_data = sub_content.get("submit") or sub_content.get("temp")
             if not sub_data or not isinstance(sub_data.get("tableData"), list):
@@ -218,6 +215,7 @@ async def get_table_data(table_id: str):
         except Exception:
             continue
 
+    # Merge with the summary table's own data for excluded/manual fields
     summary_file_path = SUBMISSIONS_DIR / f"{table_id}.json"
     if summary_file_path.exists() and aggregated_payload is not None:
         try:
@@ -242,6 +240,10 @@ async def get_table_data(table_id: str):
             pass
 
     return {"submit": aggregated_payload} if aggregated_payload else {}
+
+@app.get("/data/table/{table_id}")
+async def get_table_data(table_id: str):
+    return await get_table_data_recursive(table_id)
 
 @app.post("/project/{project_id}/table_statuses")
 async def get_table_statuses(project_id: str, table_ids: list[str] = Body(...)):
