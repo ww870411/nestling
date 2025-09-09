@@ -1,9 +1,9 @@
 {
     "submit": {
-        "submittedAt": "2025-09-09T06:59:57.602Z",
+        "submittedAt": "2025-09-09T06:58:45.875Z",
         "table": {
-            "id": "4",
-            "name": "4 北海热电厂(热电联产)表",
+            "id": "3",
+            "name": "3 北海汇总表",
             "template": "subsidiaryTemplate"
         },
         "submittedBy": {
@@ -33,7 +33,12 @@
                         "fieldId": 1003,
                         "fieldName": "totals.plan",
                         "fieldLabel": "本期计划",
-                        "value": 0
+                        "value": 15.86,
+                        "explanation": {
+                            "ruleKey": "1-soft-0",
+                            "message": "本期计划不应超过同期完成",
+                            "content": "原因: 本期计划不应超过同期完成"
+                        }
                     },
                     {
                         "fieldId": 1004,
@@ -51,7 +56,7 @@
                         "fieldId": 2001,
                         "fieldName": "monthlyData.october.plan",
                         "fieldLabel": "10月-计划",
-                        "value": 0
+                        "value": "111"
                     },
                     {
                         "fieldId": 2002,
@@ -638,12 +643,7 @@
                         "fieldId": 1003,
                         "fieldName": "totals.plan",
                         "fieldLabel": "本期计划",
-                        "value": 2999,
-                        "explanation": {
-                            "ruleKey": "6-soft-0",
-                            "message": "本期计划不应超过同期完成",
-                            "content": "原因: 本期计划不应超过同期完成"
-                        }
+                        "value": 0
                     },
                     {
                         "fieldId": 1004,
@@ -661,7 +661,7 @@
                         "fieldId": 2001,
                         "fieldName": "monthlyData.october.plan",
                         "fieldLabel": "10月-计划",
-                        "value": "2999"
+                        "value": 0
                     },
                     {
                         "fieldId": 2002,
@@ -764,7 +764,12 @@
                         "fieldId": 1003,
                         "fieldName": "totals.plan",
                         "fieldLabel": "本期计划",
-                        "value": 0
+                        "value": 299,
+                        "explanation": {
+                            "ruleKey": "7-soft-0",
+                            "message": "本期计划不应超过同期完成",
+                            "content": "原因: 本期计划不应超过同期完成"
+                        }
                     },
                     {
                         "fieldId": 1004,
@@ -782,7 +787,7 @@
                         "fieldId": 2001,
                         "fieldName": "monthlyData.october.plan",
                         "fieldLabel": "10月-计划",
-                        "value": 0
+                        "value": 299
                     },
                     {
                         "fieldId": 2002,
@@ -1006,7 +1011,12 @@
                         "fieldId": 1003,
                         "fieldName": "totals.plan",
                         "fieldLabel": "本期计划",
-                        "value": 0
+                        "value": 299,
+                        "explanation": {
+                            "ruleKey": "9-soft-0",
+                            "message": "本期计划不应超过同期完成",
+                            "content": "原因: 本期计划不应超过同期完成"
+                        }
                     },
                     {
                         "fieldId": 1004,
@@ -1024,7 +1034,7 @@
                         "fieldId": 2001,
                         "fieldName": "monthlyData.october.plan",
                         "fieldLabel": "10月-计划",
-                        "value": 0
+                        "value": "299"
                     },
                     {
                         "fieldId": 2002,
@@ -4757,12 +4767,7 @@
                         "fieldId": 1003,
                         "fieldName": "totals.plan",
                         "fieldLabel": "本期计划",
-                        "value": 10000,
-                        "explanation": {
-                            "ruleKey": "40-soft-0",
-                            "message": "本期计划不应超过同期完成",
-                            "content": "原因: 本期计划不应超过同期完成"
-                        }
+                        "value": 0
                     },
                     {
                         "fieldId": 1004,
@@ -4780,7 +4785,7 @@
                         "fieldId": 2001,
                         "fieldName": "monthlyData.october.plan",
                         "fieldLabel": "10月-计划",
-                        "value": 10000
+                        "value": 0
                     },
                     {
                         "fieldId": 2002,
@@ -4883,12 +4888,7 @@
                         "fieldId": 1003,
                         "fieldName": "totals.plan",
                         "fieldLabel": "本期计划",
-                        "value": 10000,
-                        "explanation": {
-                            "ruleKey": "41-soft-0",
-                            "message": "本期计划不应超过同期完成",
-                            "content": "原因: 本期计划不应超过同期完成"
-                        }
+                        "value": 0
                     },
                     {
                         "fieldId": 1004,
@@ -4906,7 +4906,7 @@
                         "fieldId": 2001,
                         "fieldName": "monthlyData.october.plan",
                         "fieldLabel": "10月-计划",
-                        "value": "10000"
+                        "value": 0
                     },
                     {
                         "fieldId": 2002,
@@ -9607,12 +9607,7 @@
                         "fieldId": 1003,
                         "fieldName": "totals.plan",
                         "fieldLabel": "本期计划",
-                        "value": null,
-                        "explanation": {
-                            "ruleKey": "80-soft-0",
-                            "message": "本期计划不应超过同期完成",
-                            "content": "原因: 本期计划不应超过同期完成"
-                        }
+                        "value": 0
                     },
                     {
                         "fieldId": 1004,
@@ -9872,7 +9867,7 @@
                         "fieldId": 2001,
                         "fieldName": "monthlyData.october.plan",
                         "fieldLabel": "10月-计划",
-                        "value": 0
+                        "value": null
                     },
                     {
                         "fieldId": 2002,
@@ -9993,7 +9988,7 @@
                         "fieldId": 2001,
                         "fieldName": "monthlyData.october.plan",
                         "fieldLabel": "10月-计划",
-                        "value": 0
+                        "value": null
                     },
                     {
                         "fieldId": 2002,
@@ -10114,7 +10109,7 @@
                         "fieldId": 2001,
                         "fieldName": "monthlyData.october.plan",
                         "fieldLabel": "10月-计划",
-                        "value": null
+                        "value": 0
                     },
                     {
                         "fieldId": 2002,
@@ -10235,7 +10230,7 @@
                         "fieldId": 2001,
                         "fieldName": "monthlyData.october.plan",
                         "fieldLabel": "10月-计划",
-                        "value": 0
+                        "value": null
                     },
                     {
                         "fieldId": 2002,
@@ -10356,7 +10351,7 @@
                         "fieldId": 2001,
                         "fieldName": "monthlyData.october.plan",
                         "fieldLabel": "10月-计划",
-                        "value": 0
+                        "value": null
                     },
                     {
                         "fieldId": 2002,
@@ -10477,7 +10472,7 @@
                         "fieldId": 2001,
                         "fieldName": "monthlyData.october.plan",
                         "fieldLabel": "10月-计划",
-                        "value": null
+                        "value": 0
                     },
                     {
                         "fieldId": 2002,
@@ -10580,12 +10575,7 @@
                         "fieldId": 1003,
                         "fieldName": "totals.plan",
                         "fieldLabel": "本期计划",
-                        "value": 3.33,
-                        "explanation": {
-                            "ruleKey": "88-soft-0",
-                            "message": "本期计划不应超过同期完成",
-                            "content": "原因: 本期计划不应超过同期完成"
-                        }
+                        "value": 0
                     },
                     {
                         "fieldId": 1004,
@@ -10603,7 +10593,7 @@
                         "fieldId": 2001,
                         "fieldName": "monthlyData.october.plan",
                         "fieldLabel": "10月-计划",
-                        "value": 3.33
+                        "value": null
                     },
                     {
                         "fieldId": 2002,
@@ -10724,7 +10714,7 @@
                         "fieldId": 2001,
                         "fieldName": "monthlyData.october.plan",
                         "fieldLabel": "10月-计划",
-                        "value": null
+                        "value": 0
                     },
                     {
                         "fieldId": 2002,
@@ -13126,7 +13116,12 @@
                         "fieldId": 1003,
                         "fieldName": "totals.plan",
                         "fieldLabel": "本期计划",
-                        "value": 0
+                        "value": 999,
+                        "explanation": {
+                            "ruleKey": "109-soft-0",
+                            "message": "本期计划不应超过同期完成",
+                            "content": "原因: 本期计划不应超过同期完成"
+                        }
                     },
                     {
                         "fieldId": 1004,
@@ -13144,7 +13139,7 @@
                         "fieldId": 2001,
                         "fieldName": "monthlyData.october.plan",
                         "fieldLabel": "10月-计划",
-                        "value": 0
+                        "value": "999"
                     },
                     {
                         "fieldId": 2002,
@@ -13265,7 +13260,7 @@
                         "fieldId": 2001,
                         "fieldName": "monthlyData.october.plan",
                         "fieldLabel": "10月-计划",
-                        "value": 0
+                        "value": null
                     },
                     {
                         "fieldId": 2002,
