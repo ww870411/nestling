@@ -155,6 +155,14 @@ async def get_table_data_recursive(table_id: str):
     if not table_config:
         return {}
 
+    # IDs for frontend-calculated fields and metrics, based on subsidiaryTemplate.js
+    calculated_field_ids = {1003, 1004, 1005}
+    calculated_metric_ids = {
+        7, 18, 25, 28, 29, 32, 35, 36, 40, 42, 62, 63, 65, 68, 75, 76, 77, 78, 79, 80, 81, 
+        82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 96, 98, 100, 102, 104, 106, 
+        108, 110, 112, 115
+    }
+
     # Base Case: If not a summary table, read the file directly.
     if table_config.get("type") != "summary" or not table_config.get("subsidiaries"):
         file_path = SUBMISSIONS_DIR / f"{table_id}.json"
@@ -189,6 +197,8 @@ async def get_table_data_recursive(table_id: str):
                     aggregated_payload["table"]["name"] = table_config.get("name")
                 
                 for row in aggregated_payload.get("tableData", []):
+                    # Zero out all numerical values. Frontend will calculate formula fields.
+                    # Basic, non-excluded fields will be aggregated later.
                     if row.get("metricId") not in exclusion_set:
                         for cell in row.get("values", []):
                             if isinstance(cell.get("value"), (int, float)):
@@ -200,15 +210,23 @@ async def get_table_data_recursive(table_id: str):
 
             for agg_row in aggregated_payload.get("tableData", []):
                 metric_id = agg_row.get("metricId")
-                if not metric_id or agg_row.get("type") != "basic" or metric_id in exclusion_set:
+
+                # Skip aggregation for excluded rows and calculated rows
+                if not metric_id or metric_id in exclusion_set or metric_id in calculated_metric_ids:
                     continue
                 
                 if metric_id in sub_data_map:
                     sub_row = sub_data_map[metric_id]
                     sub_cell_map = {cell["fieldId"]: cell.get("value", 0) for cell in sub_row.get("values", []) if cell.get("fieldId")}
+                    
                     for agg_cell in agg_row.get("values", []):
                         field_id = agg_cell.get("fieldId")
-                        if field_id and isinstance(agg_cell.get("value"), (int, float)):
+                        
+                        # Skip aggregation for calculated fields
+                        if not field_id or field_id in calculated_field_ids:
+                            continue
+
+                        if isinstance(agg_cell.get("value"), (int, float)):
                             current_val = agg_cell.get("value", 0)
                             agg_cell["value"] = current_val + sub_cell_map.get(field_id, 0)
 
@@ -240,6 +258,7 @@ async def get_table_data_recursive(table_id: str):
             pass
 
     return {"submit": aggregated_payload} if aggregated_payload else {}
+
 
 @app.get("/data/table/{table_id}")
 async def get_table_data(table_id: str):
