@@ -60,11 +60,40 @@ def login(user_login: UserLogin):
         headers={"WWW-Authenticate": "Bearer"},
     )
 
+def _update_data_file(file_path: Path, key: str, payload: dict):
+    """
+    Atomically reads, updates, and writes data to a JSON file.
+    'key' can be 'temp' or 'submit'.
+    """
+    data = {}
+    if file_path.exists():
+        try:
+            with open(file_path, "r", encoding="utf-8") as f:
+                # Handle empty or invalid JSON file
+                content = f.read()
+                if content:
+                    data = json.loads(content)
+                if not isinstance(data, dict):
+                    data = {}
+        except (json.JSONDecodeError, IOError):
+            # If file is corrupted or unreadable, start fresh
+            data = {}
+
+    data[key] = payload
+
+    try:
+        with open(file_path, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=4)
+    except IOError as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to write data: {str(e)}"
+        )
+
 @app.post("/project/{project_id}/table/{table_id}/submit")
 async def submit_data(project_id: str, table_id: str, payload: dict = Body(...)):
     """
-    Receives submitted table data and saves it to a JSON file named after the table's name.
-    Overwrites the file if it already exists.
+    Receives final submitted data and saves it under the 'submit' key in a JSON file.
     """
     try:
         table_name = payload['table']['name']
@@ -77,20 +106,34 @@ async def submit_data(project_id: str, table_id: str, payload: dict = Body(...))
         
     file_path = SUBMISSIONS_DIR / f"{sanitized_name}.json"
     
+    _update_data_file(file_path, "submit", payload)
+    return {"message": f"Data for table '{table_name}' submitted successfully."}
+
+@app.post("/project/{project_id}/table/{table_id}/save_draft")
+async def save_draft(project_id: str, table_id: str, payload: dict = Body(...)):
+    """
+    Receives draft data and saves it under the 'temp' key in a JSON file.
+    """
     try:
-        with open(file_path, "w", encoding="utf-8") as f:
-            json.dump(payload, f, ensure_ascii=False, indent=4)
-        return {"message": f"Data for table '{table_name}' submitted and saved successfully."}
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to save data: {str(e)}"
-        )
+        table_name = payload['table']['name']
+    except KeyError:
+        raise HTTPException(status_code=400, detail="Payload must contain table name.")
+
+    sanitized_name = sanitize_filename(table_name)
+    if not sanitized_name:
+        raise HTTPException(status_code=400, detail="Invalid table name after sanitization.")
+        
+    file_path = SUBMISSIONS_DIR / f"{sanitized_name}.json"
+    
+    _update_data_file(file_path, "temp", payload)
+    return {"message": f"Draft for table '{table_name}' saved successfully."}
+
 
 @app.get("/data/table/{table_name}")
 async def get_table_data(table_name: str):
     """
-    Retrieves saved data for a given table name.
+    Retrieves saved data for a given table name, returning the whole object
+    with 'temp' and 'submit' keys. Returns an empty object if not found.
     """
     sanitized_name = sanitize_filename(table_name)
     if not sanitized_name:
@@ -99,17 +142,58 @@ async def get_table_data(table_name: str):
     file_path = SUBMISSIONS_DIR / f"{sanitized_name}.json"
 
     if not file_path.exists():
-        raise HTTPException(status_code=404, detail=f"No saved data found for table '{table_name}'.")
+        return {} # Return empty object instead of 404
 
     try:
         with open(file_path, "r", encoding="utf-8") as f:
             data = json.load(f)
         return data
+    except (json.JSONDecodeError, IOError):
+        # If file is corrupted or unreadable, treat as if it doesn't exist
+        return {}
     except Exception as e:
         raise HTTPException(
             status_code=500,
             detail=f"Error reading data file: {str(e)}"
         )
+
+@app.post("/project/{project_id}/table_statuses")
+async def get_table_statuses(project_id: str, table_names: list[str] = Body(...)):
+    """
+    Receives a list of table names and returns their statuses.
+    """
+    statuses = {}
+    for name in table_names:
+        sanitized_name = sanitize_filename(name)
+        if not sanitized_name:
+            continue
+
+        file_path = SUBMISSIONS_DIR / f"{sanitized_name}.json"
+        
+        status_info = {"status": "new", "submittedAt": None}
+
+        if file_path.exists():
+            try:
+                with open(file_path, "r", encoding="utf-8") as f:
+                    content = f.read()
+                    if not content: # Handle empty file
+                        statuses[name] = status_info
+                        continue
+                    data = json.loads(content)
+                
+                if data.get("submit"):
+                    status_info["status"] = "submitted"
+                    status_info["submittedAt"] = data["submit"].get("submittedAt")
+                    status_info["submittedBy"] = data["submit"].get("submittedBy") # <-- 新增行
+                elif data.get("temp"):
+                    status_info["status"] = "saved"
+            except (json.JSONDecodeError, IOError):
+                # On error, report as 'new'
+                pass
+        
+        statuses[name] = status_info
+
+    return statuses
 
 
 @app.get("/")

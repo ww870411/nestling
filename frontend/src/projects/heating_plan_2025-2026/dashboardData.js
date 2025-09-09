@@ -5,6 +5,7 @@ export const dashboardConfig = {
     { prop: 'name', label: '报表名称' },
     { prop: 'status', label: '填报状态', width: 120, type: 'status' },
     { prop: 'submittedAt', label: '提交时间', width: 180, type: 'datetime' },
+    { prop: 'submittedBy', label: '提交人', width: 120, type: 'submitter' },
     { prop: 'actions', label: '操作', width: 120, type: 'actions' }
   ],
   statusMap: {

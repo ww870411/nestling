@@ -91,9 +91,9 @@
         </el-radio-group>
       </div>
       <div>
-        <el-button @click="handleLoadFromServer" :icon="Download">加载数据</el-button>
         <el-button v-if="currentTableActions.save" @click="handleSave">暂存</el-button>
         <el-button v-if="currentTableActions.save" @click="handleLoadDraft">取回暂存</el-button>
+        <el-button @click="handleLoadFromServer" :icon="Download">加载已提交数据</el-button>
         <el-button v-if="currentTableActions.submit" type="primary" :disabled="hasHardErrors" @click="handleSubmit">提交</el-button>
       </div>
     </div>
@@ -124,7 +124,7 @@ import { Close, Loading, Download } from '@element-plus/icons-vue'; // Import Do
 import * as XLSX from 'xlsx';
 import { validationSchemes, getCellState } from '@/projects/heating_plan_2025-2026/tableRules.js';
 import { validationRules } from '@/utils/validator.js';
-import { formatValue } from '@/utils/formatter.js';
+import { formatValue, formatDateTime } from '@/utils/formatter.js';
 
 import { useAuthStore } from '@/stores/authStore';
 
@@ -186,7 +186,7 @@ const processedFieldConfig = computed(() => {
           label: groupName,
           children: [],
           // A group doesn't have a single ID, so we can generate one for the key
-          id: `group-${groupName}`, 
+          id: `group-${groupName}`,
         };
         groups.set(groupName, newGroup);
         result.push(newGroup);
@@ -301,7 +301,7 @@ const calculateAll = () => {
     try {
       const funcBody = field.formula.replace(/VAL\((\d+)\)/g, (match, id) => `valResolver(${id})`);
       const result = new Function('valResolver', `return ${funcBody}`)(valResolver);
-      
+
       // Apply the result to all writable columns in the calculated row
       fieldConfig.value.forEach(col => {
         if (getCellState(targetRow, col, currentTableProperties) === 'WRITABLE') {
@@ -370,7 +370,7 @@ const runValidation = ({ level = 'hard' } = {}) => {
     // 2. Check for metric-specific override rules
     if (overrideRule === null) {
       // Validation is disabled for this metric
-      return; 
+      return;
     }
 
     const baseRules = baseScheme[row.type] || {};
@@ -380,7 +380,7 @@ const runValidation = ({ level = 'hard' } = {}) => {
     if (finalValidation.hard) {
       fieldConfig.value.forEach(field => {
         if (field.type !== 'basic' || field.component !== 'input') return;
-        
+
         const value = row.values[field.id];
         const key = `${metricId}-${field.id}`;
         let hasError = false;
@@ -471,12 +471,12 @@ const getCellStyle = (row, field) => {
   const state = getCellState(row, field, currentTableProperties);
 
   // 仅在数值列应用加粗样式
-  const isValueColumn = field.component !== 'label'; 
+  const isValueColumn = field.component !== 'label';
 
   if (isValueColumn && (state === 'READONLY_CALCULATED' || row.type === 'calculated')) {
     return { ...row.style, fontWeight: 'bold' };
   }
-  
+
   return row.style;
 };
 
@@ -493,7 +493,7 @@ const getCellClass = ({ row, column }) => {
   if (getCellState(row, field, currentTableProperties) !== 'WRITABLE') {
     return 'is-readonly-shadow';
   }
-  
+
   return '';
 };
 
@@ -503,7 +503,7 @@ const getErrorLabel = (key) => {
     const fieldId = parseInt(parts[1]);
 
     const row = tableData.value.find(r => r.metricId === metricId);
-    
+
     if (!row) return '未知错误';
 
     if (parts[1] === 'soft') {
@@ -512,91 +512,57 @@ const getErrorLabel = (key) => {
 
     const field = fieldConfig.value.find(f => f.id === fieldId);
     if (!field) return '未知错误';
-    
+
     return `${row.values[1001]} - ${field.label}`;
 };
 
-/**
- * 新功能: 显示已提交的解释说明
- * 从 localStorage 加载数据，并准备用于对话框显示
- */
-const handleShowExplanations = () => {
-  const savedExplanations = localStorage.getItem(`explanations-${route.params.tableId}`);
-  if (!savedExplanations) {
-    ElMessage.info('当前报表没有已保存的解释说明。');
-    return;
-  }
-  
-  const parsedExplanations = JSON.parse(savedExplanations);
-  if (Object.keys(parsedExplanations).length === 0) {
-    ElMessage.info('当前报表没有已保存的解释说明。');
-    return;
-  }
+const handleShowExplanations = async () => {
+  const tableName = pageTitle.value;
+  if (!tableName) return;
 
-  const explanationsList = Object.entries(parsedExplanations).map(([key, data]) => ({
-    label: getErrorLabel(key),
-    message: data.message, // 读取保存的错误信息
-    content: data.content,
-  }));
+  try {
+    const response = await fetch(`/api/data/table/${encodeURIComponent(tableName)}`);
+    if (!response.ok) throw new Error('Failed to fetch data for explanations.');
+    
+    const data = await response.json();
+    if (!data || !data.submit || !data.submit.tableData) {
+      ElMessage.info('尚未提交任何解释说明。');
+      return;
+    }
 
-  submittedExplanations.value = explanationsList;
-  isExplanationsDialogVisible.value = true;
+    const explanationsList = [];
+    data.submit.tableData.forEach(row => {
+      row.values.forEach(cell => {
+        if (cell.explanation) {
+          explanationsList.push({
+            label: getErrorLabel(cell.explanation.ruleKey),
+            message: cell.explanation.message,
+            content: cell.explanation.content,
+          });
+        }
+      });
+    });
+
+    if (explanationsList.length === 0) {
+      ElMessage.info('当前报表没有已提交的解释说明。');
+      return;
+    }
+
+    submittedExplanations.value = explanationsList;
+    isExplanationsDialogVisible.value = true;
+
+  } catch (error) {
+    console.error('Error loading explanations:', error);
+    ElMessage.error('加载解释说明失败。');
+  }
 };
 
 // --- Actions (Save, Load, Submit, Export) ---
-const handleSave = () => {
-  const draftData = {};
-  tableData.value.forEach(row => {
-    if (row.type !== 'basic') return;
-    draftData[row.metricId] = {};
-    fieldConfig.value.forEach(field => {
-      if (field.component === 'input') {
-        draftData[row.metricId][field.id] = row.values[field.id];
-      }
-    });
-  });
-  localStorage.setItem(`data-draft-${route.params.tableId}`, JSON.stringify(draftData));
-  
-  // Set status for dashboard
-  localStorage.setItem(`status-${route.params.tableId}`, 'saved');
 
-  ElMessage.success('草稿已暂存');
-};
-
-const handleLoadDraft = () => {
-  const savedData = localStorage.getItem(`data-draft-${route.params.tableId}`);
-  if (!savedData) {
-    ElMessage.warning('没有找到可用的暂存数据');
-    return;
-  }
-  const draftData = JSON.parse(savedData);
-  tableData.value.forEach(row => {
-    if (draftData[row.metricId]) {
-      Object.keys(draftData[row.metricId]).forEach(fieldId => {
-        row.values[fieldId] = draftData[row.metricId][fieldId];
-      });
-    }
-  });
-  calculateAll();
-  ElMessage.success('暂存数据已成功拉取');
-};
-
-const handleSubmit = async () => {
-  runValidation({ level: 'all' });
-  if (hasHardErrors.value) {
-    ElMessage.error('提交失败，请修正所有红色错误后再试。');
-    return;
-  }
-  
-  if (softErrorsForDisplay.value.length > 0) {
-    isErrorPanelVisible.value = true;
-    const allExplained = softErrorsForDisplay.value.every(([key]) => explanations.value[key]?.trim().length >= 10);
-    if (!allExplained) {
-        ElMessage.warning('检测到软性错误/警告，请为所有项目填写不少于10个字的说明后再提交。');
-        return;
-    }
-  }
-
+/**
+ * Helper function to create the data payload for submission or saving.
+ */
+const _createPayload = () => {
   // --- 组织要发送到后端的数据 ---
   const processedData = tableData.value.map(row => {
     const metricInfo = reportTemplate.value.find(m => m.id === row.metricId);
@@ -640,7 +606,7 @@ const handleSubmit = async () => {
     return newRow;
   });
 
-  const payload = {
+  return {
     submittedAt: new Date().toISOString(),
     table: {
       id: currentTableConfig.value?.id,
@@ -650,6 +616,106 @@ const handleSubmit = async () => {
     submittedBy: authStore.user, // 添加提交者信息
     tableData: processedData,
   };
+};
+
+/**
+ * Helper function to apply a given payload (from temp or submit) to the table.
+ */
+const _applyPayloadToTable = (payload) => {
+  if (!payload || !payload.tableData) {
+    ElMessage.info('没有可用于加载的数据。');
+    return;
+  }
+
+  const loadedDataMap = new Map(payload.tableData.map(m => [m.metricId, m]));
+
+  tableData.value.forEach(localRow => {
+    const loadedMetric = loadedDataMap.get(localRow.metricId);
+    if (loadedMetric) {
+      const loadedValuesMap = new Map(loadedMetric.values.map(v => [v.fieldId, v.value]));
+      Object.keys(localRow.values).forEach(fieldId => {
+        const numericFieldId = parseInt(fieldId);
+        if (loadedValuesMap.has(numericFieldId)) {
+          localRow.values[numericFieldId] = loadedValuesMap.get(numericFieldId);
+        }
+      });
+    }
+  });
+
+  calculateAll(); // Recalculate formulas and validations
+  ElMessage.success('数据已成功加载！');
+};
+
+const handleSave = async () => {
+  // 1. Save to localStorage for quick access
+  const draftData = {};
+  tableData.value.forEach(row => {
+    if (row.type !== 'basic') return;
+    draftData[row.metricId] = {};
+    fieldConfig.value.forEach(field => {
+      if (field.component === 'input') {
+        draftData[row.metricId][field.id] = row.values[field.id];
+      }
+    });
+  });
+  localStorage.setItem(`data-draft-${route.params.tableId}`, JSON.stringify(draftData));
+  
+  // 2. Set status for immediate UI feedback on dashboard
+  localStorage.setItem(`status-${route.params.tableId}`, 'saved');
+  ElMessage.success('草稿已暂存至本地浏览器。');
+
+  // 3. Silently back up to server
+  const payload = _createPayload();
+  try {
+    const projectId = route.params.projectId;
+    const tableId = route.params.tableId;
+    // Fire and forget
+    fetch(`/api/project/${projectId}/table/${tableId}/save_draft`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+  } catch (error) {
+    // Log silent backup error, but don't bother the user
+    console.error('Silent draft backup to server failed:', error);
+  }
+};
+
+const handleLoadDraft = () => {
+  const savedData = localStorage.getItem(`data-draft-${route.params.tableId}`);
+  if (!savedData) {
+    ElMessage.warning('没有找到可用的本地暂存数据');
+    return;
+  }
+  const draftData = JSON.parse(savedData);
+  tableData.value.forEach(row => {
+    if (draftData[row.metricId]) {
+      Object.keys(draftData[row.metricId]).forEach(fieldId => {
+        row.values[fieldId] = draftData[row.metricId][fieldId];
+      });
+    }
+  });
+  calculateAll();
+  ElMessage.success('本地暂存数据已成功拉取！');
+};
+
+const handleSubmit = async () => {
+  runValidation({ level: 'all' });
+  if (hasHardErrors.value) {
+    ElMessage.error('提交失败，请修正所有红色错误后再试。');
+    return;
+  }
+
+  if (softErrorsForDisplay.value.length > 0) {
+    isErrorPanelVisible.value = true;
+    const allExplained = softErrorsForDisplay.value.every(([key]) => explanations.value[key]?.trim().length >= 10);
+    if (!allExplained) {
+        ElMessage.warning('检测到软性错误/警告，请为所有项目填写不少于10个字的说明后再提交。');
+        return;
+    }
+  }
+
+  const payload = _createPayload();
 
   // --- 发送数据到后端 ---
   try {
@@ -667,20 +733,9 @@ const handleSubmit = async () => {
       throw new Error(errorData.detail || 'Backend submission failed');
     }
     
-    // --- 后端成功接收后，更新前端状态 (保留localStorage逻辑) ---
-    const explanationsToSave = {};
-    softErrorsForDisplay.value.forEach(([key, error]) => {
-      if (explanations.value[key]) {
-        explanationsToSave[key] = {
-          content: explanations.value[key],
-          message: error.message,
-        };
-      }
-    });
-
+    // For immediate UI feedback
     localStorage.setItem(`status-${route.params.tableId}`, 'submitted');
     localStorage.setItem(`submittedAt-${route.params.tableId}`, payload.submittedAt);
-    localStorage.setItem(`explanations-${route.params.tableId}`, JSON.stringify(explanationsToSave));
 
     ElMessage.success('数据已成功提交至服务器！');
     isErrorPanelVisible.value = false;
@@ -688,7 +743,6 @@ const handleSubmit = async () => {
   } catch (error) {
     console.error('Submission error:', error);
     ElMessage.error(`数据提交至后端失败: ${error.message}`);
-    return;
   }
 };
 
@@ -754,7 +808,7 @@ const handleExport = () => {
   ElMessage.success('导出成功！');
 };
 
-// --- NEW: Load data from server ---
+// --- Load submitted data from server ---
 const handleLoadFromServer = async () => {
   const tableName = pageTitle.value;
   if (!tableName) {
@@ -764,46 +818,22 @@ const handleLoadFromServer = async () => {
 
   try {
     const response = await fetch(`/api/data/table/${encodeURIComponent(tableName)}`);
-
-    if (response.status === 404) {
-      ElMessage.info('服务器上未找到该表格的已存数据。');
-      return;
-    }
-
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.detail || 'Failed to load data from server');
+      throw new Error('Failed to load data from server');
     }
 
-    const loadedPayload = await response.json();
-
-    // --- Transform and apply loaded data ---
-    const loadedDataMap = new Map(loadedPayload.tableData.map(m => [m.metricId, m]));
-
-    tableData.value.forEach(localRow => {
-      const loadedMetric = loadedDataMap.get(localRow.metricId);
-      if (loadedMetric) {
-        // Create a map of the loaded values for efficient lookup
-        const loadedValuesMap = new Map(loadedMetric.values.map(v => [v.fieldId, v.value]));
-        // Update the local row's values, preserving the reactive object
-        Object.keys(localRow.values).forEach(fieldId => {
-          const numericFieldId = parseInt(fieldId);
-          if (loadedValuesMap.has(numericFieldId)) {
-            localRow.values[numericFieldId] = loadedValuesMap.get(numericFieldId);
-          }
-        });
-      }
-    });
-
-    calculateAll(); // Recalculate formulas and validations
-    ElMessage.success('服务器数据加载成功！');
+    const data = await response.json();
+    if (data && data.submit) {
+      _applyPayloadToTable(data.submit);
+    } else {
+      ElMessage.info('服务器上没有找到该表格的已提交数据。');
+    }
 
   } catch (error) {
     console.error('Error loading data from server:', error);
     ElMessage.error(`从服务器加载数据失败: ${error.message}`);
   }
 };
-
 
 </script>
 

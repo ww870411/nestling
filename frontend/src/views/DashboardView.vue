@@ -2,7 +2,7 @@
   <div class="dashboard-container">
     <h2 class="dashboard-title">{{ config.title }}</h2>
     <div class="table-container">
-      <el-table :data="allReports" stripe style="width: 100%">
+      <el-table :data="allReports" stripe style="width: 100%" v-loading="isLoading">
         <template v-for="column in config.columns" :key="column.prop">
           <el-table-column :prop="column.prop" :label="column.label" :width="column.width">
             
@@ -17,6 +17,12 @@
               <!-- 时间列 -->
               <div v-else-if="column.type === 'datetime'">
                 <span v-if="row.status === 'submitted'">{{ formatDateTime(row.submittedAt) }}</span>
+                <span v-else></span>
+              </div>
+
+              <!-- 提交人列 -->
+              <div v-else-if="column.type === 'submitter'">
+                <span v-if="row.status === 'submitted'">{{ row.submittedBy?.username }}</span>
                 <span v-else></span>
               </div>
 
@@ -41,15 +47,17 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue';
-import { useRouter, useRoute } from 'vue-router'; // 引入 useRoute
+import { ref, computed, onMounted } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { useProjectStore } from '@/stores/projectStore';
 import { useAuthStore } from '@/stores/authStore';
 import { dashboardConfig } from '@/projects/heating_plan_2025-2026/dashboardData.js';
+import { formatDateTime } from '@/utils/formatter.js';
+import { ElMessage } from 'element-plus';
 
 const router = useRouter();
-const route = useRoute(); // 使用 useRoute
+const route = useRoute();
 const projectStore = useProjectStore();
 const authStore = useAuthStore();
 
@@ -58,6 +66,7 @@ const { accessibleUnits } = storeToRefs(authStore);
 
 const config = ref(dashboardConfig);
 const reportInfo = ref({});
+const isLoading = ref(false);
 
 // 将菜单数据和状态数据结合，并根据权限过滤
 const allReports = computed(() => {
@@ -68,49 +77,71 @@ const allReports = computed(() => {
       group.tables.map(table => ({
         ...table,
         groupName: group.name,
-        status: reportInfo.value[table.id]?.status || 'new',
-        submittedAt: reportInfo.value[table.id]?.submittedAt || null
+        // The key in reportInfo is the table's name
+        status: reportInfo.value[table.name]?.status || 'new',
+        submittedAt: reportInfo.value[table.name]?.submittedAt || null,
+        submittedBy: reportInfo.value[table.name]?.submittedBy || null
       }))
     );
 });
 
-// 从 localStorage 更新状态
-const updateReportInfo = () => {
-  const info = {};
-  for (let i = 0; i < localStorage.length; i++) {
-    const key = localStorage.key(i);
-    if (key.startsWith('status-')) {
-      const reportId = key.replace('status-', '');
-      if (!info[reportId]) info[reportId] = {};
-      info[reportId].status = localStorage.getItem(key);
-    } else if (key.startsWith('submittedAt-')) {
-      const reportId = key.replace('submittedAt-', '');
-      if (!info[reportId]) info[reportId] = {};
-      info[reportId].submittedAt = localStorage.getItem(key);
-    }
+// 从后端获取状态
+const fetchReportStatuses = async () => {
+  isLoading.value = true;
+  const projectId = route.params.projectId;
+  if (!projectId) {
+    isLoading.value = false;
+    return;
   }
-  reportInfo.value = info;
+
+  // 从菜单数据中收集所有表格的名称
+  const tableNames = menuData.value.flatMap(group => group.tables.map(t => t.name));
+
+  if (tableNames.length === 0) {
+    isLoading.value = false;
+    return;
+  }
+
+  try {
+    const response = await fetch(`/api/project/${projectId}/table_statuses`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(tableNames)
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch report statuses from server.');
+    }
+
+    const statuses = await response.json();
+    reportInfo.value = statuses;
+
+  } catch (error) {
+    console.error("Error fetching report statuses:", error);
+    ElMessage.error('无法从服务器加载报表状态。');
+  } finally {
+    isLoading.value = false;
+  }
 };
 
 onMounted(() => {
-  updateReportInfo();
-  window.addEventListener('storage', updateReportInfo);
-});
-
-onUnmounted(() => {
-  window.removeEventListener('storage', updateReportInfo);
+  // Ensure menuData is loaded before fetching statuses
+  if (menuData.value.length > 0) {
+    fetchReportStatuses();
+  } else {
+    // If menuData is not ready, watch it. This is a fallback.
+    const unwatch = projectStore.$subscribe((mutation, state) => {
+      if (state.menuData.length > 0) {
+        fetchReportStatuses();
+        unwatch(); // Stop watching once data is loaded
+      }
+    });
+  }
 });
 
 // 根据状态获取显示信息
 const getStatusInfo = (status) => {
   return config.value.statusMap[status] || config.value.statusMap.new;
-};
-
-// 格式化时间
-const formatDateTime = (isoString) => {
-  if (!isoString) return '';
-  const date = new Date(isoString);
-  return date.toLocaleString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
 };
 
 const goToReport = (reportId) => {

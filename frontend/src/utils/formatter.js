@@ -35,3 +35,44 @@ export function formatValue(value, format) {
       return value; // Return original value for unknown format types
   }
 }
+
+/**
+ * 将 ISO 格式的日期时间字符串或 Date 对象格式化为本地时间。
+ * @param {string | Date} isoString - ISO 8601 格式的日期时间字符串或 Date 对象。
+ * @param {string} format - 'full' (e.g., "2023-09-08 14:30:05") or 'date' (e.g., "2023-09-08")。
+ * @returns {string} 格式化后的本地时间字符串, 如果输入无效则返回空字符串。
+ */
+export function formatDateTime(isoString, format = 'full') {
+  if (!isoString) return '';
+
+  const date = new Date(isoString);
+  if (isNaN(date.getTime())) {
+    return ''; // Invalid date
+  }
+
+  const options = {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false, // Use 24-hour format
+  };
+
+  // For some reason, toLocaleString with options doesn't always produce the desired YYYY-MM-DD format.
+  // A manual approach is more reliable.
+  const year = date.getFullYear();
+  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  const day = date.getDate().toString().padStart(2, '0');
+  
+  if (format === 'date') {
+    return `${year}-${month}-${day}`;
+  }
+
+  const hours = date.getHours().toString().padStart(2, '0');
+  const minutes = date.getMinutes().toString().padStart(2, '0');
+  const seconds = date.getSeconds().toString().padStart(2, '0');
+
+  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+}
