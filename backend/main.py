@@ -156,7 +156,6 @@ async def get_table_data(table_id: str):
     if not table_config:
         raise HTTPException(status_code=404, detail="Table configuration not found.")
 
-    # If not a summary table, just read the file as before
     if table_config.get("type") != "summary" or not table_config.get("subsidiaries"):
         file_path = SUBMISSIONS_DIR / f"{table_id}.json"
         if not file_path.exists():
@@ -164,10 +163,9 @@ async def get_table_data(table_id: str):
         try:
             with open(file_path, "r", encoding="utf-8") as f:
                 return json.load(f)
-        except (json.JSONDecodeError, IOError):
+        except Exception:
             return {}
 
-    # --- Dynamic Aggregation for Summary Tables ---
     aggregated_payload = None
     subsidiary_ids = table_config.get("subsidiaries", [])
     exclusion_set = set(table_config.get("aggregationExclusions", []))
@@ -181,62 +179,67 @@ async def get_table_data(table_id: str):
             with open(sub_file_path, "r", encoding="utf-8") as f:
                 sub_content = json.load(f)
             
-            # Use submitted data preferably, otherwise temp data
             sub_data = sub_content.get("submit") or sub_content.get("temp")
-            if not sub_data or not sub_data.get("tableData"):
+            if not sub_data or not isinstance(sub_data.get("tableData"), list):
                 continue
 
-            # Initialize the aggregation payload with the structure of the first valid sub table
             if aggregated_payload is None:
                 aggregated_payload = copy.deepcopy(sub_data)
-                # Zero out all values that need to be aggregated
-                for row in aggregated_payload["tableData"]:
-                    if row["metricId"] not in exclusion_set:
-                        for cell in row["values"]:
-                            if isinstance(cell["value"], (int, float)):
+                aggregated_payload["submittedAt"] = None
+                aggregated_payload["submittedBy"] = None
+                if aggregated_payload.get("table"):
+                    aggregated_payload["table"]["id"] = table_config.get("id")
+                    aggregated_payload["table"]["name"] = table_config.get("name")
+                
+                for row in aggregated_payload.get("tableData", []):
+                    if row.get("metricId") not in exclusion_set:
+                        for cell in row.get("values", []):
+                            if isinstance(cell.get("value"), (int, float)):
                                 cell["value"] = 0
+                            if "explanation" in cell:
+                                del cell["explanation"]
             
-            # Create a map for quick lookup of metric data in the subsidiary
-            sub_data_map = {row["metricId"]: row for row in sub_data["tableData"]}
+            sub_data_map = {row["metricId"]: row for row in sub_data.get("tableData", []) if row.get("metricId")}
 
-            # Aggregate values
-            for agg_row in aggregated_payload["tableData"]:
-                metric_id = agg_row["metricId"]
-                if metric_id in exclusion_set:
+            for agg_row in aggregated_payload.get("tableData", []):
+                metric_id = agg_row.get("metricId")
+                if not metric_id or agg_row.get("type") != "basic" or metric_id in exclusion_set:
                     continue
                 
                 if metric_id in sub_data_map:
                     sub_row = sub_data_map[metric_id]
-                    # Create a map for cell values for quick lookup
-                    sub_cell_map = {cell["fieldId"]: cell["value"] for cell in sub_row["values"]}
-                    for agg_cell in agg_row["values"]:
-                        field_id = agg_cell["fieldId"]
-                        if isinstance(agg_cell["value"], (int, float)):
-                            agg_cell["value"] += sub_cell_map.get(field_id, 0)
+                    sub_cell_map = {cell["fieldId"]: cell.get("value", 0) for cell in sub_row.get("values", []) if cell.get("fieldId")}
+                    for agg_cell in agg_row.get("values", []):
+                        field_id = agg_cell.get("fieldId")
+                        if field_id and isinstance(agg_cell.get("value"), (int, float)):
+                            current_val = agg_cell.get("value", 0)
+                            agg_cell["value"] = current_val + sub_cell_map.get(field_id, 0)
 
-        except (json.JSONDecodeError, IOError):
-            continue # Skip corrupted or unreadable files
+        except Exception:
+            continue
 
-    # --- Merge with the summary table's own data for excluded fields ---
     summary_file_path = SUBMISSIONS_DIR / f"{table_id}.json"
     if summary_file_path.exists() and aggregated_payload is not None:
         try:
             with open(summary_file_path, "r", encoding="utf-8") as f:
                 summary_content = json.load(f)
             summary_data = summary_content.get("submit") or summary_content.get("temp")
-            if summary_data and summary_data.get("tableData"):
-                summary_data_map = {row["metricId"]: row for row in summary_data["tableData"]}
-                for agg_row in aggregated_payload["tableData"]:
-                    metric_id = agg_row["metricId"]
-                    if metric_id in exclusion_set and metric_id in summary_data_map:
-                        # Replace the whole row's values with the one from the summary file
-                        summary_row_cells = {cell["fieldId"]: cell for cell in summary_data_map[metric_id]["values"]}
-                        for i, agg_cell in enumerate(agg_row["values"]):
-                            if agg_cell["fieldId"] in summary_row_cells:
-                                agg_row["values"][i] = summary_row_cells[agg_cell["fieldId"]]
+            if summary_data and isinstance(summary_data.get("tableData"), list):
+                aggregated_payload["submittedAt"] = summary_data.get("submittedAt")
+                aggregated_payload["submittedBy"] = summary_data.get("submittedBy")
 
-        except (json.JSONDecodeError, IOError):
-            pass # Ignore if summary file is corrupted
+                summary_data_map = {row["metricId"]: row for row in summary_data.get("tableData", []) if row.get("metricId")}
+                for agg_row in aggregated_payload.get("tableData", []):
+                    metric_id = agg_row.get("metricId")
+                    if metric_id and metric_id in exclusion_set and metric_id in summary_data_map:
+                        summary_row_cells = {cell["fieldId"]: cell for cell in summary_data_map[metric_id].get("values", []) if cell.get("fieldId")}
+                        for i, agg_cell in enumerate(agg_row.get("values", [])):
+                            field_id = agg_cell.get("fieldId")
+                            if field_id and field_id in summary_row_cells:
+                                agg_row["values"][i] = summary_row_cells[field_id]
+
+        except Exception:
+            pass
 
     return {"submit": aggregated_payload} if aggregated_payload else {}
 
@@ -262,7 +265,7 @@ async def get_table_statuses(project_id: str, table_ids: list[str] = Body(...)):
                     status_info["submittedBy"] = data["submit"].get("submittedBy")
                 elif data.get("temp"):
                     status_info["status"] = "saved"
-            except (json.JSONDecodeError, IOError):
+            except Exception:
                 pass
         
         statuses[table_id] = status_info

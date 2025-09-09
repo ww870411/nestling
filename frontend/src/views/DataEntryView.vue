@@ -279,73 +279,56 @@ const initializeTableData = () => {
 
   tableData.value = data;
 
-  // If it's a summary table, load and aggregate data
+  // For summary tables, automatically fetch the fully aggregated data from the backend.
+  // For subsidiary tables, just present a blank, calculated form.
   if (currentTableConfig.value?.type === 'summary') {
-    loadAndAggregateSubsidiaryData();
+    _fetchDataFromServer(true); // true for silent mode
   } else {
     calculateAll();
   }
 };
 
-const loadAndAggregateSubsidiaryData = async () => {
-  isLoading.value = true;
-  const subsidiaryIds = currentTableConfig.value?.subsidiaries || [];
-  if (subsidiaryIds.length === 0) {
-    isLoading.value = false;
-    calculateAll();
+/**
+ * Core logic to fetch data from the server for the current table.
+ * The backend handles aggregation for summary tables.
+ * @param {boolean} silent - If true, no success/info messages will be shown.
+ */
+const _fetchDataFromServer = async (silent = false) => {
+  const tableId = route.params.tableId;
+  if (!tableId) {
+    if (!silent) ElMessage.error('无法获取当前表格ID。');
     return;
   }
 
+  isLoading.value = true;
   try {
-    const fetchPromises = subsidiaryIds.map(id => 
-      fetch(`/api/data/table/${id}`).then(res => res.json())
-    );
-    const results = await Promise.all(fetchPromises);
+    const response = await fetch(`/api/data/table/${tableId}`);
+    if (!response.ok) {
+      throw new Error('Failed to load data from server');
+    }
 
-    // Reset current table data to 0 before summing
-    tableData.value.forEach(row => {
-      fieldConfig.value.forEach(field => {
-        if (field.type === 'basic' && field.component === 'input') {
-          row.values[field.id] = 0;
-        }
-      });
-    });
+    const data = await response.json();
+    // Use submitted data first, fallback to temp
+    const payload = data.submit || data.temp;
 
-    const exclusionSet = new Set(currentTableConfig.value?.aggregationExclusions || []);
-
-    results.forEach(subData => {
-      const dataToUse = subData.submit || subData.temp;
-      if (!dataToUse || !dataToUse.tableData) return;
-
-      const subDataMap = new Map(dataToUse.tableData.map(m => [m.metricId, m]));
-
-      tableData.value.forEach(summaryRow => {
-        // Skip aggregation for excluded metrics
-        if (exclusionSet.has(summaryRow.metricId)) return;
-
-        const subMetric = subDataMap.get(summaryRow.metricId);
-        if (subMetric) {
-          const subValuesMap = new Map(subMetric.values.map(v => [v.fieldId, v.value]));
-          Object.keys(summaryRow.values).forEach(fieldIdStr => {
-            const fieldId = parseInt(fieldIdStr);
-            const field = fieldConfig.value.find(f => f.id === fieldId);
-            // Only sum up basic input fields
-            if (field && field.type === 'basic' && field.component === 'input') {
-              const subValue = parseFloat(subValuesMap.get(fieldId)) || 0;
-              summaryRow.values[fieldId] = (parseFloat(summaryRow.values[fieldId]) || 0) + subValue;
-            }
-          });
-        }
-      });
-    });
+    if (payload) {
+      _applyPayloadToTable(payload);
+      if (!silent) ElMessage.success('数据已成功加载！');
+    } else {
+      if (!silent) ElMessage.info('服务器上没有找到该表格的已提交数据。');
+    }
 
   } catch (error) {
-    console.error("Error during subsidiary data aggregation:", error);
-    ElMessage.error('加载或汇总分表数据时出错。');
+    console.error('Error loading data from server:', error);
+    if (!silent) ElMessage.error(`从服务器加载数据失败: ${error.message}`);
   } finally {
-    calculateAll();
     isLoading.value = false;
   }
+};
+
+// --- Load submitted data from server ---
+const handleLoadFromServer = async () => {
+  _fetchDataFromServer(false);
 };
 
 const calculateAll = () => {
@@ -724,6 +707,11 @@ const _applyPayloadToTable = (payload) => {
   const loadedDataMap = new Map(payload.tableData.map(m => [m.metricId, m]));
 
   tableData.value.forEach(localRow => {
+    // Only apply loaded data to 'basic' rows. 'calculated' rows will be re-computed.
+    if (localRow.type !== 'basic') {
+      return; // Skip calculated rows
+    }
+
     const loadedMetric = loadedDataMap.get(localRow.metricId);
     if (loadedMetric) {
       const loadedValuesMap = new Map(loadedMetric.values.map(v => [v.fieldId, v.value]));
@@ -902,32 +890,7 @@ const handleExport = () => {
   ElMessage.success('导出成功！');
 };
 
-// --- Load submitted data from server ---
-const handleLoadFromServer = async () => {
-  const tableId = route.params.tableId;
-  if (!tableId) {
-    ElMessage.error('无法获取当前表格ID。');
-    return;
-  }
 
-  try {
-    const response = await fetch(`/api/data/table/${tableId}`);
-    if (!response.ok) {
-      throw new Error('Failed to load data from server');
-    }
-
-    const data = await response.json();
-    if (data && data.submit) {
-      _applyPayloadToTable(data.submit);
-    } else {
-      ElMessage.info('服务器上没有找到该表格的已提交数据。');
-    }
-
-  } catch (error) {
-    console.error('Error loading data from server:', error);
-    ElMessage.error(`从服务器加载数据失败: ${error.message}`);
-  }
-};
 
 </script>
 

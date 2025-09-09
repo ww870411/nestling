@@ -18,7 +18,12 @@ export const getCellState = (row, field, tableConfig) => {
     return 'READONLY_DISPLAY';
   }
 
-  // 规则 0: 如果是汇总表，且当前行不在排除列表里，则所有基础输入框都只读 (最高优先级)
+  // 规则 1: 计算类型的行或列，永远是只读计算状态 (最高优先级)
+  if (row.type === 'calculated' || field.type === 'calculated') {
+    return 'READONLY_CALCULATED';
+  }
+
+  // 规则 2: 在汇总表中，非排除的指标行，其输入单元格是只读的汇总态
   if (tableConfig?.type === 'summary') {
     const isExcluded = tableConfig.aggregationExclusions?.includes(row.metricId);
     if (!isExcluded && field.component === 'input') {
@@ -26,40 +31,35 @@ export const getCellState = (row, field, tableConfig) => {
     }
   }
 
-  // 规则 1: display类型的列永远不可写
+  // 规则 3: display类型的列永远不可写
   if (field.component === 'display') {
     return 'READONLY_DISPLAY';
-  }
-
-  // 规则 2: 模板中预定义的计算行，永远是计算状态
-  if (row.type === 'calculated') {
-    return 'READONLY_CALCULATED';
   }
 
   const required = row.requiredProperties;
   const tableProperties = tableConfig?.properties || {};
 
-  // 规则 3: 检查行内定义的 requiredProperties
+  // 规则 4: 检查行内定义的 requiredProperties (已废弃，但保留兼容)
   if (required && Object.keys(required).length > 0) {
     for (const key in required) {
       const requiredValues = required[key];
       const tableValues = tableProperties[key] || [];
       if (requiredValues.length > 0 && tableValues.length === 0) {
-        return 'READONLY_CALCULATED'; // Should be calculated from other tables
+        return 'READONLY_CALCULATED';
       }
       const match = requiredValues.some(val => tableValues.includes(val));
       if (!match) {
-        return 'READONLY_CALCULATED'; // Should be calculated from other tables
+        return 'READONLY_CALCULATED';
       }
     }
   }
 
-  // 规则 4: 默认可写情况
+  // 规则 5: 默认可写情况
   if (field.component === 'input') {
     return 'WRITABLE';
   }
 
-  // 规则 5: 特殊情况 - 同期值可编辑
+  // 规则 6: 特殊情况 - 同期值可编辑
   if (row.samePeriodEditable && field.name && field.name.endsWith('.samePeriod')) {
     return 'WRITABLE';
   }
