@@ -4,7 +4,7 @@
 
     <div class="content-wrapper">
       <div class="main-content">
-        <div v-if="projectStore.isLoading" class="loading-indicator">
+        <div v-if="projectStore.isLoading || isLoading" class="loading-indicator">
           <el-icon class="is-loading" :size="26"><Loading /></el-icon>
           <p>正在加载数据...</p>
         </div>
@@ -25,7 +25,7 @@
                   :width="childField.width * zoomLevel / 100"
                   :fixed="childField.fixed">
                   <template #default="{ row }">
-                    <div v-if="getCellState(row, childField, currentTableProperties) === 'WRITABLE'" class="cell-content">
+                    <div v-if="getCellState(row, childField, currentTableConfig) === 'WRITABLE'" class="cell-content">
                       <el-input 
                         v-model="row.values[childField.id]"
                         @blur="handleInputBlur(row, childField.id)" 
@@ -45,7 +45,7 @@
                 :width="field.width * zoomLevel / 100" 
                 :fixed="field.fixed">
                 <template #default="{ row }">
-                  <div v-if="getCellState(row, field, currentTableProperties) === 'WRITABLE'" class="cell-content">
+                  <div v-if="getCellState(row, field, currentTableConfig) === 'WRITABLE'" class="cell-content">
                     <el-input 
                       v-model="row.values[field.id]"
                       @blur="handleInputBlur(row, field.id)" 
@@ -141,6 +141,7 @@ const explanations = ref({});
 const isErrorPanelVisible = ref(false);
 const panelWidth = ref(300);
 const zoomLevel = ref(100);
+const isLoading = ref(false);
 
 // --- Explanations Feature State ---
 const isExplanationsDialogVisible = ref(false);
@@ -260,6 +261,7 @@ const initializeTableData = () => {
       samePeriodEditable: metric.samePeriodEditable, // Pass editable flag to row
       requiredProperties: metric.requiredProperties, // Pass required properties to row
       columnFormulaOverrides: metric.columnFormulaOverrides, // Pass overrides
+      aggregationExclusions: currentTableConfig.value?.aggregationExclusions, // Pass aggregation exclusions
       values: {},
     };
 
@@ -276,7 +278,80 @@ const initializeTableData = () => {
   });
 
   tableData.value = data;
-  calculateAll();
+
+  // If it's a summary table, load and aggregate data
+  if (currentTableConfig.value?.type === 'summary') {
+    loadAndAggregateSubsidiaryData();
+  } else {
+    calculateAll();
+  }
+};
+
+const loadAndAggregateSubsidiaryData = async () => {
+  isLoading.value = true;
+  const subsidiaryIds = currentTableConfig.value?.subsidiaries || [];
+  if (subsidiaryIds.length === 0) {
+    isLoading.value = false;
+    calculateAll();
+    return;
+  }
+
+  const allTables = menuData.value.flatMap(group => group.tables);
+  const subsidiaryNames = subsidiaryIds.map(id => {
+    const table = allTables.find(t => t.id === id);
+    return table ? table.name : null;
+  }).filter(Boolean);
+
+  try {
+    const fetchPromises = subsidiaryNames.map(name => 
+      fetch(`/api/data/table/${encodeURIComponent(name)}`).then(res => res.json())
+    );
+    const results = await Promise.all(fetchPromises);
+
+    // Reset current table data to 0 before summing
+    tableData.value.forEach(row => {
+      fieldConfig.value.forEach(field => {
+        if (field.type === 'basic' && field.component === 'input') {
+          row.values[field.id] = 0;
+        }
+      });
+    });
+
+    const exclusionSet = new Set(currentTableConfig.value?.aggregationExclusions || []);
+
+    results.forEach(subData => {
+      const dataToUse = subData.submit || subData.temp;
+      if (!dataToUse || !dataToUse.tableData) return;
+
+      const subDataMap = new Map(dataToUse.tableData.map(m => [m.metricId, m]));
+
+      tableData.value.forEach(summaryRow => {
+        // Skip aggregation for excluded metrics
+        if (exclusionSet.has(summaryRow.metricId)) return;
+
+        const subMetric = subDataMap.get(summaryRow.metricId);
+        if (subMetric) {
+          const subValuesMap = new Map(subMetric.values.map(v => [v.fieldId, v.value]));
+          Object.keys(summaryRow.values).forEach(fieldIdStr => {
+            const fieldId = parseInt(fieldIdStr);
+            const field = fieldConfig.value.find(f => f.id === fieldId);
+            // Only sum up basic input fields
+            if (field && field.type === 'basic' && field.component === 'input') {
+              const subValue = parseFloat(subValuesMap.get(fieldId)) || 0;
+              summaryRow.values[fieldId] = (parseFloat(summaryRow.values[fieldId]) || 0) + subValue;
+            }
+          });
+        }
+      });
+    });
+
+  } catch (error) {
+    console.error("Error during subsidiary data aggregation:", error);
+    ElMessage.error('加载或汇总分表数据时出错。');
+  } finally {
+    calculateAll();
+    isLoading.value = false;
+  }
 };
 
 const calculateAll = () => {
@@ -286,33 +361,29 @@ const calculateAll = () => {
 
   // --- 行内计算 (Row-level formulas) ---
   const rowCalculatedFields = reportTemplate.value.filter(f => f.type === 'calculated' && f.formula);
-  rowCalculatedFields.forEach(field => {
-    const targetRow = getRowByMetricId(field.id);
+  const valueColumns = fieldConfig.value.filter(fc => fc.component === 'input' || fc.component === 'display');
+
+  rowCalculatedFields.forEach(metricToCalculate => {
+    const targetRow = getRowByMetricId(metricToCalculate.id);
     if (!targetRow) return;
 
-    const valResolver = (metricId) => {
-      const sourceRow = getRowByMetricId(metricId);
-      // For row-level formulas, we assume they depend on the main input columns.
-      // This might need to be more robust if formulas can span across different column types.
-      const firstInputCol = fieldConfig.value.find(fc => fc.component === 'input');
-      const rawValue = sourceRow && firstInputCol ? sourceRow.values[firstInputCol.id] : 0;
-      return parseFloat(rawValue) || 0;
-    };
+    valueColumns.forEach(col => {
+      if (getCellState(targetRow, col, currentTableConfig.value) !== 'READONLY_CALCULATED') return;
 
-    try {
-      const funcBody = field.formula.replace(/VAL\((\d+)\)/g, (match, id) => `valResolver(${id})`);
-      const result = new Function('valResolver', `return ${funcBody}`)(valResolver);
+      const valResolver = (sourceMetricId) => {
+        const sourceRow = getRowByMetricId(sourceMetricId);
+        return sourceRow ? (parseFloat(sourceRow.values[col.id]) || 0) : 0;
+      };
 
-      // Apply the result to all writable columns in the calculated row
-      fieldConfig.value.forEach(col => {
-        if (getCellState(targetRow, col, currentTableProperties) === 'WRITABLE') {
-            targetRow.values[col.id] = parseFloat(result.toFixed(2));
-        }
-      });
-
-    } catch (e) {
-      console.error(`Error calculating row formula for metric ${field.id}:`, e);
-    }
+      try {
+        const funcBody = metricToCalculate.formula.replace(/VAL\((\d+)\)/g, (match, id) => `valResolver(${id})`);
+        const result = new Function('valResolver', `return ${funcBody}`)(valResolver);
+        targetRow.values[col.id] = parseFloat(result.toFixed(2));
+      } catch (e) {
+        // console.error(`Error calculating row formula for metric ${metricToCalculate.id} in column ${col.name}:`, e);
+        targetRow.values[col.id] = NaN;
+      }
+    });
   });
 
   // --- 列内计算 (Column-level formulas) ---
@@ -323,7 +394,6 @@ const calculateAll = () => {
     colCalculatedFields.forEach(field => {
       const valResolver = (columnId) => parseFloat(row.values[columnId]) || 0;
       
-      // Check for a metric-specific override for the current column
       let formulaToUse = field.formula;
       if (metricDef?.columnFormulaOverrides?.[field.name]) {
         formulaToUse = metricDef.columnFormulaOverrides[field.name];
@@ -346,7 +416,6 @@ const calculateAll = () => {
           const lastId = ids.length > 0 ? ids[ids.length - 1] : null;
           result = lastId ? valResolver(lastId) : 0;
         } else {
-          // Default handler for SUM and other formulas like VAL(id1)+VAL(id2)
           const funcBody = formulaToUse.replace(/VAL\((\d+)\)/g, (match, id) => `valResolver(${id})`);
           result = new Function('valResolver', `return ${funcBody}`)(valResolver);
         }
@@ -472,11 +541,10 @@ const runValidation = ({ level = 'hard' } = {}) => {
 
 
 // --- Watchers ---
-watch(reportTemplate, initializeTableData, { deep: true, immediate: true });
-
-watch(() => route.params.tableId, () => {
+watch(currentTableConfig, () => {
   initializeTableData();
-}, { immediate: true });
+}, { deep: true, immediate: true });
+
 
 const handleInputBlur = (row, fieldId) => {
   calculateAll();
@@ -496,7 +564,7 @@ const startResize = (event) => {
 // --- Display & Class Logic ---
 
 const getCellStyle = (row, field) => {
-  const state = getCellState(row, field, currentTableProperties);
+  const state = getCellState(row, field, currentTableConfig.value);
 
   // 仅在数值列应用加粗样式
   const isValueColumn = field.component !== 'label';
@@ -518,7 +586,11 @@ const getCellClass = ({ row, column }) => {
     return 'is-error';
   }
 
-  if (getCellState(row, field, currentTableProperties) !== 'WRITABLE') {
+  const cellState = getCellState(row, field, currentTableConfig.value);
+  if (cellState === 'READONLY_AGGREGATED') {
+    return 'is-readonly-aggregated';
+  }
+  if (cellState !== 'WRITABLE') {
     return 'is-readonly-shadow';
   }
 
@@ -874,6 +946,7 @@ const handleLoadFromServer = async () => {
 .is-error .cell-content { box-shadow: 0 0 0 1px #f56c6c inset !important; border-radius: 4px; }
 .is-warning .el-input__wrapper, .is-warning .cell-content { box-shadow: 0 0 0 1px #e6a23c inset !important; border-radius: 4px; }
 .is-readonly-shadow { background-color: #fafafa; box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.05); }
+.is-readonly-aggregated { background-color: #f0f9eb; }
 .loading-indicator, .no-data-message { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; font-size: 16px; color: #606266; }
 .loading-indicator .el-icon { margin-bottom: 10px; }
 </style>

@@ -10,32 +10,40 @@
  * 判断一个单元格的可写状态
  * @param {object} row - 当前行的数据对象
  * @param {object} field - 当前列的配置对象
- * @param {object} tableProperties - 当前表格的属性对象
- * @returns {'WRITABLE' | 'READONLY_CALCULATED' | 'READONLY_DISPLAY'} - 返回单元格的状态
+ * @param {object} tableConfig - 当前表格的完整配置对象 from menu.js
+ * @returns {'WRITABLE' | 'READONLY_CALCULATED' | 'READONLY_DISPLAY' | 'READONLY_AGGREGATED'} - 返回单元格的状态
  */
-export const getCellState = (row, field, tableProperties) => {
+export const getCellState = (row, field, tableConfig) => {
   if (!row || !field) {
     return 'READONLY_DISPLAY';
   }
 
-  // 规则1: display类型的列永远不可写 (最高优先级)
+  // 规则 0: 如果是汇总表，且当前行不在排除列表里，则所有基础输入框都只读 (最高优先级)
+  if (tableConfig?.type === 'summary') {
+    const isExcluded = tableConfig.aggregationExclusions?.includes(row.metricId);
+    if (!isExcluded && field.component === 'input') {
+      return 'READONLY_AGGREGATED';
+    }
+  }
+
+  // 规则 1: display类型的列永远不可写
   if (field.component === 'display') {
     return 'READONLY_DISPLAY';
   }
 
-  // 规则2: 模板中预定义的计算行，永远是计算状态 (高优先级)
+  // 规则 2: 模板中预定义的计算行，永远是计算状态
   if (row.type === 'calculated') {
     return 'READONLY_CALCULATED';
   }
 
   const required = row.requiredProperties;
+  const tableProperties = tableConfig?.properties || {};
 
-  // 规则3: 检查行内定义的 requiredProperties
+  // 规则 3: 检查行内定义的 requiredProperties
   if (required && Object.keys(required).length > 0) {
-    const props = tableProperties || {};
     for (const key in required) {
       const requiredValues = required[key];
-      const tableValues = props[key] || [];
+      const tableValues = tableProperties[key] || [];
       if (requiredValues.length > 0 && tableValues.length === 0) {
         return 'READONLY_CALCULATED'; // Should be calculated from other tables
       }
@@ -46,12 +54,12 @@ export const getCellState = (row, field, tableProperties) => {
     }
   }
 
-  // 规则4: 默认可写情况
+  // 规则 4: 默认可写情况
   if (field.component === 'input') {
     return 'WRITABLE';
   }
 
-  // 规则5: 特殊情况 - 同期值可编辑
+  // 规则 5: 特殊情况 - 同期值可编辑
   if (row.samePeriodEditable && field.name && field.name.endsWith('.samePeriod')) {
     return 'WRITABLE';
   }
