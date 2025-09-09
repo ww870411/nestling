@@ -77,10 +77,10 @@ const allReports = computed(() => {
       group.tables.map(table => ({
         ...table,
         groupName: group.name,
-        // The key in reportInfo is the table's name
-        status: reportInfo.value[table.name]?.status || 'new',
-        submittedAt: reportInfo.value[table.name]?.submittedAt || null,
-        submittedBy: reportInfo.value[table.name]?.submittedBy || null
+        // The key in reportInfo is the table's id
+        status: reportInfo.value[table.id]?.status || 'new',
+        submittedAt: reportInfo.value[table.id]?.submittedAt || null,
+        submittedBy: reportInfo.value[table.id]?.submittedBy || null
       }))
     );
 });
@@ -94,10 +94,10 @@ const fetchReportStatuses = async () => {
     return;
   }
 
-  // 从菜单数据中收集所有表格的名称
-  const tableNames = menuData.value.flatMap(group => group.tables.map(t => t.name));
+  // 从菜单数据中收集所有表格的ID
+  const tableIds = menuData.value.flatMap(group => group.tables.map(t => t.id));
 
-  if (tableNames.length === 0) {
+  if (tableIds.length === 0) {
     isLoading.value = false;
     return;
   }
@@ -106,7 +106,7 @@ const fetchReportStatuses = async () => {
     const response = await fetch(`/api/project/${projectId}/table_statuses`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(tableNames)
+      body: JSON.stringify(tableIds)
     });
 
     if (!response.ok) {

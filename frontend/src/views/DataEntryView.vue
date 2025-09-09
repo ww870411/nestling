@@ -296,15 +296,9 @@ const loadAndAggregateSubsidiaryData = async () => {
     return;
   }
 
-  const allTables = menuData.value.flatMap(group => group.tables);
-  const subsidiaryNames = subsidiaryIds.map(id => {
-    const table = allTables.find(t => t.id === id);
-    return table ? table.name : null;
-  }).filter(Boolean);
-
   try {
-    const fetchPromises = subsidiaryNames.map(name => 
-      fetch(`/api/data/table/${encodeURIComponent(name)}`).then(res => res.json())
+    const fetchPromises = subsidiaryIds.map(id => 
+      fetch(`/api/data/table/${id}`).then(res => res.json())
     );
     const results = await Promise.all(fetchPromises);
 
@@ -617,11 +611,11 @@ const getErrorLabel = (key) => {
 };
 
 const handleShowExplanations = async () => {
-  const tableName = pageTitle.value;
-  if (!tableName) return;
+  const tableId = route.params.tableId;
+  if (!tableId) return;
 
   try {
-    const response = await fetch(`/api/data/table/${encodeURIComponent(tableName)}`);
+    const response = await fetch(`/api/data/table/${tableId}`);
     if (!response.ok) throw new Error('Failed to fetch data for explanations.');
     
     const data = await response.json();
@@ -910,14 +904,14 @@ const handleExport = () => {
 
 // --- Load submitted data from server ---
 const handleLoadFromServer = async () => {
-  const tableName = pageTitle.value;
-  if (!tableName) {
-    ElMessage.error('无法获取当前表格名称。');
+  const tableId = route.params.tableId;
+  if (!tableId) {
+    ElMessage.error('无法获取当前表格ID。');
     return;
   }
 
   try {
-    const response = await fetch(`/api/data/table/${encodeURIComponent(tableName)}`);
+    const response = await fetch(`/api/data/table/${tableId}`);
     if (!response.ok) {
       throw new Error('Failed to load data from server');
     }

@@ -1,5 +1,4 @@
 import json
-import re
 from pathlib import Path
 from fastapi import FastAPI, HTTPException, status, Body
 from fastapi.middleware.cors import CORSMiddleware
@@ -25,13 +24,6 @@ AUTH_FILE = "app/data/auth.json"
 SUBMISSIONS_DIR = Path("app/data/submissions")
 # Ensure the submissions directory exists on startup
 SUBMISSIONS_DIR.mkdir(parents=True, exist_ok=True)
-
-def sanitize_filename(name: str) -> str:
-    """Removes characters that are invalid or problematic in filenames."""
-    # Remove invalid characters for Windows/Linux/macOS and other problematic ones like parentheses
-    name = re.sub(r'[\\/*?<>|()"\\]', '', name).strip()
-    # Replace spaces with underscores for further safety
-    return name.replace(' ', '_')
 
 @app.post("/login")
 def login(user_login: UserLogin):
@@ -94,55 +86,33 @@ def _update_data_file(file_path: Path, key: str, payload: dict):
 async def submit_data(project_id: str, table_id: str, payload: dict = Body(...)):
     """
     Receives final submitted data and saves it under the 'submit' key in a JSON file.
+    The filename is based on the table_id.
     """
-    try:
-        table_name = payload['table']['name']
-    except KeyError:
-        raise HTTPException(status_code=400, detail="Payload must contain table name.")
-
-    sanitized_name = sanitize_filename(table_name)
-    if not sanitized_name:
-        raise HTTPException(status_code=400, detail="Invalid table name after sanitization.")
-        
-    file_path = SUBMISSIONS_DIR / f"{sanitized_name}.json"
-    
+    file_path = SUBMISSIONS_DIR / f"{table_id}.json"
     _update_data_file(file_path, "submit", payload)
-    return {"message": f"Data for table '{table_name}' submitted successfully."}
+    return {"message": f"Data for table ID '{table_id}' submitted successfully."}
 
 @app.post("/project/{project_id}/table/{table_id}/save_draft")
 async def save_draft(project_id: str, table_id: str, payload: dict = Body(...)):
     """
     Receives draft data and saves it under the 'temp' key in a JSON file.
+    The filename is based on the table_id.
     """
-    try:
-        table_name = payload['table']['name']
-    except KeyError:
-        raise HTTPException(status_code=400, detail="Payload must contain table name.")
-
-    sanitized_name = sanitize_filename(table_name)
-    if not sanitized_name:
-        raise HTTPException(status_code=400, detail="Invalid table name after sanitization.")
-        
-    file_path = SUBMISSIONS_DIR / f"{sanitized_name}.json"
-    
+    file_path = SUBMISSIONS_DIR / f"{table_id}.json"
     _update_data_file(file_path, "temp", payload)
-    return {"message": f"Draft for table '{table_name}' saved successfully."}
+    return {"message": f"Draft for table ID '{table_id}' saved successfully."}
 
 
-@app.get("/data/table/{table_name}")
-async def get_table_data(table_name: str):
+@app.get("/data/table/{table_id}")
+async def get_table_data(table_id: str):
     """
-    Retrieves saved data for a given table name, returning the whole object
+    Retrieves saved data for a given table ID, returning the whole object
     with 'temp' and 'submit' keys. Returns an empty object if not found.
     """
-    sanitized_name = sanitize_filename(table_name)
-    if not sanitized_name:
-        raise HTTPException(status_code=400, detail="Invalid table name after sanitization.")
-
-    file_path = SUBMISSIONS_DIR / f"{sanitized_name}.json"
+    file_path = SUBMISSIONS_DIR / f"{table_id}.json"
 
     if not file_path.exists():
-        return {} # Return empty object instead of 404
+        return {}  # Return empty object instead of 404
 
     try:
         with open(file_path, "r", encoding="utf-8") as f:
@@ -158,17 +128,13 @@ async def get_table_data(table_name: str):
         )
 
 @app.post("/project/{project_id}/table_statuses")
-async def get_table_statuses(project_id: str, table_names: list[str] = Body(...)):
+async def get_table_statuses(project_id: str, table_ids: list[str] = Body(...)):
     """
-    Receives a list of table names and returns their statuses.
+    Receives a list of table IDs and returns their statuses.
     """
     statuses = {}
-    for name in table_names:
-        sanitized_name = sanitize_filename(name)
-        if not sanitized_name:
-            continue
-
-        file_path = SUBMISSIONS_DIR / f"{sanitized_name}.json"
+    for table_id in table_ids:
+        file_path = SUBMISSIONS_DIR / f"{table_id}.json"
         
         status_info = {"status": "new", "submittedAt": None}
 
@@ -176,22 +142,22 @@ async def get_table_statuses(project_id: str, table_names: list[str] = Body(...)
             try:
                 with open(file_path, "r", encoding="utf-8") as f:
                     content = f.read()
-                    if not content: # Handle empty file
-                        statuses[name] = status_info
+                    if not content:  # Handle empty file
+                        statuses[table_id] = status_info
                         continue
                     data = json.loads(content)
                 
                 if data.get("submit"):
                     status_info["status"] = "submitted"
                     status_info["submittedAt"] = data["submit"].get("submittedAt")
-                    status_info["submittedBy"] = data["submit"].get("submittedBy") # <-- 新增行
+                    status_info["submittedBy"] = data["submit"].get("submittedBy")
                 elif data.get("temp"):
                     status_info["status"] = "saved"
             except (json.JSONDecodeError, IOError):
                 # On error, report as 'new'
                 pass
         
-        statuses[name] = status_info
+        statuses[table_id] = status_info
 
     return statuses
 
