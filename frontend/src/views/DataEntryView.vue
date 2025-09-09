@@ -259,6 +259,7 @@ const initializeTableData = () => {
       validation: metric.validation, // Pass personalized validation to row
       samePeriodEditable: metric.samePeriodEditable, // Pass editable flag to row
       requiredProperties: metric.requiredProperties, // Pass required properties to row
+      columnFormulaOverrides: metric.columnFormulaOverrides, // Pass overrides
       values: {},
     };
 
@@ -317,11 +318,38 @@ const calculateAll = () => {
   // --- 列内计算 (Column-level formulas) ---
   const colCalculatedFields = fieldConfig.value.filter(f => f.type === 'calculated' && f.formula);
   tableData.value.forEach(row => {
+    const metricDef = reportTemplate.value.find(m => m.id === row.metricId);
+
     colCalculatedFields.forEach(field => {
       const valResolver = (columnId) => parseFloat(row.values[columnId]) || 0;
+      
+      // Check for a metric-specific override for the current column
+      let formulaToUse = field.formula;
+      if (metricDef?.columnFormulaOverrides?.[field.name]) {
+        formulaToUse = metricDef.columnFormulaOverrides[field.name];
+      }
+
       try {
-        const funcBody = field.formula.replace(/VAL\((\d+)\)/g, (match, id) => `valResolver(${id})`);
-        const result = new Function('valResolver', `return ${funcBody}`)(valResolver);
+        let result;
+        
+        if (formulaToUse.startsWith('AVG(')) {
+          const ids = formulaToUse.match(/\d+/g).map(Number);
+          const values = ids.map(id => valResolver(id));
+          if (values.length > 0) {
+            const sum = values.reduce((a, b) => a + b, 0);
+            result = sum / values.length;
+          } else {
+            result = 0;
+          }
+        } else if (formulaToUse.startsWith('LAST_VAL(')) {
+          const ids = formulaToUse.match(/\d+/g).map(Number);
+          const lastId = ids.length > 0 ? ids[ids.length - 1] : null;
+          result = lastId ? valResolver(lastId) : 0;
+        } else {
+          // Default handler for SUM and other formulas like VAL(id1)+VAL(id2)
+          const funcBody = formulaToUse.replace(/VAL\((\d+)\)/g, (match, id) => `valResolver(${id})`);
+          result = new Function('valResolver', `return ${funcBody}`)(valResolver);
+        }
         row.values[field.id] = parseFloat(result.toFixed(2));
       } catch (e) {
         console.error(`Error calculating column formula for field ${field.id} in row ${row.metricId}:`, e);
