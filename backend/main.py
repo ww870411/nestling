@@ -192,7 +192,7 @@ async def get_table_0_data():
         }
         for field in field_config:
             field_id = field['id']
-            value = None  # Use None for data columns initially
+            value = 0  # Default to 0 for all data cells
 
             if field_id == 1001: value = row_template['name']
             elif field_id == 1002: value = row_template['unit']
