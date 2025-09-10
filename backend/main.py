@@ -19,7 +19,7 @@ app.add_middleware(
 # --- App Configuration ---
 
 AUTH_FILE = "app/data/auth.json"
-SUBMISSIONS_DIR = Path("app/data/submissions")
+SUBMISSIONS_DIR = Path("app/data/heating_plan_2025-2026_data")
 SUBMISSIONS_DIR.mkdir(parents=True, exist_ok=True)
 
 MENU_DATA = [
