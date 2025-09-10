@@ -2,12 +2,14 @@
   <div class="data-entry-container">
     <div class="title-container">
       <h2 class="page-title">{{ pageTitle }}</h2>
-      <span v-if="lastSubmittedAt" class="submission-time submitted">
-        上次提交时间: {{ formatDateTime(lastSubmittedAt) }}
-      </span>
-      <span v-else class="submission-time not-submitted">
-        无提交记录
-      </span>
+      <template v-if="route.params.tableId !== '0' && route.params.tableId !== '1'">
+        <span v-if="lastSubmittedAt" class="submission-time submitted">
+          上次提交时间: {{ formatDateTime(lastSubmittedAt) }}
+        </span>
+        <span v-else class="submission-time not-submitted">
+          无提交记录
+        </span>
+      </template>
     </div>
 
     <div class="content-wrapper">
