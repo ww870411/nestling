@@ -257,7 +257,7 @@ const softErrorsForDisplay = computed(() => Object.entries(errors.value).filter(
 
 // --- Core Logic: Initialization & Formula Engine ---
 
-const initializeTableData = () => {
+const initializeTableData = async () => {
   if (!reportTemplate.value || !fieldConfig.value) return;
 
   const data = reportTemplate.value.map(metric => {
@@ -287,11 +287,9 @@ const initializeTableData = () => {
 
   tableData.value = data;
 
-  // For summary tables, automatically fetch the fully aggregated data from the backend.
-  // For subsidiary tables, just present a blank, calculated form.
-  if (currentTableConfig.value?.type === 'summary') {
-    _fetchDataFromServer(true); // true for silent mode
-  } else {
+  const dataLoaded = await _fetchDataFromServer(true);
+  if (!dataLoaded) {
+    // If no data was loaded from the server, we still need to calculate the blank form.
     calculateAll();
   }
 };
@@ -305,14 +303,18 @@ const _fetchDataFromServer = async (silent = false) => {
   const tableId = route.params.tableId;
   if (!tableId) {
     if (!silent) ElMessage.error('无法获取当前表格ID。');
-    return;
+    return false;
   }
 
   isLoading.value = true;
   try {
     const response = await fetch(`/api/data/table/${tableId}`);
     if (!response.ok) {
-      throw new Error('Failed to load data from server');
+      // It's okay if not found (404), just means no submission yet.
+      if (response.status !== 404) {
+        throw new Error('Failed to load data from server');
+      }
+      return false;
     }
 
     const data = await response.json();
@@ -320,13 +322,16 @@ const _fetchDataFromServer = async (silent = false) => {
 
     if (payload) {
       _applyPayloadToTable(payload);
+      return true;
     } else {
       if (!silent) ElMessage.info('服务器上没有找到该表格的已提交数据。');
+      return false;
     }
 
   } catch (error) {
     console.error('Error loading data from server:', error);
     if (!silent) ElMessage.error(`从服务器加载数据失败: ${error.message}`);
+    return false;
   } finally {
     isLoading.value = false;
   }
@@ -524,8 +529,8 @@ const runValidation = ({ level = 'hard' } = {}) => {
 
 
 // --- Watchers ---
-watch(currentTableConfig, () => {
-  initializeTableData();
+watch(currentTableConfig, async () => {
+  await initializeTableData();
   checkLocalDraft();
 }, { deep: true, immediate: true });
 
