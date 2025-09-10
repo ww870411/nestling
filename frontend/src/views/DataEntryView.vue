@@ -1,6 +1,14 @@
 <template>
   <div class="data-entry-container">
-    <h2 class="page-title">{{ pageTitle }}</h2>
+    <div class="title-container">
+      <h2 class="page-title">{{ pageTitle }}</h2>
+      <span v-if="lastSubmittedAt" class="submission-time submitted">
+        上次提交时间: {{ formatDateTime(lastSubmittedAt) }}
+      </span>
+      <span v-else class="submission-time not-submitted">
+        无提交记录
+      </span>
+    </div>
 
     <div class="content-wrapper">
       <div class="main-content">
@@ -143,6 +151,7 @@ const panelWidth = ref(300);
 const zoomLevel = ref(100);
 const isLoading = ref(false);
 const hasLocalDraft = ref(false);
+const lastSubmittedAt = ref(null);
 
 const localDraftKey = computed(() => `data-draft-${route.params.tableId}`);
 
@@ -307,10 +316,10 @@ const _fetchDataFromServer = async (silent = false) => {
   }
 
   isLoading.value = true;
+  lastSubmittedAt.value = null; // Reset before fetching
   try {
     const response = await fetch(`/api/data/table/${tableId}`);
     if (!response.ok) {
-      // It's okay if not found (404), just means no submission yet.
       if (response.status !== 404) {
         throw new Error('Failed to load data from server');
       }
@@ -322,6 +331,7 @@ const _fetchDataFromServer = async (silent = false) => {
 
     if (payload) {
       _applyPayloadToTable(payload);
+      lastSubmittedAt.value = payload.submittedAt;
       return true;
     } else {
       if (!silent) ElMessage.info('服务器上没有找到该表格的已提交数据。');
@@ -923,7 +933,35 @@ const handleExport = () => {
 
 <style scoped>
 .data-entry-container { display: flex; flex-direction: column; height: 100%; padding: 20px; box-sizing: border-box; }
-.page-title { flex-shrink: 0; text-align: center; margin: 5px 0; font-size: 18px; }
+.title-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  margin: 5px 0;
+}
+
+.page-title {
+  flex-shrink: 0;
+  font-size: 18px;
+  margin: 0;
+}
+
+.submission-time {
+  font-size: 13px; /* Slightly larger font size */
+  margin-left: 16px;
+  position: absolute;
+  right: 0;
+  bottom: 0;
+}
+
+.submission-time.submitted {
+  color: #f56c6c; /* Red color */
+}
+
+.submission-time.not-submitted {
+  color: #909399; /* Grey color */
+}
 .content-wrapper { flex-grow: 1; display: flex; overflow: hidden; }
 .main-content { flex-grow: 1; display: flex; flex-direction: row; overflow: hidden; }
 .table-controls { display: flex; align-items: center; }
