@@ -91,8 +91,8 @@
         </el-radio-group>
       </div>
       <div>
-        <el-button v-if="currentTableActions.save" @click="handleSave">暂存</el-button>
-        <el-button v-if="currentTableActions.save" @click="handleLoadDraft">取回暂存</el-button>
+        <el-button v-if="currentTableActions.save" @click="handleSave">{{ hasLocalDraft ? '更新暂存' : '暂存' }}</el-button>
+        <el-button v-if="currentTableActions.save" @click="handleLoadDraft" :disabled="!hasLocalDraft">{{ hasLocalDraft ? '取回暂存数据' : '尚无暂存数据' }}</el-button>
         <el-button @click="handleLoadFromServer" :icon="Download">加载已提交数据</el-button>
         <el-button v-if="currentTableActions.submit" type="primary" :disabled="hasHardErrors" @click="handleSubmit">提交</el-button>
       </div>
@@ -142,6 +142,14 @@ const isErrorPanelVisible = ref(false);
 const panelWidth = ref(300);
 const zoomLevel = ref(100);
 const isLoading = ref(false);
+const hasLocalDraft = ref(false);
+
+const localDraftKey = computed(() => `data-draft-${route.params.tableId}`);
+
+const checkLocalDraft = () => {
+  const draft = localStorage.getItem(localDraftKey.value);
+  hasLocalDraft.value = !!draft;
+};
 
 // --- Explanations Feature State ---
 const isExplanationsDialogVisible = ref(false);
@@ -518,6 +526,7 @@ const runValidation = ({ level = 'hard' } = {}) => {
 // --- Watchers ---
 watch(currentTableConfig, () => {
   initializeTableData();
+  checkLocalDraft();
 }, { deep: true, immediate: true });
 
 
@@ -738,7 +747,8 @@ const handleSave = async () => {
       }
     });
   });
-  localStorage.setItem(`data-draft-${route.params.tableId}`, JSON.stringify(draftData));
+  localStorage.setItem(localDraftKey.value, JSON.stringify(draftData));
+  hasLocalDraft.value = true; // Update the state
   
   // 2. Set status for immediate UI feedback on dashboard
   localStorage.setItem(`status-${route.params.tableId}`, 'saved');
@@ -762,7 +772,7 @@ const handleSave = async () => {
 };
 
 const handleLoadDraft = () => {
-  const savedData = localStorage.getItem(`data-draft-${route.params.tableId}`);
+  const savedData = localStorage.getItem(localDraftKey.value);
   if (!savedData) {
     ElMessage.warning('没有找到可用的本地暂存数据');
     return;
