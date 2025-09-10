@@ -10,7 +10,27 @@ export const menuData = [
   {
     name: '集团公司',
     tables: [
-      { id: '0', name: '0 集团分单位汇总表', template: groupTemplate, templateName: 'groupTemplate', type: 'summary', subsidiaries: [], aggregationExclusions: [], actions: { submit: false, save: false } },
+      { 
+        id: '0', 
+        name: '0 集团分单位汇总表', 
+        template: groupTemplate, 
+        templateName: 'groupTemplate', 
+        type: 'summary', 
+        // 使用对象来定义列与数据源的映射关系
+        subsidiaries: {
+          'group': '1',
+          'downtown': '2',
+          'beihai': '3',
+          'xianghai': '7',
+          'jinzhou': '10',
+          'beifang': '11',
+          'jinpu': '12',
+          'zhuanghe': '13',
+          'research': '14'
+        },
+        aggregationExclusions: [], 
+        actions: { submit: false, save: false } 
+      },
       { 
         id: '1', 
         name: '1 集团汇总表', 
@@ -20,7 +40,7 @@ export const menuData = [
         subsidiaries: ['2', '9', '10', '11', '12', '13', '14'],
         aggregationExclusions: [],
         properties: { productionMethod: ['thermoelectric','heating_company','boiler_room'], fuelType: ['coal','natural_gas','purchased_heat'], businessModel: ['independent'] },
-        actions: { submit: false, save: false },
+        actions: { submit: true, save: false },
       },
     ]
   },

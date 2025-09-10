@@ -2,7 +2,7 @@
   {
     "name": "集团公司",
     "tables": [
-      { "id": "0", "name": "0 集团分单位汇总表", "templateName": "groupTemplate", "type": "summary", "subsidiaries": [], "aggregationExclusions": [], "actions": { "submit": false, "save": false } },
+      { "id": "0", "name": "0 集团分单位汇总表", "templateName": "groupTemplate", "type": "summary", "subsidiaries": {"group": "1", "downtown": "2", "beihai": "3", "xianghai": "7", "jinzhou": "10", "beifang": "11", "jinpu": "12", "zhuanghe": "13", "research": "14"}, "aggregationExclusions": [], "actions": { "submit": false, "save": false } },
       { 
         "id": "1", 
         "name": "1 集团汇总表", 
