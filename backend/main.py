@@ -180,7 +180,6 @@ async def get_table_0_data():
     # Create maps from the subsidiary key (e.g., 'group') to the target fieldId
     key_to_plan_field_id = { field['name'].split('.')[0]: field['id'] for field in field_config if '.plan' in field['name'] }
     key_to_same_period_field_id = { field['name'].split('.')[0]: field['id'] for field in field_config if '.samePeriod' in field['name'] }
-    key_to_diff_rate_field_id = { field['name'].split('.')[0]: field['id'] for field in field_config if '.diffRate' in field['name'] }
 
     # Initialize tableData
     table_data = []
@@ -193,7 +192,8 @@ async def get_table_0_data():
         }
         for field in field_config:
             field_id = field['id']
-            value = 0
+            value = None  # Use None for data columns initially
+
             if field_id == 1001: value = row_template['name']
             elif field_id == 1002: value = row_template['unit']
             new_row["values"].append({"fieldId": field_id, "value": value})
@@ -229,24 +229,6 @@ async def get_table_0_data():
                         agg_cell["value"] = sub_values[metric_id]["plan"]
                     elif agg_cell.get("fieldId") == target_same_period_id:
                         agg_cell["value"] = sub_values[metric_id]["samePeriod"]
-    
-    # Calculate diffRate
-    plan_id_to_key = {v: k for k, v in key_to_plan_field_id.items()}
-    for row in table_data:
-        row_values_by_id = {cell['fieldId']: cell for cell in row['values']}
-        for plan_id, sub_key in plan_id_to_key.items():
-            same_period_id = key_to_same_period_field_id.get(sub_key)
-            diff_rate_id = key_to_diff_rate_field_id.get(sub_key)
-
-            if same_period_id and diff_rate_id:
-                plan_val = row_values_by_id[plan_id]['value']
-                same_period_val = row_values_by_id[same_period_id]['value']
-                
-                if isinstance(plan_val, (int, float)) and isinstance(same_period_val, (int, float)) and same_period_val != 0:
-                    result = (plan_val - same_period_val) / same_period_val
-                else:
-                    result = None
-                row_values_by_id[diff_rate_id]['value'] = result
 
     aggregated_payload = {
         "table": {"id": table_config.get("id"), "name": table_config.get("name")},
