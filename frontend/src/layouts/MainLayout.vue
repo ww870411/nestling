@@ -58,7 +58,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router'; // 引入 useRoute
 import { storeToRefs } from 'pinia';
 import { useProjectStore } from '@/stores/projectStore';
@@ -89,33 +89,46 @@ const filteredMenuData = computed(() => {
   return menuData.value.filter(group => allowedUnits.has(group.name));
 });
 
+const fetchReportStatuses = async () => {
+  if (!menuData.value || menuData.value.length === 0) return;
+
+  const tableIds = menuData.value.flatMap(group => group.tables.map(table => table.id));
+  if (tableIds.length === 0) return;
+
+  try {
+    const response = await fetch(`/api/project/${currentProjectId.value}/table_statuses`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(tableIds)
+    });
+    if (response.ok) {
+      const statuses = await response.json();
+      reportStatuses.value = statuses;
+    } else {
+      console.error('Failed to fetch report statuses.');
+    }
+  } catch (error) {
+    console.error('Error fetching report statuses:', error);
+  }
+};
+
 const toggleSidebar = () => {
   isSidebarCollapsed.value = !isSidebarCollapsed.value;
 };
 
-const updateStatuses = () => {
-  const statuses = {};
-  for (let i = 0; i < localStorage.length; i++) {
-    const key = localStorage.key(i);
-    if (key.startsWith('status-')) {
-      const reportId = key.replace('status-', '');
-      statuses[reportId] = localStorage.getItem(key);
-    }
-  }
-  reportStatuses.value = statuses;
-};
-
 onMounted(() => {
-  updateStatuses();
-  window.addEventListener('storage', updateStatuses);
+  fetchReportStatuses();
 });
 
-onUnmounted(() => {
-  window.removeEventListener('storage', updateStatuses);
-});
+watch(menuData, () => {
+  fetchReportStatuses();
+}, { deep: true });
 
 const getStatusClass = (reportId) => {
-  const status = reportStatuses.value[reportId];
+  const statusInfo = reportStatuses.value[reportId];
+  if (!statusInfo) return 'status-new';
+  
+  const status = statusInfo.status;
   if (status === 'saved') return 'status-saved';
   if (status === 'submitted') return 'status-submitted';
   return 'status-new';
