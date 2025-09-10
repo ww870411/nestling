@@ -133,7 +133,6 @@ import { useProjectStore } from '@/stores/projectStore';
 import { Close, Loading, Download } from '@element-plus/icons-vue'; // Import Download icon
 import * as XLSX from 'xlsx';
 import { validationSchemes, getCellState } from '@/projects/heating_plan_2025-2026/tableRules.js';
-import { validationRules } from '@/utils/validator.js';
 import { formatValue, formatDateTime } from '@/utils/formatter.js';
 
 import { useAuthStore } from '@/stores/authStore';
@@ -432,33 +431,61 @@ const calculateAll = () => {
 };
 
 // --- NEW Validation Logic ---
+const evaluateValidationRule = (rule, rowData, findFieldByIdentifier) => {
+    const valResolver = (identifier) => {
+        const field = findFieldByIdentifier(identifier);
+        if (!field) {
+            console.warn(`Validation rule error: Field '${identifier}' not found.`);
+            return 0;
+        }
+        const value = rowData.values[field.id];
+        if (value === undefined || value === null) return 0;
+        const parsed = parseFloat(value);
+        return isNaN(parsed) ? 0 : parsed;
+    };
+
+    const identifiers = Array.from(new Set(rule.match(/[a-zA-Z_][a-zA-Z0-9_.]*/g) || []));
+    identifiers.sort((a, b) => b.length - a.length);
+
+    let evaluatableString = rule;
+    identifiers.forEach(id => {
+        const escapedId = id.replace(/\./g, '\\.');
+        const regex = new RegExp(escapedId, 'g');
+        evaluatableString = evaluatableString.replace(regex, `valResolver('${id}')`);
+    });
+
+    try {
+        // The expression is now expected to use standard JS operators like && and || directly.
+        return Boolean(new Function('valResolver', `return ${evaluatableString}`)(valResolver));
+    } catch (e) {
+        console.error(`Error evaluating validation rule "${rule}":`, e);
+        return false;
+    }
+};
+
 const runValidation = ({ level = 'hard' } = {}) => {
   const newErrors = {};
 
-  // 1. Determine the validation scheme and overrides from menu.js config
   const schemeName = currentTableConfig.value?.validationScheme || 'default';
   const baseScheme = validationSchemes[schemeName] || validationSchemes['default'];
   const overrides = currentTableConfig.value?.validationOverrides || {};
 
-  // If validation is explicitly disabled for the whole table, stop here.
   if (currentTableConfig.value?.validation === null) {
     errors.value = {};
     return;
   }
 
   const findFieldByIdentifier = (identifier) => {
-    if (typeof identifier === 'number') {
-      return fieldConfig.value.find(f => f.id === identifier);
-    }
+    if (typeof identifier === 'number') return fieldConfig.value.find(f => f.id === identifier);
     return fieldConfig.value.find(f => f.name === identifier);
   };
 
-  // Clear previous errors based on validation level
-  if (level === 'all') {
-    Object.assign(newErrors, errors.value);
-  } else {
-    Object.entries(errors.value).forEach(([key, err]) => {
-      if (err.type !== 'A') newErrors[key] = err; // Keep soft errors
+  // When running hard validation, we start fresh but keep soft errors.
+  // When running all, we start fresh.
+  const oldErrors = { ...errors.value };
+  if (level === 'hard') {
+    Object.entries(oldErrors).forEach(([key, err]) => {
+      if (err.type === 'B') newErrors[key] = err;
     });
   }
 
@@ -466,73 +493,32 @@ const runValidation = ({ level = 'hard' } = {}) => {
     const metricId = row.metricId;
     const overrideRule = overrides[metricId];
 
-    // 2. Check for metric-specific override rules
-    if (overrideRule === null) {
-      // Validation is disabled for this metric
-      return;
-    }
+    if (overrideRule === null) return;
 
     const baseRules = baseScheme[row.type] || {};
     const finalValidation = overrideRule ? { ...baseRules, ...overrideRule } : baseRules;
 
-    // Hard Validations
-    if (finalValidation.hard) {
-      fieldConfig.value.forEach(field => {
-        if (field.type !== 'basic' || field.component !== 'input') return;
+    const processRules = (rules, errorType) => {
+      if (!rules) return;
+      
+      rules.forEach((ruleDef, index) => {
+        const key = `${metricId}-${errorType}-${index}`;
+        
+        if (!evaluateValidationRule(ruleDef.rule, row, findFieldByIdentifier)) {
+          const firstFieldInRule = (ruleDef.rule.match(/[a-zA-Z_][a-zA-Z0-9_.]*/g) || [])[0];
+          const fieldForError = findFieldByIdentifier(firstFieldInRule);
 
-        const value = row.values[field.id];
-        const key = `${metricId}-${field.id}`;
-        let hasError = false;
-        finalValidation.hard.forEach(ruleDef => {
-          const ruleFunc = validationRules[ruleDef.rule];
-          if (ruleDef.rule === 'comparison') {
-            const fieldA = findFieldByIdentifier(ruleDef.fieldA);
-            const fieldB = findFieldByIdentifier(ruleDef.fieldB);
-            if (!fieldA || !fieldB) return;
-            const valueA = row.values[fieldA.id];
-            const valueB = row.values[fieldB.id];
-            if (ruleFunc && !ruleFunc(valueA, ruleDef.operator, valueB, ruleDef.factor, ruleDef.offset)) {
-              newErrors[key] = { type: 'A', message: ruleDef.message };
-              hasError = true;
-            }
-          } else {
-            if (ruleFunc && !ruleFunc(value)) {
-              newErrors[key] = { type: 'A', message: ruleDef.message };
-              hasError = true;
-            }
-          }
-        });
-        if (!hasError && newErrors[key]?.type === 'A') {
-          delete newErrors[key];
+          newErrors[key] = { 
+            type: errorType, 
+            message: ruleDef.message,
+            fieldId: fieldForError ? fieldForError.id : null 
+          };
         }
       });
-    }
+    };
 
-    // Soft Validations (only run on 'all' level)
-    if (level === 'all' && finalValidation.soft) {
-      finalValidation.soft.forEach((ruleDef, index) => {
-        const key = `${metricId}-soft-${index}`;
-        let hasError = false;
-        if (ruleDef.rule === 'comparison') {
-          const fieldA = findFieldByIdentifier(ruleDef.fieldA);
-          const fieldB = findFieldByIdentifier(ruleDef.fieldB);
-          if (!fieldA || !fieldB) return;
-
-          const valueA = row.values[fieldA.id];
-          const valueB = row.values[fieldB.id];
-
-          const ruleFunc = validationRules[ruleDef.rule];
-          if (ruleFunc && !ruleFunc(valueA, ruleDef.operator, valueB, ruleDef.factor, ruleDef.offset)) {
-            // Associate the error with the primary field (fieldA)
-            newErrors[key] = { type: 'B', message: ruleDef.message, fieldId: fieldA.id };
-            hasError = true;
-          }
-        }
-        if (!hasError && newErrors[key]?.type === 'B') {
-          delete newErrors[key];
-        }
-      });
-    }
+    if (finalValidation.hard) processRules(finalValidation.hard, 'A');
+    if (level === 'all' && finalValidation.soft) processRules(finalValidation.soft, 'B');
   });
 
   errors.value = newErrors;
@@ -540,6 +526,8 @@ const runValidation = ({ level = 'hard' } = {}) => {
     isErrorPanelVisible.value = true;
   }
 };
+
+
 
 
 // --- Watchers ---
@@ -602,21 +590,37 @@ const getCellClass = ({ row, column }) => {
 
 const getErrorLabel = (key) => {
     const parts = key.split('-');
+    if (parts.length < 2) return '未知错误';
+
     const metricId = parseInt(parts[0]);
-    const fieldId = parseInt(parts[1]);
+    const errorType = parts[1]; // 'A', 'B', or legacy field ID
 
     const row = tableData.value.find(r => r.metricId === metricId);
+    if (!row) return `未知指标 (ID: ${metricId})`;
 
-    if (!row) return '未知错误';
+    const metricName = row.values[1001] || `指标ID ${metricId}`;
 
-    if (parts[1] === 'soft') {
-        return `${row.values[1001]} (汇总)`; // 1001 is the ID for 'name'
+    // Handle new row-based errors ('A' for hard, 'B' for soft)
+    if (errorType === 'A' || errorType === 'B') {
+        const error = errors.value[key];
+        // If the error is associated with a specific field, mention it.
+        if (error && error.fieldId) {
+            const field = fieldConfig.value.find(f => f.id === error.fieldId);
+            if (field) return `${metricName} - ${field.label}`;
+        }
+        return `${metricName} (行校验)`; // Fallback for row-level errors
     }
 
-    const field = fieldConfig.value.find(f => f.id === fieldId);
-    if (!field) return '未知错误';
+    // Legacy support for old cell-based errors
+    const fieldId = parseInt(parts[1]);
+    if (!isNaN(fieldId)) {
+        const field = fieldConfig.value.find(f => f.id === fieldId);
+        if (field) {
+            return `${metricName} - ${field.label}`;
+        }
+    }
 
-    return `${row.values[1001]} - ${field.label}`;
+    return '未知错误';
 };
 
 const handleShowExplanations = async () => {

@@ -15,7 +15,7 @@ export const fieldConfig = [
   // --- 基础信息列 (ID: 1001-1002) ---
   {
     id: 1000,
-    name: 'id', 
+    name: 'metricid', 
     label: '指标序号',
     type: 'basic',
     component: 'label',

@@ -102,18 +102,61 @@ export const getCellState = (row, field, tableConfig) => {
  *    - 示例 3 (偏移量比较):
  *      `{ rule: 'comparison', fieldA: 'totals.plan', operator: '<=', fieldB: 'totals.samePeriod', offset: 100, message: '本期计划不应超过同期完成值+100' }`
  */
+/**
+ * =================================================================================
+ *                            新版校验引擎语法说明
+ * =================================================================================
+ *
+ * 新版校验引擎使用标准的JavaScript表达式作为规则，提供了强大的灵活性。
+ *
+ * --- 规则基本结构 ---
+ * 每个校验规则都是一个包含'rule'和'message'的对象：
+ * { rule: '表达式字符串', message: '用户友好的提示信息' }
+ *
+ * --- 表达式语法 (rule) ---
+ *
+ * 1. 引用字段:
+ *    - 直接使用字段在`fieldConfig`中定义的`name`属性来引用其值。
+ *    - 示例: `totals.plan`, `monthlyData.october.samePeriod`
+ *
+ * 2. 支持的运算符:
+ *    - 比较运算符: `>`  `>=`  `<`  `<=`  `==`  `!=`  `===`  `!==`
+ *    - 算术运算符: `+`  `-`  `*`  `/`  `%` (遵循标准运算优先级)
+ *    - 逻辑运算符: `&&` (逻辑与), `||` (逻辑或)
+ *    - 分组运算符: `()` (用于控制运算顺序)
+ *
+ * --- 规则示例 ---
+ *
+ * // 示例1: 简单比较
+ * { rule: 'totals.plan <= totals.samePeriod', message: '本期计划不应超过同期完成。' }
+ *
+ * // 示例2: 使用算术运算
+ * { rule: 'monthlyData.october.plan * 1.1 >= monthlyData.november.plan', message: '11月计划不应比10月计划高出超过10%。' }
+ *
+ * // 示例3: 使用逻辑运算符 (&&)
+ * {
+ *   rule: 'totals.plan <= totals.samePeriod * 1.2 && totals.plan >= totals.samePeriod * 0.8',
+ *   message: '本期计划与同期的差异率绝对值不应超过20%。'
+ * }
+ *
+ * // 示例4: 复杂的混合运算
+ * {
+ *   rule: '(monthlyData.october.plan + monthlyData.november.plan) > totals.samePeriod / 2',
+ *   message: '10月与11月计划之和，应大于同期总完成值的一半。'
+ * }
+ *
+ */
 const defaultScheme = {
   basic: {
     hard: [
-      { rule: 'isNumber', message: '必须为数字格式' },
-      { rule: 'notEmpty', message: '此项为必填项，不能为空' }
+      // {
+      //   rule: 'isNumber', 
+      //   message: '必须为数字格式'
+      // },
     ],
     soft: [
       {
-        rule: 'comparison',
-        fieldA: 'totals.plan',
-        operator: '<=',
-        fieldB: 'totals.samePeriod',
+        rule: 'totals.plan <= totals.samePeriod',
         message: '本期计划不应超过同期完成'
       }
     ]
@@ -122,10 +165,7 @@ const defaultScheme = {
     hard: [], // Calculated fields have no direct input to validate
     soft: [
       {
-        rule: 'comparison',
-        fieldA: 'totals.plan',
-        operator: '<=',
-        fieldB: 'totals.samePeriod',
+        rule: 'totals.plan <= totals.samePeriod',
         message: '本期计划不应超过同期完成'
       }
     ]
