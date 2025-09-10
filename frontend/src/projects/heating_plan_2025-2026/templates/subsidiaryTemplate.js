@@ -14,6 +14,15 @@
 export const fieldConfig = [
   // --- 基础信息列 (ID: 1001-1002) ---
   {
+    id: 1000,
+    name: 'id', 
+    label: '指标序号',
+    type: 'basic',
+    component: 'label',
+    width: 74,
+    fixed: true,
+  },
+  {
     id: 1001,
     name: 'name', // 保留原始name用于数据映射
     label: '指标名称',

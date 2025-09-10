@@ -285,7 +285,9 @@ const initializeTableData = async () => {
     };
 
     fieldConfig.value.forEach(field => {
-      if (field.name === 'name') {
+      if (field.id === 1000) { // NEW: Handle metric ID column
+        rowData.values[field.id] = metric.id;
+      } else if (field.name === 'name') {
         rowData.values[field.id] = metric.name;
       } else if (field.name === 'unit') {
         rowData.values[field.id] = metric.unit;
