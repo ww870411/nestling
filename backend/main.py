@@ -76,10 +76,10 @@ def _update_data_file(file_path: Path, key: str, payload: dict):
     try:
         with open(file_path, "w", encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii=False, indent=4)
-    except IOError as e:
+    except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to write data: {str(e)}"
+            detail=f"An unexpected error occurred during file write: {str(e)}"
         )
 
 @app.post("/project/{project_id}/table/{table_id}/submit")

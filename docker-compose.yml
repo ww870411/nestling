@@ -7,22 +7,13 @@ services:
       dockerfile: Dockerfile
     ports:
       - "5173:5173"
-    # Volumes are not needed when using watch, but the node_modules volume is still useful
     volumes:
+      - ./frontend:/app
       - frontend_node_modules:/app/node_modules
     environment:
       - VITE_API_BASE_URL=http://backend:8000
     depends_on:
       - backend
-    # Add the develop section for watch mode
-    develop:
-      watch:
-        - action: sync
-          path: ./frontend
-          target: /app
-          ignore:
-            - node_modules/
-    # Override the default command to run the dev server
     command: npm run dev
 
   backend:
@@ -31,21 +22,13 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8000:8000"
-    # Volumes are not needed when using watch
-    # volumes:
-    #   - ./backend:/app
+    volumes:
+      - ./backend:/app
     environment:
       - DATABASE_URL=postgresql://user:password@db/nestling_db
     depends_on:
       - db
-    # Add the develop section for watch mode
-    develop:
-      watch:
-        - action: sync
-          path: ./backend
-          target: /app
-    # Override the default command to run uvicorn with reload
-    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    command: uvicorn main:app --host 0.0.0.0 --port 8000
 
   db:
     image: postgres:13
