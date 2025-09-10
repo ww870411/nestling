@@ -491,12 +491,21 @@ const runValidation = ({ level = 'hard' } = {}) => {
 
   tableData.value.forEach(row => {
     const metricId = row.metricId;
-    const overrideRule = overrides[metricId];
+    
+    // Get overrides from menu.js (table-level)
+    const menuOverride = overrides[metricId];
+    // Get overrides from the template's metric definition (highest priority)
+    const templateOverride = row.validation;
 
-    if (overrideRule === null) return;
+    // Check if validation is explicitly disabled at either level (null means disabled)
+    if (menuOverride === null || templateOverride === null) {
+      return;
+    }
 
     const baseRules = baseScheme[row.type] || {};
-    const finalValidation = overrideRule ? { ...baseRules, ...overrideRule } : baseRules;
+    
+    // Layer the overrides in order of increasing precedence: template > menu > base
+    const finalValidation = { ...baseRules, ...menuOverride, ...templateOverride };
 
     const processRules = (rules, errorType) => {
       if (!rules) return;
@@ -526,6 +535,8 @@ const runValidation = ({ level = 'hard' } = {}) => {
     isErrorPanelVisible.value = true;
   }
 };
+
+
 
 
 
