@@ -364,28 +364,50 @@ const calculateAll = () => {
   const rowCalculatedFields = reportTemplate.value.filter(f => f.type === 'calculated' && f.formula);
   const valueColumns = fieldConfig.value.filter(fc => fc.component === 'input' || fc.component === 'display');
 
-  rowCalculatedFields.forEach(metricToCalculate => {
-    const targetRow = getRowByMetricId(metricToCalculate.id);
-    if (!targetRow) return;
+  const MAX_ITERATIONS = 10; // Safety break for circular dependencies
+  let iteration = 0;
+  let changedInPass;
 
-    valueColumns.forEach(col => {
-      if (getCellState(targetRow, col, currentTableConfig.value) !== 'READONLY_CALCULATED') return;
+  do {
+    changedInPass = false;
+    iteration++;
 
-      const valResolver = (sourceMetricId) => {
-        const sourceRow = getRowByMetricId(sourceMetricId);
-        return sourceRow ? (parseFloat(sourceRow.values[col.id]) || 0) : 0;
-      };
+    rowCalculatedFields.forEach(metricToCalculate => {
+      const targetRow = getRowByMetricId(metricToCalculate.id);
+      if (!targetRow) return;
 
-      try {
-        const funcBody = metricToCalculate.formula.replace(/VAL\((\d+)\)/g, (match, id) => `valResolver(${id})`);
-        const result = new Function('valResolver', `return ${funcBody}`)(valResolver);
-        targetRow.values[col.id] = parseFloat(result.toFixed(2));
-      } catch (e) {
-        // console.error(`Error calculating row formula for metric ${metricToCalculate.id} in column ${col.name}:`, e);
-        targetRow.values[col.id] = NaN;
-      }
+      valueColumns.forEach(col => {
+        if (getCellState(targetRow, col, currentTableConfig.value) !== 'READONLY_CALCULATED') return;
+
+        const valResolver = (sourceMetricId) => {
+          const sourceRow = getRowByMetricId(sourceMetricId);
+          return sourceRow ? (parseFloat(sourceRow.values[col.id]) || 0) : 0;
+        };
+
+        try {
+          const funcBody = metricToCalculate.formula.replace(/VAL\((\d+)\)/g, (match, id) => `valResolver(${id})`);
+          const result = new Function('valResolver', `return ${funcBody}`)(valResolver);
+          const newValue = parseFloat(result.toFixed(2));
+          
+          // Check if the value has changed, also handling NaN cases to prevent infinite loops
+          if (targetRow.values[col.id] !== newValue && !(isNaN(targetRow.values[col.id]) && isNaN(newValue))) {
+            targetRow.values[col.id] = newValue;
+            changedInPass = true;
+          }
+        } catch (e) {
+          if (!isNaN(targetRow.values[col.id])) {
+             targetRow.values[col.id] = NaN;
+             changedInPass = true;
+          }
+        }
+      });
     });
-  });
+
+  } while (changedInPass && iteration < MAX_ITERATIONS);
+
+  if (iteration >= MAX_ITERATIONS) {
+      console.warn("Calculation reached max iterations. Check for circular dependencies in formulas.");
+  }
 
   // --- 列内计算 (Column-level formulas) ---
   const colCalculatedFields = fieldConfig.value.filter(f => f.type === 'calculated' && f.formula);
