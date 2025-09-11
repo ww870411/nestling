@@ -19,8 +19,7 @@ app.add_middleware(
 # --- App Configuration ---
 
 AUTH_FILE = "app/data/auth.json"
-SUBMISSIONS_DIR = Path("app/data/heating_plan_2025-2026_data")
-SUBMISSIONS_DIR.mkdir(parents=True, exist_ok=True)
+# SUBMISSIONS_DIR is now dynamic, defined within each endpoint.
 
 # Load menu data from the JSON file
 with open("app/data/menucopy.json", "r", encoding="utf-8") as f:
@@ -84,13 +83,17 @@ def _update_data_file(file_path: Path, key: str, payload: dict):
 
 @app.post("/project/{project_id}/table/{table_id}/submit")
 async def submit_data(project_id: str, table_id: str, payload: dict = Body(...)):
-    file_path = SUBMISSIONS_DIR / f"{table_id}.json"
+    submissions_dir = Path(f"app/data/{project_id}_data")
+    submissions_dir.mkdir(parents=True, exist_ok=True)
+    file_path = submissions_dir / f"{table_id}.json"
     _update_data_file(file_path, "submit", payload)
     return {"message": f"Data for table ID '{table_id}' submitted successfully."}
 
 @app.post("/project/{project_id}/table/{table_id}/save_draft")
 async def save_draft(project_id: str, table_id: str, payload: dict = Body(...)):
-    file_path = SUBMISSIONS_DIR / f"{table_id}.json"
+    submissions_dir = Path(f"app/data/{project_id}_data")
+    submissions_dir.mkdir(parents=True, exist_ok=True)
+    file_path = submissions_dir / f"{table_id}.json"
     _update_data_file(file_path, "temp", payload)
     return {"message": f"Draft for table ID '{table_id}' saved successfully."}
 
@@ -240,7 +243,7 @@ async def get_table_0_data():
     return {"submit": aggregated_payload}
 
 
-async def get_table_data_recursive(table_id: str):
+async def get_table_data_recursive(project_id: str, table_id: str):
     if table_id == '0':
         return await get_table_0_data()
 
@@ -256,7 +259,8 @@ async def get_table_data_recursive(table_id: str):
     }
 
     if table_config.get("type") != "summary" or not table_config.get("subsidiaries"):
-        file_path = SUBMISSIONS_DIR / f"{table_id}.json"
+        submissions_dir = Path(f"app/data/{project_id}_data")
+        file_path = submissions_dir / f"{table_id}.json"
         if not file_path.exists(): return {}
         try:
             with open(file_path, "r", encoding="utf-8") as f: return json.load(f)
@@ -269,7 +273,7 @@ async def get_table_data_recursive(table_id: str):
 
         for sub_id in subsidiary_ids:
             try:
-                sub_content = await get_table_data_recursive(sub_id)
+                sub_content = await get_table_data_recursive(project_id, sub_id)
                 sub_data = sub_content.get("submit") or sub_content.get("temp")
                 if not sub_data or not isinstance(sub_data.get("tableData"), list): continue
 
@@ -307,7 +311,8 @@ async def get_table_data_recursive(table_id: str):
 
             except Exception: continue
 
-        summary_file_path = SUBMISSIONS_DIR / f"{table_id}.json"
+        submissions_dir = Path(f"app/data/{project_id}_data")
+        summary_file_path = submissions_dir / f"{table_id}.json"
         if summary_file_path.exists() and aggregated_payload is not None:
             try:
                 with open(summary_file_path, "r", encoding="utf-8") as f: summary_content = json.load(f)
@@ -333,15 +338,16 @@ async def get_table_data_recursive(table_id: str):
     return {}
 
 
-@app.get("/data/table/{table_id}")
-async def get_table_data(table_id: str):
-    return await get_table_data_recursive(table_id)
+@app.get("/project/{project_id}/data/table/{table_id}")
+async def get_table_data(project_id: str, table_id: str):
+    return await get_table_data_recursive(project_id, table_id)
 
 @app.post("/project/{project_id}/table_statuses")
 async def get_table_statuses(project_id: str, table_ids: list[str] = Body(...)):
     statuses = {}
+    submissions_dir = Path(f"app/data/{project_id}_data")
     for table_id in table_ids:
-        file_path = SUBMISSIONS_DIR / f"{table_id}.json"
+        file_path = submissions_dir / f"{table_id}.json"
         status_info = {"status": "new", "submittedAt": None}
 
         if file_path.exists():

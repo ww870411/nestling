@@ -312,16 +312,16 @@ const initializeTableData = async () => {
  * @param {boolean} silent - If true, no success/info messages will be shown.
  */
 const _fetchDataFromServer = async (silent = false) => {
-  const tableId = route.params.tableId;
-  if (!tableId) {
-    if (!silent) ElMessage.error('无法获取当前表格ID。');
+  const { projectId, tableId } = route.params;
+  if (!tableId || !projectId) {
+    if (!silent) ElMessage.error('无法获取当前项目或表格ID。');
     return false;
   }
 
   isLoading.value = true;
   lastSubmittedAt.value = null; // Reset before fetching
   try {
-    const response = await fetch(`/api/data/table/${tableId}`);
+    const response = await fetch(`/api/project/${projectId}/data/table/${tableId}`);
     if (!response.ok) {
       if (response.status !== 404) {
         throw new Error('Failed to load data from server');
