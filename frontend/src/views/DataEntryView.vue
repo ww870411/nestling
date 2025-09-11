@@ -658,11 +658,11 @@ const getErrorLabel = (key) => {
 };
 
 const handleShowExplanations = async () => {
-  const tableId = route.params.tableId;
-  if (!tableId) return;
+  const { projectId, tableId } = route.params;
+  if (!tableId || !projectId) return;
 
   try {
-    const response = await fetch(`/api/data/table/${tableId}`);
+    const response = await fetch(`/api/project/${projectId}/data/table/${tableId}`);
     if (!response.ok) throw new Error('Failed to fetch data for explanations.');
     
     const data = await response.json();

@@ -97,7 +97,7 @@ async def save_draft(project_id: str, table_id: str, payload: dict = Body(...)):
     _update_data_file(file_path, "temp", payload)
     return {"message": f"Draft for table ID '{table_id}' saved successfully."}
 
-async def get_table_0_data():
+async def get_table_0_data(project_id: str):
     """
     Special function to aggregate data for Table 0.
     """
@@ -205,7 +205,7 @@ async def get_table_0_data():
     # Fetch and populate plan and samePeriod data
     subsidiaries_map = table_config.get("subsidiaries", {})
     for sub_key, sub_id in subsidiaries_map.items():
-        sub_content = await get_table_data_recursive(sub_id)
+        sub_content = await get_table_data_recursive(project_id, sub_id)
         sub_data = sub_content.get("submit") or sub_content.get("temp")
         if not sub_data or not isinstance(sub_data.get("tableData"), list):
             continue
@@ -241,6 +241,11 @@ async def get_table_0_data():
     }
 
     return {"submit": aggregated_payload}
+
+
+async def get_table_data_recursive(project_id: str, table_id: str):
+    if table_id == '0':
+        return await get_table_0_data(project_id)
 
 
 async def get_table_data_recursive(project_id: str, table_id: str):
