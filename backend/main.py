@@ -244,13 +244,9 @@ async def get_table_0_data(project_id: str):
 
 
 async def get_table_data_recursive(project_id: str, table_id: str):
+    # Table 0 is the group summary table – aggregate from subsidiaries
     if table_id == '0':
         return await get_table_0_data(project_id)
-
-
-async def get_table_data_recursive(project_id: str, table_id: str):
-    if table_id == '0':
-        return await get_table_0_data()
 
     table_config = ALL_TABLES.get(table_id)
     if not table_config:
