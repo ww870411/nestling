@@ -55,13 +55,15 @@ export const getCellState = (row, field, currentTableConfig) => {
   }
 
   // For basic data entry tables
-  if (field.name.endsWith('.plan')) {
+  // 仅允许“月度计划”可写：monthlyData.*.plan，避免误将 totals.plan 判为可写
+  if (typeof field.name === 'string' && field.name.startsWith('monthlyData.') && field.name.endsWith('.plan')) {
     if (row.type === 'basic') {
       return 'WRITABLE';
     }
   }
 
-  if (field.name.endsWith('.samePeriod')) {
+  // 同期可写性仅作用于“月度同期”字段：monthlyData.*.samePeriod
+  if (typeof field.name === 'string' && field.name.startsWith('monthlyData.') && field.name.endsWith('.samePeriod')) {
     const tableSetting = currentTableConfig?.samePeriodEditable;
     const metricSetting = row.samePeriodEditable;
     const metricId = row.metricId;
@@ -82,7 +84,7 @@ export const getCellState = (row, field, currentTableConfig) => {
       return 'WRITABLE';
     }
 
-    // Final Default
+    // Final Default（除菜单或指标显式开放外，默认只读）
     return 'READONLY';
   }
 
