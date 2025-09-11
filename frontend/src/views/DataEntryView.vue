@@ -568,7 +568,8 @@ const runValidation = ({ level = 'hard' } = {}) => {
 
       if (row.isForced) {
         // --- REVERSE VALIDATION: Check if children sum up to the forced parent ---
-        const childMetricIds = (row.formula.match(/\d+/g) || []).map(Number);
+        // 仅提取 VAL(<id>) 中的 <id>，避免把小数常量(如 2.951694)误拆成 2 和 951694
+        const childMetricIds = Array.from(row.formula.matchAll(/VAL\((\d+)\)/g)).map(m => Number(m[1]));
         if (childMetricIds.length === 0) return;
 
         columnsToValidate.forEach((col) => {

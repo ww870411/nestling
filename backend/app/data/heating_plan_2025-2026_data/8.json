@@ -802,7 +802,7 @@
                         "fieldId": 1003,
                         "fieldName": "totals.plan",
                         "fieldLabel": "本期计划",
-                        "value": 555
+                        "value": 0
                     },
                     {
                         "fieldId": 1004,
@@ -820,7 +820,7 @@
                         "fieldId": 2001,
                         "fieldName": "monthlyData.october.plan",
                         "fieldLabel": "10月-计划",
-                        "value": 555
+                        "value": 0
                     },
                     {
                         "fieldId": 2002,
