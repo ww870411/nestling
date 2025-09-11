@@ -377,11 +377,12 @@ const calculateAll = () => {
 
     rowCalculatedFields.forEach(metricToCalculate => {
       const targetRow = getRowByMetricId(metricToCalculate.id);
-      // Skip calculation for forced rows
-      if (!targetRow || targetRow.isForced) return;
+      if (!targetRow) return;
 
       valueColumns.forEach(col => {
         if (getCellState(targetRow, col, currentTableConfig.value) !== 'READONLY_CALCULATED') return;
+        // 若该行被标记为强制，仅屏蔽“同期值”列的自动计算，允许“计划值”等继续计算
+        if (targetRow.isForced && typeof col.name === 'string' && col.name.endsWith('.samePeriod')) return;
 
         const valResolver = (sourceMetricId) => {
           const sourceRow = getRowByMetricId(sourceMetricId);
@@ -566,22 +567,20 @@ const runValidation = ({ level = 'hard' } = {}) => {
         c => c.name === 'totals.plan' || c.name === 'totals.samePeriod'
       );
 
-      if (row.isForced) {
-        // --- REVERSE VALIDATION: Check if children sum up to the forced parent ---
-        // 仅提取 VAL(<id>) 中的 <id>，避免把小数常量(如 2.951694)误拆成 2 和 951694
-        const childMetricIds = Array.from(row.formula.matchAll(/VAL\((\d+)\)/g)).map(m => Number(m[1]));
-        if (childMetricIds.length === 0) return;
+      // 按列进行校验：若行被强制，仅对“同期”列执行反向校验；其他列执行正常校验
+      const childMetricIds = Array.from(row.formula.matchAll(/VAL\((\d+)\)/g)).map(m => Number(m[1]));
+      columnsToValidate.forEach((col) => {
+        if (getCellState(row, col, currentTableConfig.value) !== 'READONLY_CALCULATED') return;
+        const isSamePeriodCol = typeof col.name === 'string' && col.name.endsWith('.samePeriod');
 
-        columnsToValidate.forEach((col) => {
-          if (getCellState(row, col, currentTableConfig.value) !== 'READONLY_CALCULATED') return;
+        const valResolver = (sourceMetricId) => {
+          const sourceRow = getRowByMetricId(sourceMetricId);
+          return sourceRow ? sanitize(sourceRow.values[col.id]) : 0;
+        };
 
-          const forcedValue = sanitize(row.values[col.id]);
-
-          const valResolver = (sourceMetricId) => {
-            const sourceRow = getRowByMetricId(sourceMetricId);
-            return sourceRow ? sanitize(sourceRow.values[col.id]) : 0;
-          };
-
+        if (row.isForced && isSamePeriodCol) {
+          // 反向校验：强制行的“同期”列以子项合计校验
+          if (childMetricIds.length === 0) return;
           let childrenSum = 0;
           try {
             const funcBody = row.formula.replace(/VAL\((\d+)\)/g, (match, id) => `(valResolver(${id}))`);
@@ -590,9 +589,8 @@ const runValidation = ({ level = 'hard' } = {}) => {
           } catch (e) {
             console.error(`Error evaluating reverse-calc formula for metric ${metricId} in column ${col.id}:`, e);
           }
-
+          const forcedValue = sanitize(row.values[col.id]);
           if (!validationRules.calculation(forcedValue, childrenSum, config.tolerance)) {
-            // If validation fails, create errors for all child metrics in this column
             childMetricIds.forEach(childId => {
               const key = `${childId}-C-reverse-${row.metricId}-${col.id}`;
               newErrors[key] = {
@@ -603,19 +601,9 @@ const runValidation = ({ level = 'hard' } = {}) => {
               };
             });
           }
-        });
-      } else {
-        // --- NORMAL VALIDATION: Check if the calculated value is correct ---
-        columnsToValidate.forEach((col) => {
-          if (getCellState(row, col, currentTableConfig.value) !== 'READONLY_CALCULATED') return;
-
+        } else {
+          // 正常校验：计算值与期望值比较
           const actualValue = sanitize(row.values[col.id]);
-
-          const valResolver = (sourceMetricId) => {
-            const sourceRow = getRowByMetricId(sourceMetricId);
-            return sourceRow ? sanitize(sourceRow.values[col.id]) : 0;
-          };
-
           let expectedValue = 0;
           try {
             const funcBody = row.formula.replace(/VAL\((\d+)\)/g, (match, id) => `(valResolver(${id}))`);
@@ -624,7 +612,6 @@ const runValidation = ({ level = 'hard' } = {}) => {
           } catch (e) {
             console.error(`Error evaluating calc formula for metric ${metricId} in column ${col.id}:`, e);
           }
-
           if (!validationRules.calculation(actualValue, expectedValue, config.tolerance)) {
             const key = `${metricId}-C-${col.id}`;
             newErrors[key] = {
@@ -634,8 +621,8 @@ const runValidation = ({ level = 'hard' } = {}) => {
               fieldId: col.id,
             };
           }
-        });
-      }
+        }
+      });
     };
 
     if (finalValidation.hard) processRules(finalValidation.hard, 'A');
@@ -878,12 +865,23 @@ const _applyPayloadToTable = (payload) => {
         localRow.isForced = true;
       }
 
-      // Only apply loaded data to 'basic' rows or 'forced' calculated rows.
-      if (localRow.type === 'basic' || localRow.isForced) {
-        const loadedValuesMap = new Map(loadedMetric.values.map(v => [v.fieldId, v.value]));
+      // 仅对 basic 行直接应用所有加载数据；
+      // 若是被强制的 calculated 行，仅应用“各月的同期值”（monthlyData.*.samePeriod），不覆盖计划值和其他计算列。
+      const loadedValuesMap = new Map(loadedMetric.values.map(v => [v.fieldId, v.value]));
+      if (localRow.type === 'basic') {
         Object.keys(localRow.values).forEach(fieldId => {
           const numericFieldId = parseInt(fieldId);
           if (loadedValuesMap.has(numericFieldId)) {
+            localRow.values[numericFieldId] = loadedValuesMap.get(numericFieldId);
+          }
+        });
+      } else if (localRow.isForced) {
+        Object.keys(localRow.values).forEach(fieldId => {
+          const numericFieldId = parseInt(fieldId);
+          const fieldDef = fieldConfig.value.find(f => f.id === numericFieldId);
+          if (!fieldDef || typeof fieldDef.name !== 'string') return;
+          const isMonthlySamePeriod = fieldDef.name.startsWith('monthlyData.') && fieldDef.name.endsWith('.samePeriod');
+          if (isMonthlySamePeriod && loadedValuesMap.has(numericFieldId)) {
             localRow.values[numericFieldId] = loadedValuesMap.get(numericFieldId);
           }
         });
