@@ -133,6 +133,7 @@ import { useProjectStore } from '@/stores/projectStore';
 import { Close, Loading, Download } from '@element-plus/icons-vue'; // Import Download icon
 import * as XLSX from 'xlsx';
 import { validationSchemes, getCellState } from '@/projects/heating_plan_2025-2026/tableRules.js';
+import { validationRules } from '@/utils/validator.js'; // Import the whole rules object
 import { formatValue, formatDateTime } from '@/utils/formatter.js';
 
 import { useAuthStore } from '@/stores/authStore';
@@ -262,7 +263,7 @@ const zoomStyle = computed(() => {
   };
 });
 
-const hasHardErrors = computed(() => Object.values(errors.value).some(e => e && e.type === 'A'));
+const hasHardErrors = computed(() => Object.values(errors.value).some(e => e && (e.type === 'A' || e.type === 'C')));
 const softErrorsForDisplay = computed(() => Object.entries(errors.value).filter(([, error]) => error.type === 'B'));
 
 // --- Core Logic: Initialization & Formula Engine ---
@@ -275,6 +276,7 @@ const initializeTableData = async () => {
       metricId: metric.id,
       style: metric.style,
       type: metric.type, // Pass metric type to row
+      formula: metric.formula, // Pass formula to row for calc validation
       validation: metric.validation, // Pass personalized validation to row
       samePeriodEditable: metric.samePeriodEditable, // Pass editable flag to row
       requiredProperties: metric.requiredProperties, // Pass required properties to row
@@ -503,8 +505,6 @@ const runValidation = ({ level = 'hard' } = {}) => {
     return fieldConfig.value.find(f => f.name === identifier);
   };
 
-  // When running hard validation, we start fresh but keep soft errors.
-  // When running all, we start fresh.
   const oldErrors = { ...errors.value };
   if (level === 'hard') {
     Object.entries(oldErrors).forEach(([key, err]) => {
@@ -512,22 +512,17 @@ const runValidation = ({ level = 'hard' } = {}) => {
     });
   }
 
-  tableData.value.forEach(row => {
+  tableData.value.forEach((row, rowIndex) => {
     const metricId = row.metricId;
     
-    // Get overrides from menu.js (table-level)
     const menuOverride = overrides[metricId];
-    // Get overrides from the template's metric definition (highest priority)
     const templateOverride = row.validation;
 
-    // Check if validation is explicitly disabled at either level (null means disabled)
     if (menuOverride === null || templateOverride === null) {
       return;
     }
 
     const baseRules = baseScheme[row.type] || {};
-    
-    // Layer the overrides in order of increasing precedence: template > menu > base
     const finalValidation = { ...baseRules, ...menuOverride, ...templateOverride };
 
     const processRules = (rules, errorType) => {
@@ -543,7 +538,50 @@ const runValidation = ({ level = 'hard' } = {}) => {
           newErrors[key] = { 
             type: errorType, 
             message: ruleDef.message,
+            metricId: metricId,
             fieldId: fieldForError ? fieldForError.id : null 
+          };
+        }
+      });
+    };
+
+    // --- New Calc Validation Logic ---
+    const processCalcRules = (calcConfig) => {
+      // A simple 'true' in the config object means use defaults.
+      const config = typeof calcConfig === 'object' ? { ...baseScheme.calculated.calc, ...calcConfig } : baseScheme.calculated.calc;
+
+      if (!config.enabled || row.type !== 'calculated' || !row.formula) return;
+
+      const getRowByMetricId = (mId) => tableData.value.find(r => r.metricId === mId);
+
+      // Iterate over all columns to find which ones are calculated for this row
+      fieldConfig.value.forEach((col, colIndex) => {
+        if (getCellState(row, col, currentTableConfig.value) !== 'READONLY_CALCULATED') return;
+
+        const actualValue = parseFloat(row.values[col.id]);
+
+        // This resolver is now column-aware. It gets values from the same column in other rows.
+        const valResolver = (sourceMetricId) => {
+          const sourceRow = getRowByMetricId(sourceMetricId);
+          return sourceRow ? (parseFloat(sourceRow.values[col.id]) || 0) : 0;
+        };
+
+        let expectedValue = NaN;
+        try {
+          const funcBody = row.formula.replace(/VAL\((\d+)\)/g, (match, id) => `valResolver(${id})`);
+          const result = new Function('valResolver', `return ${funcBody}`)(valResolver);
+          expectedValue = parseFloat(result);
+        } catch (e) {
+          console.error(`Error evaluating calc formula for metric ${metricId} in column ${col.id}:`, e);
+        }
+
+        if (!validationRules.calculation(actualValue, expectedValue, config.tolerance)) {
+          const key = `${metricId}-C-${col.id}`;
+          newErrors[key] = {
+            type: 'C',
+            message: config.message,
+            metricId: metricId,
+            fieldId: col.id,
           };
         }
       });
@@ -551,6 +589,7 @@ const runValidation = ({ level = 'hard' } = {}) => {
 
     if (finalValidation.hard) processRules(finalValidation.hard, 'A');
     if (level === 'all' && finalValidation.soft) processRules(finalValidation.soft, 'B');
+    if (finalValidation.calc) processCalcRules(finalValidation.calc);
   });
 
   errors.value = newErrors;
@@ -602,12 +641,17 @@ const getCellStyle = (row, field) => {
 };
 
 const getCellClass = ({ row, column }) => {
-  // Search in the original flat config, as it's simpler and contains all fields.
   const field = fieldConfig.value.find(f => f.name === column.property);
   if (!field) return '';
 
-  const key = `${row.metricId}-${field.id}`;
-  if (errors.value[key]?.type === 'A') {
+  // Find if there is any hard error ('A' or 'C') associated with this specific cell
+  const hasCellError = Object.values(errors.value).some(error => 
+    error.metricId === row.metricId && 
+    error.fieldId === field.id &&
+    (error.type === 'A' || error.type === 'C')
+  );
+
+  if (hasCellError) {
     return 'is-error';
   }
 

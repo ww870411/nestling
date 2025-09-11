@@ -195,7 +195,15 @@ const defaultScheme = {
         rule: 'totals.plan <= totals.samePeriod',
         message: '本期计划不应超过同期完成'
       }
-    ]
+    ],
+    // C类校验：用于校验计算指标的准确性
+    // 在指标的 validation 属性中设置 { calc: true } 来启用
+    // 或设置 { calc: { tolerance: 0.02, message: '自定义消息' } } 来覆盖默认值
+    calc: {
+      enabled: true, // 对所有计算指标默认启用
+      tolerance: 0.01, // 默认 1% 容差
+      message: '计算结果与公式不符'
+    }
   }
 };
 

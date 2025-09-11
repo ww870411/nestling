@@ -54,5 +54,28 @@ export const validationRules = {
       case '==': return valueA == comparisonValue;
       default: return true;
     }
+  },
+
+  /**
+   * 校验一个计算结果是否在容差范围内
+   * @param {number} actualValue - 单元格中的实际值
+   * @param {number} expectedValue - 根据公式计算出的期望值
+   * @param {number} [tolerance=0.01] - 容差，默认为 1%
+   * @returns {boolean}
+   */
+  calculation: (actualValue, expectedValue, tolerance = 0.01) => {
+    if (typeof actualValue !== 'number' || typeof expectedValue !== 'number') {
+      return true; // 无法比较非数字
+    }
+
+    // 处理期望值为0的特殊情况
+    if (expectedValue === 0) {
+      return actualValue === 0;
+    }
+
+    const difference = Math.abs(actualValue - expectedValue);
+    const differenceRate = difference / Math.abs(expectedValue);
+
+    return differenceRate <= tolerance;
   }
 };
