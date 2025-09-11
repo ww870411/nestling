@@ -12,7 +12,7 @@ export const menuData = [
     tables: [
       { 
         id: '0', 
-        name: '0 集团分单位汇总表', 
+        name: '集团分单位汇总表', 
         template: groupTemplate, 
         templateName: 'groupTemplate', 
         type: 'summary', 
@@ -20,26 +20,27 @@ export const menuData = [
         subsidiaries: {
           'group': '1',
           'downtown': '2',
-          'beihai': '3',
-          'xianghai': '7',
-          'jinzhou': '10',
-          'beifang': '11',
-          'jinpu': '12',
-          'zhuanghe': '13',
-          'research': '14'
+          'gufenbenbu':'3',
+          'beihai': '4',
+          'xianghai': '8',
+          'jinzhou': '11',
+          'beifang': '12',
+          'jinpu': '13',
+          'zhuanghe': '14',
+          'research': '15'
         },
         aggregationExclusions: [], 
         actions: { submit: false, save: false } 
       },
       { 
         id: '1', 
-        name: '1 集团汇总表', 
+        name: '集团汇总表', 
         samePeriodEditable: 'all',
         validation: false,
         template: subsidiaryTemplate, 
         templateName: 'subsidiaryTemplate', 
         type: 'summary',
-        subsidiaries: ['2', '9', '10', '11', '12', '13', '14'],
+        subsidiaries: ['2', '11', '12', '13', '14', '15'],
         aggregationExclusions: [],
         properties: { productionMethod: ['thermoelectric','heating_company','boiler_room'], fuelType: ['coal','natural_gas','purchased_heat'], businessModel: ['independent'] },
         actions: { submit: true, save: false },
@@ -51,13 +52,25 @@ export const menuData = [
     tables: [
       { 
         id: '2', 
-        name: '2 主城区汇总表', 
+        name: '主城区汇总表', 
         samePeriodEditable: 'all',
         validation: false,
         template: subsidiaryTemplate, 
         templateName: 'subsidiaryTemplate', 
         type: 'summary',
-        subsidiaries: ['3', '7', '8'],
+        subsidiaries: ['4', '8', '9'],
+        aggregationExclusions: [],
+        properties: { productionMethod: ['thermoelectric','heating_company','boiler_room'], fuelType: ['coal','natural_gas'], businessModel: ['independent'] },
+      },
+      { 
+        id: '3', 
+        name: '股份本部汇总表', 
+        samePeriodEditable: 'all',
+        validation: false,
+        template: subsidiaryTemplate, 
+        templateName: 'subsidiaryTemplate', 
+        type: 'summary',
+        subsidiaries: ['4'],
         aggregationExclusions: [],
         properties: { productionMethod: ['thermoelectric','heating_company','boiler_room'], fuelType: ['coal','natural_gas'], businessModel: ['independent'] },
       },
@@ -67,20 +80,20 @@ export const menuData = [
     name: '北海热电厂',
     tables: [
       { 
-        id: '3', 
-        name: '3 北海汇总表', 
+        id: '4', 
+        name: '北海汇总表', 
         samePeriodEditable: 'all',
         validation: false,
         template: subsidiaryTemplate, 
         templateName: 'subsidiaryTemplate', 
         type: 'summary',
-        subsidiaries: ['4', '5', '6'],
+        subsidiaries: ['5', '6', '7'],
         aggregationExclusions: [97,105,107,109,111,113,114],
         properties: { productionMethod: ['thermoelectric','boiler_room'], fuelType: ['coal','natural_gas'], businessModel: ['independent'] },
       },
       { 
-        id: '4', 
-        name: '4 北海热电厂(热电联产)表', 
+        id: '5', 
+        name: '北海热电厂(热电联产)表', 
         samePeriodEditable: 'all',
         validation: false,
         template: subsidiaryTemplate, 
@@ -89,8 +102,8 @@ export const menuData = [
         properties: { productionMethod: ['thermoelectric'], fuelType: ['coal'], businessModel: ['non_independent'] },
       },
       { 
-        id: '5', 
-        name: '5 北海热电厂(水炉)表', 
+        id: '6', 
+        name: '北海热电厂(水炉)表', 
         samePeriodEditable: 'all',
         validation: false,
         template: subsidiaryTemplate, 
@@ -99,8 +112,8 @@ export const menuData = [
         properties: { productionMethod: ['boiler_room'], fuelType: ['coal'], businessModel: ['non_independent'] },
       },
       { 
-        id: '6', 
-        name: '6 北海热电厂(天然气炉)表', 
+        id: '7', 
+        name: '北海热电厂(天然气炉)表', 
         samePeriodEditable: 'all',
         validation: false,
         template: subsidiaryTemplate, 
@@ -114,8 +127,8 @@ export const menuData = [
     name: '香海热电厂',
     tables: [ 
       { 
-        id: '7', 
-        name: '7 香海热电厂表', 
+        id: '8', 
+        name: '香海热电厂表', 
         samePeriodEditable: 'all',
         validation: false,
         template: subsidiaryTemplate, 
@@ -129,8 +142,8 @@ export const menuData = [
     name: '供热公司',
     tables: [
       { 
-        id: '8', 
-        name: '8 供热公司表', 
+        id: '9', 
+        name: '供热公司表', 
         samePeriodEditable: 'all',
         validation: false,
         template: subsidiaryTemplate, 
@@ -139,8 +152,8 @@ export const menuData = [
         properties: { productionMethod: ['heating_company'], fuelType: [], businessModel: ['independent'] },
       },
       { 
-        id: '9', 
-        name: '9 主城区电锅炉表', 
+        id: '10', 
+        name: '主城区电锅炉表', 
         samePeriodEditable: 'all',
         validation: false,
         template: subsidiaryTemplate, 
@@ -154,9 +167,9 @@ export const menuData = [
     name: '金州热电',
     tables: [ 
       { 
-        id: '10', 
-        name: '10 金州热电表', 
-        samePeriodEditable: 'all',
+        id: '11', 
+        name: '金州热电表', 
+        samePeriodEditable: '',
         validation: false,
         template: subsidiaryTemplate, 
         templateName: 'subsidiaryTemplate', 
@@ -169,8 +182,8 @@ export const menuData = [
     name: '北方热电',
     tables: [ 
       { 
-        id: '11', 
-        name: '11 北方热电表', 
+        id: '12', 
+        name: '北方热电表', 
         samePeriodEditable: 'all',
         validation: false,
         template: subsidiaryTemplate, 
@@ -184,8 +197,8 @@ export const menuData = [
     name: '金普热电',
     tables: [ 
       { 
-        id: '12', 
-        name: '12 金普热电表', 
+        id: '13', 
+        name: '金普热电表', 
         samePeriodEditable: 'all',
         validation: false,
         template: subsidiaryTemplate, 
@@ -199,8 +212,8 @@ export const menuData = [
     name: '庄河热电',
     tables: [ 
       { 
-        id: '13', 
-        name: '13 庄河环海表', 
+        id: '14', 
+        name: '庄河环海表', 
         samePeriodEditable: 'all',
         validation: false,
         template: subsidiaryTemplate, 
@@ -214,8 +227,8 @@ export const menuData = [
     name: '研究院',
     tables: [ 
       { 
-        id: '14', 
-        name: '14 研究院表', 
+        id: '15', 
+        name: '研究院表', 
         samePeriodEditable: 'all',
         validation: false,
         template: subsidiaryTemplate, 

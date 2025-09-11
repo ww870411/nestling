@@ -76,6 +76,7 @@ const allReports = computed(() => {
     .flatMap(group => 
       group.tables.map(table => ({
         ...table,
+        name: `${table.id} ${table.name.replace(/^\d+\s*/, '')}`,
         groupName: group.name,
         // The key in reportInfo is the table's id
         status: reportInfo.value[table.id]?.status || 'new',

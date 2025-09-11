@@ -40,40 +40,45 @@ export const fieldConfig = [
   { id: 1007, name: 'downtown.samePeriod', label: '主城区-同期完成', type: 'basic', component: 'display', width: 120 },
   { id: 1008, name: 'downtown.diffRate', label: '主城区-差异率', type: 'calculated', formula: '(VAL(1006)-VAL(1007))/VAL(1007)', component: 'display', width: 120, displayFormat: { type: 'percentage', places: 2 } },
 
-  // --- 北海汇总 (ID: 1009-1011) ---
-  { id: 1009, name: 'beihai.plan', label: '北海汇总-本期计划', type: 'basic', component: 'display', width: 120 },
-  { id: 1010, name: 'beihai.samePeriod', label: '北海汇总-同期完成', type: 'basic', component: 'display', width: 120 },
-  { id: 1011, name: 'beihai.diffRate', label: '北海汇总-差异率', type: 'calculated', formula: '(VAL(1009)-VAL(1010))/VAL(1010)', component: 'display', width: 120, displayFormat: { type: 'percentage', places: 2 } },
+  // --- 股份本部汇总 (ID: 1009-1011) ---
+  { id: 1009, name: 'gufenbenbu.plan', label: '股份本部-本期计划', type: 'basic', component: 'display', width: 120 },
+  { id: 1010, name: 'gufenbenbu.samePeriod', label: '股份本部-同期完成', type: 'basic', component: 'display', width: 120 },
+  { id: 1011, name: 'gufenbenbu.diffRate', label: '股份本部-差异率', type: 'calculated', formula: '(VAL(1009)-VAL(1010))/VAL(1010)', component: 'display', width: 120, displayFormat: { type: 'percentage', places: 2 } },
 
-  // --- 香海 (ID: 1012-1014) ---
-  { id: 1012, name: 'xianghai.plan', label: '香海-本期计划', type: 'basic', component: 'display', width: 120 },
-  { id: 1013, name: 'xianghai.samePeriod', label: '香海-同期完成', type: 'basic', component: 'display', width: 120 },
-  { id: 1014, name: 'xianghai.diffRate', label: '香海-差异率', type: 'calculated', formula: '(VAL(1012)-VAL(1013))/VAL(1013)', component: 'display', width: 120, displayFormat: { type: 'percentage', places: 2 } },
+  // --- 北海汇总 (ID: 1012-1014) ---
+  { id: 1012, name: 'beihai.plan', label: '北海汇总-本期计划', type: 'basic', component: 'display', width: 120 },
+  { id: 1013, name: 'beihai.samePeriod', label: '北海汇总-同期完成', type: 'basic', component: 'display', width: 120 },
+  { id: 1014, name: 'beihai.diffRate', label: '北海汇总-差异率', type: 'calculated', formula: '(VAL(1012)-VAL(1013))/VAL(1013)', component: 'display', width: 120, displayFormat: { type: 'percentage', places: 2 } },
 
-  // --- 金州 (ID: 1015-1017) ---
-  { id: 1015, name: 'jinzhou.plan', label: '金州-本期计划', type: 'basic', component: 'display', width: 120 },
-  { id: 1016, name: 'jinzhou.samePeriod', label: '金州-同期完成', type: 'basic', component: 'display', width: 120 },
-  { id: 1017, name: 'jinzhou.diffRate', label: '金州-差异率', type: 'calculated', formula: '(VAL(1015)-VAL(1016))/VAL(1016)', component: 'display', width: 120, displayFormat: { type: 'percentage', places: 2 } },
+  // --- 香海 (ID: 1015-1017) ---
+  { id: 1015, name: 'xianghai.plan', label: '香海-本期计划', type: 'basic', component: 'display', width: 120 },
+  { id: 1016, name: 'xianghai.samePeriod', label: '香海-同期完成', type: 'basic', component: 'display', width: 120 },
+  { id: 1017, name: 'xianghai.diffRate', label: '香海-差异率', type: 'calculated', formula: '(VAL(1015)-VAL(1016))/VAL(1016)', component: 'display', width: 120, displayFormat: { type: 'percentage', places: 2 } },
 
-  // --- 北方 (ID: 1018-1020) ---
-  { id: 1018, name: 'beifang.plan', label: '北方-本期计划', type: 'basic', component: 'display', width: 120 },
-  { id: 1019, name: 'beifang.samePeriod', label: '北方-同期完成', type: 'basic', component: 'display', width: 120 },
-  { id: 1020, name: 'beifang.diffRate', label: '北方-差异率', type: 'calculated', formula: '(VAL(1018)-VAL(1019))/VAL(1019)', component: 'display', width: 120, displayFormat: { type: 'percentage', places: 2 } },
+  // --- 金州 (ID: 1018-1020) ---
+  { id: 1018, name: 'jinzhou.plan', label: '金州-本期计划', type: 'basic', component: 'display', width: 120 },
+  { id: 1019, name: 'jinzhou.samePeriod', label: '金州-同期完成', type: 'basic', component: 'display', width: 120 },
+  { id: 1020, name: 'jinzhou.diffRate', label: '金州-差异率', type: 'calculated', formula: '(VAL(1018)-VAL(1019))/VAL(1019)', component: 'display', width: 120, displayFormat: { type: 'percentage', places: 2 } },
 
-  // --- 金普 (ID: 1021-1023) ---
-  { id: 1021, name: 'jinpu.plan', label: '金普-本期计划', type: 'basic', component: 'display', width: 120 },
-  { id: 1022, name: 'jinpu.samePeriod', label: '金普-同期完成', type: 'basic', component: 'display', width: 120 },
-  { id: 1023, name: 'jinpu.diffRate', label: '金普-差异率', type: 'calculated', formula: '(VAL(1021)-VAL(1022))/VAL(1022)', component: 'display', width: 120, displayFormat: { type: 'percentage', places: 2 } },
+  // --- 北方 (ID: 1021-1023) ---
+  { id: 1021, name: 'beifang.plan', label: '北方-本期计划', type: 'basic', component: 'display', width: 120 },
+  { id: 1022, name: 'beifang.samePeriod', label: '北方-同期完成', type: 'basic', component: 'display', width: 120 },
+  { id: 1023, name: 'beifang.diffRate', label: '北方-差异率', type: 'calculated', formula: '(VAL(1021)-VAL(1022))/VAL(1022)', component: 'display', width: 120, displayFormat: { type: 'percentage', places: 2 } },
 
-  // --- 庄河 (ID: 1024-1026) ---
-  { id: 1024, name: 'zhuanghe.plan', label: '庄河-本期计划', type: 'basic', component: 'display', width: 120 },
-  { id: 1025, name: 'zhuanghe.samePeriod', label: '庄河-同期完成', type: 'basic', component: 'display', width: 120 },
-  { id: 1026, name: 'zhuanghe.diffRate', label: '庄河-差异率', type: 'calculated', formula: '(VAL(1024)-VAL(1025))/VAL(1025)', component: 'display', width: 120, displayFormat: { type: 'percentage', places: 2 } },
+  // --- 金普 (ID: 1024-1026) ---
+  { id: 1024, name: 'jinpu.plan', label: '金普-本期计划', type: 'basic', component: 'display', width: 120 },
+  { id: 1025, name: 'jinpu.samePeriod', label: '金普-同期完成', type: 'basic', component: 'display', width: 120 },
+  { id: 1026, name: 'jinpu.diffRate', label: '金普-差异率', type: 'calculated', formula: '(VAL(1024)-VAL(1025))/VAL(1025)', component: 'display', width: 120, displayFormat: { type: 'percentage', places: 2 } },
 
-  // --- 研究院 (ID: 1027-1029) ---
-  { id: 1027, name: 'research.plan', label: '研究院-本期计划', type: 'basic', component: 'display', width: 120 },
-  { id: 1028, name: 'research.samePeriod', label: '研究院-同期完成', type: 'basic', component: 'display', width: 120 },
-  { id: 1029, name: 'research.diffRate', label: '研究院-差异率', type: 'calculated', formula: '(VAL(1027)-VAL(1028))/VAL(1028)', component: 'display', width: 120, displayFormat: { type: 'percentage', places: 2 } },
+  // --- 庄河 (ID: 1027-1029) ---
+  { id: 1027, name: 'zhuanghe.plan', label: '庄河-本期计划', type: 'basic', component: 'display', width: 120 },
+  { id: 1028, name: 'zhuanghe.samePeriod', label: '庄河-同期完成', type: 'basic', component: 'display', width: 120 },
+  { id: 1029, name: 'zhuanghe.diffRate', label: '庄河-差异率', type: 'calculated', formula: '(VAL(1027)-VAL(1028))/VAL(1028)', component: 'display', width: 120, displayFormat: { type: 'percentage', places: 2 } },
+
+  // --- 研究院 (ID: 1030-1032) ---
+  { id: 1030, name: 'research.plan', label: '研究院-本期计划', type: 'basic', component: 'display', width: 120 },
+  { id: 1031, name: 'research.samePeriod', label: '研究院-同期完成', type: 'basic', component: 'display', width: 120 },
+  { id: 1032, name: 'research.diffRate', label: '研究院-差异率', type: 'calculated', formula: '(VAL(1030)-VAL(1031))/VAL(1031)', component: 'display', width: 120, displayFormat: { type: 'percentage', places: 2 } },
 ];
 
 export const reportTemplate = [

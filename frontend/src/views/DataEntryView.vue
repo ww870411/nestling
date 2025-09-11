@@ -248,7 +248,7 @@ const pageTitle = computed(() => {
   if (!menuData.value) return '数据填报';
   for (const group of menuData.value) {
     const table = group.tables.find(t => t.id === tableId);
-    if (table) return table.name;
+    if (table) return `${table.id} ${table.name.replace(/^\d+\s*/, '')}`;
   }
   return '数据填报';
 });

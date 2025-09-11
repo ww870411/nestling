@@ -30,7 +30,7 @@
               :index="`/project/${currentProjectId}/data-entry/${table.id}`" 
               :class="getStatusClass(table.id)"
             >
-              {{ table.name }}
+              {{ `${table.id} ${table.name.replace(/^\d+\s*/, '')}` }}
             </el-menu-item>
           </el-sub-menu>
         </el-menu>

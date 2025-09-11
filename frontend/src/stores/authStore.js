@@ -19,7 +19,8 @@ export const useAuthStore = defineStore('auth', {
       if (!state.user) return [];
 
       switch (state.user.globalRole) {
-        case 'super_admin' || 'god':
+        case 'super_admin':
+        case 'god':
           // Super admin can access all units.
           return ALL_UNITS;
         case 'regional_admin':
