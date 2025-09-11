@@ -35,7 +35,7 @@ export const menuData = [
       { 
         id: '1', 
         name: '集团汇总表', 
-        samePeriodEditable: 'all',
+        samePeriodEditable: '',
         validation: false,
         template: subsidiaryTemplate, 
         templateName: 'subsidiaryTemplate', 
@@ -53,7 +53,7 @@ export const menuData = [
       { 
         id: '2', 
         name: '主城区汇总表', 
-        samePeriodEditable: 'all',
+        samePeriodEditable: '',
         validation: false,
         template: subsidiaryTemplate, 
         templateName: 'subsidiaryTemplate', 
@@ -65,7 +65,7 @@ export const menuData = [
       { 
         id: '3', 
         name: '股份本部汇总表', 
-        samePeriodEditable: 'all',
+        samePeriodEditable: '',
         validation: false,
         template: subsidiaryTemplate, 
         templateName: 'subsidiaryTemplate', 
@@ -82,7 +82,7 @@ export const menuData = [
       { 
         id: '4', 
         name: '北海汇总表', 
-        samePeriodEditable: 'all',
+        samePeriodEditable: '',
         validation: false,
         template: subsidiaryTemplate, 
         templateName: 'subsidiaryTemplate', 
@@ -94,7 +94,7 @@ export const menuData = [
       { 
         id: '5', 
         name: '北海热电厂(热电联产)表', 
-        samePeriodEditable: 'all',
+        samePeriodEditable: '',
         validation: false,
         template: subsidiaryTemplate, 
         templateName: 'subsidiaryTemplate', 
@@ -104,7 +104,7 @@ export const menuData = [
       { 
         id: '6', 
         name: '北海热电厂(水炉)表', 
-        samePeriodEditable: 'all',
+        samePeriodEditable: '',
         validation: false,
         template: subsidiaryTemplate, 
         templateName: 'subsidiaryTemplate', 
@@ -114,7 +114,7 @@ export const menuData = [
       { 
         id: '7', 
         name: '北海热电厂(天然气炉)表', 
-        samePeriodEditable: 'all',
+        samePeriodEditable: '',
         validation: false,
         template: subsidiaryTemplate, 
         templateName: 'subsidiaryTemplate', 
@@ -129,8 +129,8 @@ export const menuData = [
       { 
         id: '8', 
         name: '香海热电厂表', 
-        samePeriodEditable: 'all',
-        validation: false,
+        samePeriodEditable: '',
+        validation: true,
         template: subsidiaryTemplate, 
         templateName: 'subsidiaryTemplate', 
         type: 'subsidiary',
@@ -144,7 +144,7 @@ export const menuData = [
       { 
         id: '9', 
         name: '供热公司表', 
-        samePeriodEditable: 'all',
+        samePeriodEditable: '',
         validation: false,
         template: subsidiaryTemplate, 
         templateName: 'subsidiaryTemplate', 
@@ -154,7 +154,7 @@ export const menuData = [
       { 
         id: '10', 
         name: '主城区电锅炉表', 
-        samePeriodEditable: 'all',
+        samePeriodEditable: '',
         validation: false,
         template: subsidiaryTemplate, 
         templateName: 'subsidiaryTemplate', 
@@ -184,7 +184,7 @@ export const menuData = [
       { 
         id: '12', 
         name: '北方热电表', 
-        samePeriodEditable: 'all',
+        samePeriodEditable: '',
         validation: false,
         template: subsidiaryTemplate, 
         templateName: 'subsidiaryTemplate', 
@@ -199,7 +199,7 @@ export const menuData = [
       { 
         id: '13', 
         name: '金普热电表', 
-        samePeriodEditable: 'all',
+        samePeriodEditable: '',
         validation: false,
         template: subsidiaryTemplate, 
         templateName: 'subsidiaryTemplate', 
@@ -214,7 +214,7 @@ export const menuData = [
       { 
         id: '14', 
         name: '庄河环海表', 
-        samePeriodEditable: 'all',
+        samePeriodEditable: '',
         validation: false,
         template: subsidiaryTemplate, 
         templateName: 'subsidiaryTemplate', 
@@ -229,7 +229,7 @@ export const menuData = [
       { 
         id: '15', 
         name: '研究院表', 
-        samePeriodEditable: 'all',
+        samePeriodEditable: '',
         validation: false,
         template: subsidiaryTemplate, 
         templateName: 'subsidiaryTemplate', 

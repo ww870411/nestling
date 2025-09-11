@@ -277,6 +277,7 @@ const initializeTableData = async () => {
       style: metric.style,
       type: metric.type, // Pass metric type to row
       formula: metric.formula, // Pass formula to row for calc validation
+      isForced: false, // Flag to prevent calculation override
       validation: metric.validation, // Pass personalized validation to row
       samePeriodEditable: metric.samePeriodEditable, // Pass editable flag to row
       requiredProperties: metric.requiredProperties, // Pass required properties to row
@@ -376,7 +377,8 @@ const calculateAll = () => {
 
     rowCalculatedFields.forEach(metricToCalculate => {
       const targetRow = getRowByMetricId(metricToCalculate.id);
-      if (!targetRow) return;
+      // Skip calculation for forced rows
+      if (!targetRow || targetRow.isForced) return;
 
       valueColumns.forEach(col => {
         if (getCellState(targetRow, col, currentTableConfig.value) !== 'READONLY_CALCULATED') return;
@@ -387,7 +389,7 @@ const calculateAll = () => {
         };
 
         try {
-          const funcBody = metricToCalculate.formula.replace(/VAL\((\d+)\)/g, (match, id) => `valResolver(${id})`);
+          const funcBody = metricToCalculate.formula.replace(/VAL\((\d+)\)/g, (match, id) => `(valResolver(${id}))`);
           const result = new Function('valResolver', `return ${funcBody}`)(valResolver);
           const newValue = parseFloat(result.toFixed(2));
           
@@ -441,7 +443,7 @@ const calculateAll = () => {
           const lastId = ids.length > 0 ? ids[ids.length - 1] : null;
           result = lastId ? valResolver(lastId) : 0;
         } else {
-          const funcBody = formulaToUse.replace(/VAL\((\d+)\)/g, (match, id) => `valResolver(${id})`);
+          const funcBody = formulaToUse.replace(/VAL\((\d+)\)/g, (match, id) => `(valResolver(${id}))`);
           result = new Function('valResolver', `return ${funcBody}`)(valResolver);
         }
         row.values[field.id] = parseFloat(result.toFixed(2));
@@ -451,7 +453,10 @@ const calculateAll = () => {
     });
   });
 
-  runValidation({ level: 'hard' });
+  // Run validation only if it's not explicitly disabled for the table
+  if (currentTableConfig.value?.validation !== false) {
+    runValidation({ level: 'hard' });
+  }
 };
 
 // --- NEW Validation Logic ---
@@ -545,46 +550,91 @@ const runValidation = ({ level = 'hard' } = {}) => {
       });
     };
 
-    // --- New Calc Validation Logic ---
     const processCalcRules = (calcConfig) => {
-      // A simple 'true' in the config object means use defaults.
       const config = typeof calcConfig === 'object' ? { ...baseScheme.calculated.calc, ...calcConfig } : baseScheme.calculated.calc;
 
       if (!config.enabled || row.type !== 'calculated' || !row.formula) return;
 
       const getRowByMetricId = (mId) => tableData.value.find(r => r.metricId === mId);
+      const sanitize = (v) => {
+        const p = parseFloat(v);
+        return isFinite(p) ? p : 0;
+      };
 
-      // Iterate over all columns to find which ones are calculated for this row
-      fieldConfig.value.forEach((col, colIndex) => {
-        if (getCellState(row, col, currentTableConfig.value) !== 'READONLY_CALCULATED') return;
+      // Per user request, C-type validation only applies to these two columns.
+      const columnsToValidate = fieldConfig.value.filter(
+        c => c.name === 'totals.plan' || c.name === 'totals.samePeriod'
+      );
 
-        const actualValue = parseFloat(row.values[col.id]);
+      if (row.isForced) {
+        // --- REVERSE VALIDATION: Check if children sum up to the forced parent ---
+        const childMetricIds = (row.formula.match(/\d+/g) || []).map(Number);
+        if (childMetricIds.length === 0) return;
 
-        // This resolver is now column-aware. It gets values from the same column in other rows.
-        const valResolver = (sourceMetricId) => {
-          const sourceRow = getRowByMetricId(sourceMetricId);
-          return sourceRow ? (parseFloat(sourceRow.values[col.id]) || 0) : 0;
-        };
+        columnsToValidate.forEach((col) => {
+          if (getCellState(row, col, currentTableConfig.value) !== 'READONLY_CALCULATED') return;
 
-        let expectedValue = NaN;
-        try {
-          const funcBody = row.formula.replace(/VAL\((\d+)\)/g, (match, id) => `valResolver(${id})`);
-          const result = new Function('valResolver', `return ${funcBody}`)(valResolver);
-          expectedValue = parseFloat(result);
-        } catch (e) {
-          console.error(`Error evaluating calc formula for metric ${metricId} in column ${col.id}:`, e);
-        }
+          const forcedValue = sanitize(row.values[col.id]);
 
-        if (!validationRules.calculation(actualValue, expectedValue, config.tolerance)) {
-          const key = `${metricId}-C-${col.id}`;
-          newErrors[key] = {
-            type: 'C',
-            message: config.message,
-            metricId: metricId,
-            fieldId: col.id,
+          const valResolver = (sourceMetricId) => {
+            const sourceRow = getRowByMetricId(sourceMetricId);
+            return sourceRow ? sanitize(sourceRow.values[col.id]) : 0;
           };
-        }
-      });
+
+          let childrenSum = 0;
+          try {
+            const funcBody = row.formula.replace(/VAL\((\d+)\)/g, (match, id) => `(valResolver(${id}))`);
+            const result = new Function('valResolver', `return ${funcBody}`)(valResolver);
+            childrenSum = sanitize(result);
+          } catch (e) {
+            console.error(`Error evaluating reverse-calc formula for metric ${metricId} in column ${col.id}:`, e);
+          }
+
+          if (!validationRules.calculation(forcedValue, childrenSum, config.tolerance)) {
+            // If validation fails, create errors for all child metrics in this column
+            childMetricIds.forEach(childId => {
+              const key = `${childId}-C-reverse-${row.metricId}-${col.id}`;
+              newErrors[key] = {
+                type: 'C',
+                message: `该值导致上级计算指标 '${row.values[1001]}' 的合计值不等于其强制设定的值 (${forcedValue})`,
+                metricId: childId,
+                fieldId: col.id,
+              };
+            });
+          }
+        });
+      } else {
+        // --- NORMAL VALIDATION: Check if the calculated value is correct ---
+        columnsToValidate.forEach((col) => {
+          if (getCellState(row, col, currentTableConfig.value) !== 'READONLY_CALCULATED') return;
+
+          const actualValue = sanitize(row.values[col.id]);
+
+          const valResolver = (sourceMetricId) => {
+            const sourceRow = getRowByMetricId(sourceMetricId);
+            return sourceRow ? sanitize(sourceRow.values[col.id]) : 0;
+          };
+
+          let expectedValue = 0;
+          try {
+            const funcBody = row.formula.replace(/VAL\((\d+)\)/g, (match, id) => `(valResolver(${id}))`);
+            const result = new Function('valResolver', `return ${funcBody}`)(valResolver);
+            expectedValue = sanitize(result);
+          } catch (e) {
+            console.error(`Error evaluating calc formula for metric ${metricId} in column ${col.id}:`, e);
+          }
+
+          if (!validationRules.calculation(actualValue, expectedValue, config.tolerance)) {
+            const key = `${metricId}-C-${col.id}`;
+            newErrors[key] = {
+              type: 'C',
+              message: config.message,
+              metricId: metricId,
+              fieldId: col.id,
+            };
+          }
+        });
+      }
     };
 
     if (finalValidation.hard) processRules(finalValidation.hard, 'A');
@@ -785,6 +835,7 @@ const _createPayload = () => {
       metricId: row.metricId,
       metricName: metricInfo ? metricInfo.name : 'unknown',
       type: row.type,
+      ...(row.isForced && { force: true }), // Conditionally add force flag
       values: processedValues,
     };
 
@@ -815,20 +866,27 @@ const _applyPayloadToTable = (payload) => {
   const loadedDataMap = new Map(payload.tableData.map(m => [m.metricId, m]));
 
   tableData.value.forEach(localRow => {
-    // Only apply loaded data to 'basic' rows. 'calculated' rows will be re-computed.
-    if (localRow.type !== 'basic') {
-      return; // Skip calculated rows
-    }
-
     const loadedMetric = loadedDataMap.get(localRow.metricId);
+
+    // Reset force flag before applying new data
+    localRow.isForced = false;
+
     if (loadedMetric) {
-      const loadedValuesMap = new Map(loadedMetric.values.map(v => [v.fieldId, v.value]));
-      Object.keys(localRow.values).forEach(fieldId => {
-        const numericFieldId = parseInt(fieldId);
-        if (loadedValuesMap.has(numericFieldId)) {
-          localRow.values[numericFieldId] = loadedValuesMap.get(numericFieldId);
-        }
-      });
+      // Apply the force flag from the payload
+      if (loadedMetric.force) {
+        localRow.isForced = true;
+      }
+
+      // Only apply loaded data to 'basic' rows or 'forced' calculated rows.
+      if (localRow.type === 'basic' || localRow.isForced) {
+        const loadedValuesMap = new Map(loadedMetric.values.map(v => [v.fieldId, v.value]));
+        Object.keys(localRow.values).forEach(fieldId => {
+          const numericFieldId = parseInt(fieldId);
+          if (loadedValuesMap.has(numericFieldId)) {
+            localRow.values[numericFieldId] = loadedValuesMap.get(numericFieldId);
+          }
+        });
+      }
     }
   });
 

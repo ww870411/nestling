@@ -1,6 +1,6 @@
 {
     "submit": {
-        "submittedAt": "2025-09-11T13:07:30.260Z",
+        "submittedAt": "2025-09-11T14:49:17.266Z",
         "table": {
             "id": "8",
             "name": "香海热电厂表",
@@ -674,25 +674,25 @@
                         "fieldId": 1003,
                         "fieldName": "totals.plan",
                         "fieldLabel": "本期计划",
-                        "value": 888
+                        "value": 0
                     },
                     {
                         "fieldId": 1004,
                         "fieldName": "totals.samePeriod",
                         "fieldLabel": "同期完成",
-                        "value": 0
+                        "value": 999
                     },
                     {
                         "fieldId": 1005,
                         "fieldName": "totals.diffRate",
                         "fieldLabel": "差异率",
-                        "value": null
+                        "value": -0.11
                     },
                     {
                         "fieldId": 2001,
                         "fieldName": "monthlyData.october.plan",
                         "fieldLabel": "10月-计划",
-                        "value": "888"
+                        "value": 0
                     },
                     {
                         "fieldId": 2002,
@@ -778,6 +778,7 @@
                 "metricId": 7,
                 "metricName": "供热量",
                 "type": "calculated",
+                "force": true,
                 "values": [
                     {
                         "fieldId": 1000,
@@ -801,19 +802,19 @@
                         "fieldId": 1003,
                         "fieldName": "totals.plan",
                         "fieldLabel": "本期计划",
-                        "value": 0
+                        "value": 555
                     },
                     {
                         "fieldId": 1004,
                         "fieldName": "totals.samePeriod",
                         "fieldLabel": "同期完成",
-                        "value": 0
+                        "value": 666
                     },
                     {
                         "fieldId": 1005,
                         "fieldName": "totals.diffRate",
                         "fieldLabel": "差异率",
-                        "value": null
+                        "value": -0.17
                     },
                     {
                         "fieldId": 2001,
@@ -9437,7 +9438,7 @@
                         "fieldId": 1003,
                         "fieldName": "totals.plan",
                         "fieldLabel": "本期计划",
-                        "value": 0
+                        "value": null
                     },
                     {
                         "fieldId": 1004,
@@ -9691,7 +9692,7 @@
                         "fieldId": 1003,
                         "fieldName": "totals.plan",
                         "fieldLabel": "本期计划",
-                        "value": 0
+                        "value": null
                     },
                     {
                         "fieldId": 1004,
@@ -9818,7 +9819,7 @@
                         "fieldId": 1003,
                         "fieldName": "totals.plan",
                         "fieldLabel": "本期计划",
-                        "value": 0
+                        "value": null
                     },
                     {
                         "fieldId": 1004,
@@ -10199,7 +10200,7 @@
                         "fieldId": 1003,
                         "fieldName": "totals.plan",
                         "fieldLabel": "本期计划",
-                        "value": 0
+                        "value": null
                     },
                     {
                         "fieldId": 1004,
@@ -10598,7 +10599,7 @@
                         "fieldId": 2001,
                         "fieldName": "monthlyData.october.plan",
                         "fieldLabel": "10月-计划",
-                        "value": null
+                        "value": 0
                     },
                     {
                         "fieldId": 2002,
@@ -10979,7 +10980,7 @@
                         "fieldId": 2001,
                         "fieldName": "monthlyData.october.plan",
                         "fieldLabel": "10月-计划",
-                        "value": null
+                        "value": 0
                     },
                     {
                         "fieldId": 2002,
@@ -11233,7 +11234,7 @@
                         "fieldId": 2001,
                         "fieldName": "monthlyData.october.plan",
                         "fieldLabel": "10月-计划",
-                        "value": null
+                        "value": 0
                     },
                     {
                         "fieldId": 2002,
