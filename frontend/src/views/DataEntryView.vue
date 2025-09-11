@@ -463,7 +463,8 @@ const evaluateValidationRule = (rule, rowData, findFieldByIdentifier) => {
         const value = rowData.values[field.id];
         if (value === undefined || value === null) return 0;
         const parsed = parseFloat(value);
-        return isNaN(parsed) ? 0 : parsed;
+        // Replace NaN, Infinity, and -Infinity with 0 for stable validation
+        return isFinite(parsed) ? parsed : 0;
     };
 
     const identifiers = Array.from(new Set(rule.match(/[a-zA-Z_][a-zA-Z0-9_.]*/g) || []));
