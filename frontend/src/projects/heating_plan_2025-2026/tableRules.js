@@ -13,58 +13,85 @@
  * @param {object} tableConfig - 当前表格的完整配置对象 from menu.js
  * @returns {'WRITABLE' | 'READONLY_CALCULATED' | 'READONLY_DISPLAY' | 'READONLY_AGGREGATED'} - 返回单元格的状态
  */
-export const getCellState = (row, field, tableConfig) => {
-  if (!row || !field) {
-    return 'READONLY_DISPLAY';
-  }
+/**
+ * @function getCellState
+ * @description 决定单元格的最终状态（可写、只读、只读计算等）。
+ * 包含了核心的业务逻辑，特别是针对“同期完成”字段的动态权限控制。
+ *
+ * “同期完成”单元格（field.name.endsWith('.samePeriod')）是否可写的判断逻辑如下：
+ * 该权限由表级（menu.js中）和指标级（模板文件中）的 `samePeriodEditable` 属性共同决定。
+ *
+ * 解析顺序与规则:
+ * 1. 检查表级 `samePeriodEditable` 的设置:
+ *    - 若为 'all': 单元格强制为【可写】。
+ *    - 若为 'none': 单元格强制为【只读】。
+ *    - 若为数组 (e.g., [1, 2, 3]):
+ *        - 如果当前指标ID在数组中, 单元格为【可写】。
+ *        - 如果不在数组中, 则继续执行第2步。
+ *    - 若为空或未设置: 表级无影响，继续执行第2步。
+ *
+ * 2. 检查指标级 `samePeriodEditable` 的设置:
+ *    - 若为 true: 单元格为【可写】。
+ *
+ * 3. 默认状态:
+ *    - 如果以上所有规则都未允许写入，单元格最终为【只读】。
+ */
+export const getCellState = (row, field, currentTableConfig) => {
+  const properties = currentTableConfig?.properties || {};
+  const isAggregated = properties.isAggregated || false;
+  const isGroupSummary = properties.isGroupSummary || false;
 
-  // 规则 1: 计算类型的行或列，永远是只读计算状态 (最高优先级)
-  if (row.type === 'calculated' || field.type === 'calculated') {
+  // For group summary tables (Table 0), all data cells are readonly calculated
+  if (isGroupSummary && field.component !== 'label') {
     return 'READONLY_CALCULATED';
   }
 
-  // 规则 2: 在汇总表中，非排除的指标行，其输入单元格是只读的汇总态
-  if (tableConfig?.type === 'summary') {
-    const isExcluded = tableConfig.aggregationExclusions?.includes(row.metricId);
-    if (!isExcluded && field.component === 'input') {
+  // For aggregated tables (like Table 1), plan is readonly, others are calculated
+  if (isAggregated && field.component !== 'label') {
+    if (field.name.endsWith('.plan')) {
       return 'READONLY_AGGREGATED';
     }
+    return 'READONLY_CALCULATED';
   }
 
-  // 规则 3: display类型的列永远不可写
-  if (field.component === 'display') {
-    return 'READONLY_DISPLAY';
-  }
-
-  const required = row.requiredProperties;
-  const tableProperties = tableConfig?.properties || {};
-
-  // 规则 4: 检查行内定义的 requiredProperties (已废弃，但保留兼容)
-  if (required && Object.keys(required).length > 0) {
-    for (const key in required) {
-      const requiredValues = required[key];
-      const tableValues = tableProperties[key] || [];
-      if (requiredValues.length > 0 && tableValues.length === 0) {
-        return 'READONLY_CALCULATED';
-      }
-      const match = requiredValues.some(val => tableValues.includes(val));
-      if (!match) {
-        return 'READONLY_CALCULATED';
-      }
+  // For basic data entry tables
+  if (field.name.endsWith('.plan')) {
+    if (row.type === 'basic') {
+      return 'WRITABLE';
     }
   }
 
-  // 规则 5: 默认可写情况
-  if (field.component === 'input') {
-    return 'WRITABLE';
+  if (field.name.endsWith('.samePeriod')) {
+    const tableSetting = currentTableConfig?.samePeriodEditable;
+    const metricSetting = row.samePeriodEditable;
+    const metricId = row.metricId;
+
+    // Check for table-level overrides that stop further checks
+    if (tableSetting === 'all') return 'WRITABLE';
+    if (tableSetting === 'none') return 'READONLY';
+
+    // Check for table-level array setting
+    if (Array.isArray(tableSetting)) {
+      if (tableSetting.includes(metricId)) {
+        return 'WRITABLE';
+      }
+    }
+
+    // Fall back to metric-level setting
+    if (metricSetting === true) {
+      return 'WRITABLE';
+    }
+
+    // Final Default
+    return 'READONLY';
   }
 
-  // 规则 6: 特殊情况 - 同期值可编辑
-  if (row.samePeriodEditable && field.name && field.name.endsWith('.samePeriod')) {
-    return 'WRITABLE';
+  if (field.component === 'label') {
+    return 'READONLY';
   }
 
-  return 'READONLY_DISPLAY';
+  // Default for other cells (like diffRate) is calculated
+  return 'READONLY_CALCULATED';
 };
 
 

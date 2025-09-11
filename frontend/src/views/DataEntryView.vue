@@ -847,7 +847,16 @@ const handleLoadDraft = () => {
 };
 
 const handleSubmit = async () => {
-  runValidation({ level: 'all' });
+  // Check if validation should be skipped for this table
+  const shouldValidate = currentTableConfig.value?.validation;
+
+  if (shouldValidate !== false) {
+    runValidation({ level: 'all' });
+  } else {
+    // If validation is skipped, clear any existing errors
+    errors.value = {};
+  }
+
   if (hasHardErrors.value) {
     ElMessage.error('提交失败，请修正所有红色错误后再试。');
     return;
