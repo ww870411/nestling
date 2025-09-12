@@ -271,7 +271,7 @@ const softErrorsForDisplay = computed(() => Object.entries(errors.value).filter(
 const initializeTableData = async () => {
   if (!reportTemplate.value || !fieldConfig.value) return;
 
-  const data = reportTemplate.value.filter(metric => metric.visible !== false).map(metric => {
+  const data = reportTemplate.value.filter(metric => metric.visible !== false).map((metric, index) => {
     const rowData = {
       metricId: metric.id,
       style: metric.style,
@@ -288,7 +288,7 @@ const initializeTableData = async () => {
 
     fieldConfig.value.forEach(field => {
       if (field.id === 1000) { // NEW: Handle metric ID column
-        rowData.values[field.id] = metric.id;
+        rowData.values[field.id] = index + 1;
       } else if (field.name === 'name') {
         rowData.values[field.id] = metric.name;
       } else if (field.name === 'unit') {
@@ -889,6 +889,9 @@ const _applyPayloadToTable = (payload) => {
       if (localRow.type === 'basic') {
         Object.keys(localRow.values).forEach(fieldId => {
           const numericFieldId = parseInt(fieldId);
+          // Do not overwrite the sequential number column (ID 1000)
+          if (numericFieldId === 1000) return;
+
           if (loadedValuesMap.has(numericFieldId)) {
             localRow.values[numericFieldId] = loadedValuesMap.get(numericFieldId);
           }
