@@ -1093,13 +1093,18 @@ const handleExport = () => {
     // Handle row-level formulas (e.g., VAL(8)+VAL(9))
     if (metricDef && metricDef.type === 'calculated' && metricDef.formula) {
       fieldConfig.value.forEach((field, colIndex) => {
-        if (field.component !== 'input') return; // Apply formula only to data columns
-        const c = colIndex;
-        const excelFormula = metricDef.formula.replace(/VAL\((\d+)\)/g, (match, id) => {
-          const sourceRowIndex = metricIdToRowIndex.get(parseInt(id));
-          return XLSX.utils.encode_cell({ r: sourceRowIndex, c });
-        });
-        worksheet[XLSX.utils.encode_cell({ r, c })] = { t: 'n', f: excelFormula };
+        const cellState = getCellState(row, field, currentTableConfig.value);
+
+        // Only add formulas to cells that are meant to be calculated,
+        // and respect the 'isForced' flag for samePeriod columns.
+        if (cellState === 'READONLY_CALCULATED' && !(row.isForced && typeof field.name === 'string' && field.name.endsWith('.samePeriod'))) {
+          const c = colIndex;
+          const excelFormula = metricDef.formula.replace(/VAL\((\d+)\)/g, (match, id) => {
+            const sourceRowIndex = metricIdToRowIndex.get(parseInt(id));
+            return XLSX.utils.encode_cell({ r: sourceRowIndex, c });
+          });
+          worksheet[XLSX.utils.encode_cell({ r, c })] = { t: 'n', f: excelFormula };
+        }
       });
     }
 
