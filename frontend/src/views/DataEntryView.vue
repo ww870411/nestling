@@ -501,7 +501,7 @@ const runValidation = ({ level = 'hard' } = {}) => {
   const baseScheme = validationSchemes[schemeName] || validationSchemes['default'];
   const overrides = currentTableConfig.value?.validationOverrides || {};
 
-  if (currentTableConfig.value?.validation === null) {
+  if (currentTableConfig.value?.validation === false) {
     errors.value = {};
     return;
   }

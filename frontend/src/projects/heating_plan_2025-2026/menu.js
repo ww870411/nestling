@@ -171,7 +171,7 @@ export const menuData = [
         id: '11', 
         name: '金州热电表', 
         samePeriodEditable: '',
-        validation: false,
+        validation: true,
         template: subsidiaryTemplate, 
         templateName: 'subsidiaryTemplate', 
         type: 'subsidiary',
