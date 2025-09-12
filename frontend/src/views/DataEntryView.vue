@@ -127,7 +127,7 @@
 <script setup>
 import { ref, computed, watch } from 'vue';
 import { useRoute } from 'vue-router';
-import { ElMessage } from 'element-plus';
+import { ElMessage, ElMessageBox } from 'element-plus';
 import { storeToRefs } from 'pinia';
 import { useProjectStore } from '@/stores/projectStore';
 import { Close, Loading, Download } from '@element-plus/icons-vue'; // Import Download icon
@@ -363,6 +363,46 @@ const calculateAll = () => {
 
   const getRowByMetricId = (metricId) => tableData.value.find(r => r.metricId === metricId);
 
+  // --- 列内计算 (Column-level formulas) ---
+  const colCalculatedFields = fieldConfig.value.filter(f => f.type === 'calculated' && f.formula);
+  tableData.value.forEach(row => {
+    const metricDef = reportTemplate.value.find(m => m.id === row.metricId);
+
+    colCalculatedFields.forEach(field => {
+      const valResolver = (columnId) => parseFloat(row.values[columnId]) || 0;
+      
+      let formulaToUse = field.formula;
+      if (metricDef?.columnFormulaOverrides?.[field.name]) {
+        formulaToUse = metricDef.columnFormulaOverrides[field.name];
+      }
+
+      try {
+        let result;
+        
+        if (formulaToUse.startsWith('AVG(')) {
+          const ids = formulaToUse.match(/\d+/g).map(Number);
+          const values = ids.map(id => valResolver(id));
+          if (values.length > 0) {
+            const sum = values.reduce((a, b) => a + b, 0);
+            result = sum / values.length;
+          } else {
+            result = 0;
+          }
+        } else if (formulaToUse.startsWith('LAST_VAL(')) {
+          const ids = formulaToUse.match(/\d+/g).map(Number);
+          const lastId = ids.length > 0 ? ids[ids.length - 1] : null;
+          result = lastId ? valResolver(lastId) : 0;
+        } else {
+          const funcBody = formulaToUse.replace(/VAL\((\d+)\)/g, (match, id) => `(valResolver(${id}))`);
+          result = new Function('valResolver', `return ${funcBody}`)(valResolver);
+        }
+        row.values[field.id] = parseFloat(result.toFixed(2));
+      } catch (e) {
+        console.error(`Error calculating column formula for field ${field.id} in row ${row.metricId}:`, e);
+      }
+    });
+  });
+
   // --- 行内计算 (Row-level formulas) ---
   const rowCalculatedFields = reportTemplate.value.filter(f => f.type === 'calculated' && f.formula);
   const valueColumns = fieldConfig.value.filter(fc => fc.component === 'input' || fc.component === 'display');
@@ -413,46 +453,6 @@ const calculateAll = () => {
   if (iteration >= MAX_ITERATIONS) {
       console.warn("Calculation reached max iterations. Check for circular dependencies in formulas.");
   }
-
-  // --- 列内计算 (Column-level formulas) ---
-  const colCalculatedFields = fieldConfig.value.filter(f => f.type === 'calculated' && f.formula);
-  tableData.value.forEach(row => {
-    const metricDef = reportTemplate.value.find(m => m.id === row.metricId);
-
-    colCalculatedFields.forEach(field => {
-      const valResolver = (columnId) => parseFloat(row.values[columnId]) || 0;
-      
-      let formulaToUse = field.formula;
-      if (metricDef?.columnFormulaOverrides?.[field.name]) {
-        formulaToUse = metricDef.columnFormulaOverrides[field.name];
-      }
-
-      try {
-        let result;
-        
-        if (formulaToUse.startsWith('AVG(')) {
-          const ids = formulaToUse.match(/\d+/g).map(Number);
-          const values = ids.map(id => valResolver(id));
-          if (values.length > 0) {
-            const sum = values.reduce((a, b) => a + b, 0);
-            result = sum / values.length;
-          } else {
-            result = 0;
-          }
-        } else if (formulaToUse.startsWith('LAST_VAL(')) {
-          const ids = formulaToUse.match(/\d+/g).map(Number);
-          const lastId = ids.length > 0 ? ids[ids.length - 1] : null;
-          result = lastId ? valResolver(lastId) : 0;
-        } else {
-          const funcBody = formulaToUse.replace(/VAL\((\d+)\)/g, (match, id) => `(valResolver(${id}))`);
-          result = new Function('valResolver', `return ${funcBody}`)(valResolver);
-        }
-        row.values[field.id] = parseFloat(result.toFixed(2));
-      } catch (e) {
-        console.error(`Error calculating column formula for field ${field.id} in row ${row.metricId}:`, e);
-      }
-    });
-  });
 
   // Run validation only if it's not explicitly disabled for the table
   if (currentTableConfig.value?.validation !== false) {
@@ -909,6 +909,46 @@ const _applyPayloadToTable = (payload) => {
 
   calculateAll(); // Recalculate formulas and validations
   ElMessage.success('数据已成功加载！');
+
+  // New logic to show validation errors
+  const hardErrors = Object.entries(errors.value).filter(([, error]) => error.type === 'A' || error.type === 'C');
+  if (hardErrors.length > 0) {
+    const errorDetails = hardErrors.map(([key, error]) => {
+      const label = getErrorLabel(key);
+      const [metricName, fieldName] = label.split(' - ');
+      return {
+        metric: metricName || 'N/A',
+        field: fieldName || 'N/A',
+        message: error.message
+      };
+    });
+
+    const tableHeader = `
+      <thead style="text-align: left;">
+        <tr>
+          <th style="padding: 4px 8px;">指标</th>
+          <th style="padding: 4px 8px;">字段</th>
+          <th style="padding: 4px 8px;">错误信息</th>
+        </tr>
+      </thead>
+    `;
+
+    const tableBody = errorDetails.map(e => `
+      <tr>
+        <td style="padding: 4px 8px;">${e.metric}</td>
+        <td style="padding: 4px 8px;">${e.field}</td>
+        <td style="padding: 4px 8px;">${e.message}</td>
+      </tr>
+    `).join('');
+
+    const tableHtml = `<table style="width: 100%; border-collapse: collapse;">${tableHeader}<tbody>${tableBody}</tbody></table>`;
+
+    ElMessageBox.alert(tableHtml, '校验错误详情', {
+      dangerouslyUseHTMLString: true,
+      confirmButtonText: '确定',
+      width: '60%',
+    });
+  }
 };
 
 const handleSave = async () => {

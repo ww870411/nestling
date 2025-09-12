@@ -84,6 +84,11 @@ export const getCellState = (row, field, currentTableConfig) => {
 
   // 同期可写性仅作用于“月度同期”字段：monthlyData.*.samePeriod
   if (typeof field.name === 'string' && field.name.startsWith('monthlyData.') && field.name.endsWith('.samePeriod')) {
+    // If the row itself is a calculated metric, its samePeriod value should also be calculated.
+    if (row.type === 'calculated') {
+      return 'READONLY_CALCULATED';
+    }
+
     const tableSetting = currentTableConfig?.samePeriodEditable;
     const metricSetting = row.samePeriodEditable;
     const metricId = row.metricId;
