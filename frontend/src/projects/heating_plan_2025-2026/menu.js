@@ -60,7 +60,7 @@ export const menuData = [
         type: 'summary',
         subsidiaries: ['4', '8', '9','10'],
         aggregationExclusions: [],
-        properties: { productionMethod: ['thermoelectric','heating_company','boiler_room'], fuelType: ['coal','natural_gas'], businessModel: ['independent'] ,special:['related-rarty transaction','steam']},
+        properties: { productionMethod: ['thermoelectric','heating_company','boiler_room'], fuelType: ['coal','natural_gas'], businessModel: ['independent'] ,special:['related-rarty transaction','steam','hotwater','low vacuum']},
       },
       { 
         id: '3', 
@@ -72,7 +72,7 @@ export const menuData = [
         type: 'summary',
         subsidiaries: ['4'],
         aggregationExclusions: [],
-        properties: { productionMethod: ['thermoelectric','heating_company','boiler_room'], fuelType: ['coal','natural_gas'], businessModel: ['independent'] ,special:['related-rarty transaction','steam']},
+        properties: { productionMethod: ['thermoelectric','heating_company','boiler_room'], fuelType: ['coal','natural_gas'], businessModel: ['independent'] ,special:['related-rarty transaction','steam','hotwater','low vacuum']},
       },
     ]
   },
@@ -89,7 +89,7 @@ export const menuData = [
         type: 'summary',
         subsidiaries: ['5', '6', '7'],
         aggregationExclusions: [97,105,107,109,111,113,114],  //在表5,6,7中不必填写，因此默认为零，防止其将汇总表中填写的数据覆盖，并且在读取时引用本表自身的json数据。
-        properties: { productionMethod: ['thermoelectric','boiler_room'], fuelType: ['coal','natural_gas'], businessModel: ['independent'] },
+        properties: { productionMethod: ['thermoelectric','boiler_room'], fuelType: ['coal','natural_gas'], businessModel: ['semi_independent'] },
       },
       { 
         id: '5', 
@@ -99,7 +99,7 @@ export const menuData = [
         template: subsidiaryTemplate, 
         templateName: 'subsidiaryTemplate', 
         type: 'subsidiary',
-        properties: { productionMethod: ['thermoelectric'], fuelType: ['coal'], businessModel: ['non_independent'] },
+        properties: { productionMethod: ['thermoelectric'], fuelType: ['coal'], businessModel: ['non_independent'],special:['steel ball','low vacuum'] },
       },
       { 
         id: '6', 
@@ -135,7 +135,7 @@ export const menuData = [
         template: subsidiaryTemplate, 
         templateName: 'subsidiaryTemplate', 
         type: 'subsidiary',
-        properties: { productionMethod: ['thermoelectric'], fuelType: ['coal'], businessModel: ['independent'] },
+        properties: { productionMethod: ['thermoelectric'], fuelType: ['coal'], businessModel: ['independent'],special:['low vacuum'] },
       } 
     ]
   },
@@ -150,7 +150,7 @@ export const menuData = [
         template: subsidiaryTemplate, 
         templateName: 'subsidiaryTemplate', 
         type: 'subsidiary',
-        properties: { productionMethod: ['heating_company'], fuelType: [], businessModel: ['independent'],special:['steam'] },
+        properties: { productionMethod: ['heating_company'], fuelType: [], businessModel: ['independent'],special:['hotwater','steam'] },
       },
       { 
         id: '10', 
@@ -175,7 +175,7 @@ export const menuData = [
         template: subsidiaryTemplate, 
         templateName: 'subsidiaryTemplate', 
         type: 'subsidiary',
-        properties: { productionMethod: ['thermoelectric','heating_company'], fuelType: ['coal'], businessModel: ['independent'] },
+        properties: { productionMethod: ['thermoelectric','heating_company'], fuelType: ['coal'], businessModel: ['independent'] ,special:['hotwater','low vacuum']},
       } 
     ]
   },
@@ -190,7 +190,7 @@ export const menuData = [
         template: subsidiaryTemplate, 
         templateName: 'subsidiaryTemplate', 
         type: 'subsidiary',
-        properties: { productionMethod: ['thermoelectric','heating_company'], fuelType: ['coal'], businessModel: ['independent'] },
+        properties: { productionMethod: ['thermoelectric','heating_company'], fuelType: ['coal'], businessModel: ['independent'] ,special:['hotwater','coarse powder','steel ball']},
       } 
     ]
   },
@@ -205,7 +205,7 @@ export const menuData = [
         template: subsidiaryTemplate, 
         templateName: 'subsidiaryTemplate', 
         type: 'subsidiary',
-        properties: { productionMethod: ['boiler_room'], fuelType: ['coal'], businessModel: ['independent'] ,special:['jinpu']},
+        properties: { productionMethod: ['heating_company','boiler_room'], fuelType: ['coal'], businessModel: ['independent'] ,special:['hotwater']},
       } 
     ]
   },
@@ -220,7 +220,7 @@ export const menuData = [
         template: subsidiaryTemplate, 
         templateName: 'subsidiaryTemplate', 
         type: 'subsidiary',
-        properties: { productionMethod: ['boiler_room'], fuelType: ['coal','purchased_heat'], businessModel: ['independent'] },
+        properties: { productionMethod: ['heating_company','boiler_room'], fuelType: ['coal','purchased_heat'], businessModel: ['independent'] },
       } 
     ]
   },
