@@ -359,7 +359,7 @@ async def get_table_statuses(project_id: str, table_ids: list[str] = Body(...)):
     submissions_dir = Path(f"app/data/{project_id}_data")
     for table_id in table_ids:
         file_path = submissions_dir / f"{table_id}.json"
-        status_info = {"status": "new", "submittedAt": None}
+        status_info = {"status": "new", "submittedAt": None, "submittedBy": None}
 
         if file_path.exists():
             try:
@@ -370,12 +370,19 @@ async def get_table_statuses(project_id: str, table_ids: list[str] = Body(...)):
                         continue
                     data = json.loads(content)
                 
-                if data.get("submit"):
-                    status_info["status"] = "submitted"
-                    status_info["submittedAt"] = data["submit"].get("submittedAt")
-                    status_info["submittedBy"] = data["submit"].get("submittedBy")
-                elif data.get("temp"):
+                # Default to 'saved' if a temp copy exists
+                if data.get("temp"):
                     status_info["status"] = "saved"
+
+                # Check for a valid submission that can override the status
+                if data.get("submit"):
+                    submitted_by = data["submit"].get("submittedBy")
+                    # If NOT submitted by the admin, then it's officially "submitted"
+                    if not (submitted_by and submitted_by.get("username") == 'ww870411'):
+                        status_info["status"] = "submitted"
+                        status_info["submittedAt"] = data["submit"].get("submittedAt")
+                        status_info["submittedBy"] = data["submit"].get("submittedBy")
+
             except Exception:
                 pass
         

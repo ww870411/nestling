@@ -58,7 +58,7 @@ export const menuData = [
         template: subsidiaryTemplate, 
         templateName: 'subsidiaryTemplate', 
         type: 'summary',
-        subsidiaries: ['4', '8', '9'],
+        subsidiaries: ['4', '8', '9','10'],
         aggregationExclusions: [],
         properties: { productionMethod: ['thermoelectric','heating_company','boiler_room'], fuelType: ['coal','natural_gas'], businessModel: ['independent'] },
       },

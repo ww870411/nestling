@@ -1,15 +1,15 @@
 {
     "submit": {
-        "submittedAt": "2025-09-12T02:24:15.388Z",
+        "submittedAt": "2025-09-12T04:11:42.719Z",
         "table": {
             "id": "7",
             "name": "北海热电厂(天然气炉)表",
             "template": "subsidiaryTemplate"
         },
         "submittedBy": {
-            "username": "group_admin",
-            "unit": "集团公司",
-            "globalRole": "super_admin"
+            "username": "ww870411",
+            "unit": "系统管理员",
+            "globalRole": "god"
         },
         "tableData": [
             {
@@ -21,7 +21,7 @@
                         "fieldId": 1000,
                         "fieldName": "metricid",
                         "fieldLabel": "指标序号",
-                        "value": 1
+                        "value": "1"
                     },
                     {
                         "fieldId": 1001,
@@ -148,7 +148,7 @@
                         "fieldId": 1000,
                         "fieldName": "metricid",
                         "fieldLabel": "指标序号",
-                        "value": 2
+                        "value": "2"
                     },
                     {
                         "fieldId": 1001,
@@ -275,7 +275,7 @@
                         "fieldId": 1000,
                         "fieldName": "metricid",
                         "fieldLabel": "指标序号",
-                        "value": 3
+                        "value": "3"
                     },
                     {
                         "fieldId": 1001,
@@ -397,12 +397,13 @@
                 "metricId": 4,
                 "metricName": "燃煤锅炉装机容量",
                 "type": "basic",
+                "force": true,
                 "values": [
                     {
                         "fieldId": 1000,
                         "fieldName": "metricid",
                         "fieldLabel": "指标序号",
-                        "value": 4
+                        "value": "4"
                     },
                     {
                         "fieldId": 1001,
@@ -426,13 +427,13 @@
                         "fieldId": 1004,
                         "fieldName": "totals.samePeriod",
                         "fieldLabel": "同期完成",
-                        "value": 0
+                        "value": 217
                     },
                     {
                         "fieldId": 1005,
                         "fieldName": "totals.diffRate",
                         "fieldLabel": "差异率",
-                        "value": null
+                        "value": -1
                     },
                     {
                         "fieldId": 2001,
@@ -444,7 +445,7 @@
                         "fieldId": 2002,
                         "fieldName": "monthlyData.october.samePeriod",
                         "fieldLabel": "10月-同期",
-                        "value": 0
+                        "value": 217
                     },
                     {
                         "fieldId": 2003,
@@ -456,7 +457,7 @@
                         "fieldId": 2004,
                         "fieldName": "monthlyData.november.samePeriod",
                         "fieldLabel": "11月-同期",
-                        "value": 0
+                        "value": 217
                     },
                     {
                         "fieldId": 2005,
@@ -468,7 +469,7 @@
                         "fieldId": 2006,
                         "fieldName": "monthlyData.december.samePeriod",
                         "fieldLabel": "12月-同期",
-                        "value": 0
+                        "value": 217
                     },
                     {
                         "fieldId": 2007,
@@ -480,7 +481,7 @@
                         "fieldId": 2008,
                         "fieldName": "monthlyData.january.samePeriod",
                         "fieldLabel": "1月-同期",
-                        "value": 0
+                        "value": 217
                     },
                     {
                         "fieldId": 2009,
@@ -492,7 +493,7 @@
                         "fieldId": 2010,
                         "fieldName": "monthlyData.february.samePeriod",
                         "fieldLabel": "2月-同期",
-                        "value": 0
+                        "value": 217
                     },
                     {
                         "fieldId": 2011,
@@ -504,7 +505,7 @@
                         "fieldId": 2012,
                         "fieldName": "monthlyData.march.samePeriod",
                         "fieldLabel": "3月-同期",
-                        "value": 0
+                        "value": 217
                     },
                     {
                         "fieldId": 2013,
@@ -516,7 +517,7 @@
                         "fieldId": 2014,
                         "fieldName": "monthlyData.april.samePeriod",
                         "fieldLabel": "4月-同期",
-                        "value": 0
+                        "value": 217
                     }
                 ]
             },
@@ -529,7 +530,7 @@
                         "fieldId": 1000,
                         "fieldName": "metricid",
                         "fieldLabel": "指标序号",
-                        "value": 5
+                        "value": "5"
                     },
                     {
                         "fieldId": 1001,
@@ -656,7 +657,7 @@
                         "fieldId": 1000,
                         "fieldName": "metricid",
                         "fieldLabel": "指标序号",
-                        "value": 6
+                        "value": "6"
                     },
                     {
                         "fieldId": 1001,
@@ -910,7 +911,7 @@
                         "fieldId": 1000,
                         "fieldName": "metricid",
                         "fieldLabel": "指标序号",
-                        "value": 8
+                        "value": "8"
                     },
                     {
                         "fieldId": 1001,
@@ -1037,7 +1038,7 @@
                         "fieldId": 1000,
                         "fieldName": "metricid",
                         "fieldLabel": "指标序号",
-                        "value": 9
+                        "value": "9"
                     },
                     {
                         "fieldId": 1001,
@@ -1164,7 +1165,7 @@
                         "fieldId": 1000,
                         "fieldName": "metricid",
                         "fieldLabel": "指标序号",
-                        "value": 10
+                        "value": "10"
                     },
                     {
                         "fieldId": 1001,
@@ -1291,7 +1292,7 @@
                         "fieldId": 1000,
                         "fieldName": "metricid",
                         "fieldLabel": "指标序号",
-                        "value": 11
+                        "value": "11"
                     },
                     {
                         "fieldId": 1001,
@@ -1418,7 +1419,7 @@
                         "fieldId": 1000,
                         "fieldName": "metricid",
                         "fieldLabel": "指标序号",
-                        "value": 12
+                        "value": "12"
                     },
                     {
                         "fieldId": 1001,
@@ -1545,7 +1546,7 @@
                         "fieldId": 1000,
                         "fieldName": "metricid",
                         "fieldLabel": "指标序号",
-                        "value": 13
+                        "value": "13"
                     },
                     {
                         "fieldId": 1001,
@@ -1672,7 +1673,7 @@
                         "fieldId": 1000,
                         "fieldName": "metricid",
                         "fieldLabel": "指标序号",
-                        "value": 14
+                        "value": "14"
                     },
                     {
                         "fieldId": 1001,
@@ -1799,7 +1800,7 @@
                         "fieldId": 1000,
                         "fieldName": "metricid",
                         "fieldLabel": "指标序号",
-                        "value": 15
+                        "value": "15"
                     },
                     {
                         "fieldId": 1001,
@@ -1926,7 +1927,7 @@
                         "fieldId": 1000,
                         "fieldName": "metricid",
                         "fieldLabel": "指标序号",
-                        "value": 16
+                        "value": "16"
                     },
                     {
                         "fieldId": 1001,
@@ -2053,7 +2054,7 @@
                         "fieldId": 1000,
                         "fieldName": "metricid",
                         "fieldLabel": "指标序号",
-                        "value": 17
+                        "value": "17"
                     },
                     {
                         "fieldId": 1001,
@@ -2307,7 +2308,7 @@
                         "fieldId": 1000,
                         "fieldName": "metricid",
                         "fieldLabel": "指标序号",
-                        "value": 19
+                        "value": "19"
                     },
                     {
                         "fieldId": 1001,
@@ -2434,7 +2435,7 @@
                         "fieldId": 1000,
                         "fieldName": "metricid",
                         "fieldLabel": "指标序号",
-                        "value": 20
+                        "value": "20"
                     },
                     {
                         "fieldId": 1001,
@@ -2561,7 +2562,7 @@
                         "fieldId": 1000,
                         "fieldName": "metricid",
                         "fieldLabel": "指标序号",
-                        "value": 21
+                        "value": "21"
                     },
                     {
                         "fieldId": 1001,
@@ -2688,7 +2689,7 @@
                         "fieldId": 1000,
                         "fieldName": "metricid",
                         "fieldLabel": "指标序号",
-                        "value": 22
+                        "value": "22"
                     },
                     {
                         "fieldId": 1001,
@@ -2815,7 +2816,7 @@
                         "fieldId": 1000,
                         "fieldName": "metricid",
                         "fieldLabel": "指标序号",
-                        "value": 23
+                        "value": "23"
                     },
                     {
                         "fieldId": 1001,
@@ -2942,7 +2943,7 @@
                         "fieldId": 1000,
                         "fieldName": "metricid",
                         "fieldLabel": "指标序号",
-                        "value": 24
+                        "value": "24"
                     },
                     {
                         "fieldId": 1001,
@@ -3196,7 +3197,7 @@
                         "fieldId": 1000,
                         "fieldName": "metricid",
                         "fieldLabel": "指标序号",
-                        "value": 26
+                        "value": "26"
                     },
                     {
                         "fieldId": 1001,
@@ -3323,7 +3324,7 @@
                         "fieldId": 1000,
                         "fieldName": "metricid",
                         "fieldLabel": "指标序号",
-                        "value": 27
+                        "value": "27"
                     },
                     {
                         "fieldId": 1001,
@@ -3704,7 +3705,7 @@
                         "fieldId": 1000,
                         "fieldName": "metricid",
                         "fieldLabel": "指标序号",
-                        "value": 30
+                        "value": "30"
                     },
                     {
                         "fieldId": 1001,
@@ -3831,7 +3832,7 @@
                         "fieldId": 1000,
                         "fieldName": "metricid",
                         "fieldLabel": "指标序号",
-                        "value": 31
+                        "value": "31"
                     },
                     {
                         "fieldId": 1001,
@@ -4085,7 +4086,7 @@
                         "fieldId": 1000,
                         "fieldName": "metricid",
                         "fieldLabel": "指标序号",
-                        "value": 33
+                        "value": "33"
                     },
                     {
                         "fieldId": 1001,
@@ -4212,7 +4213,7 @@
                         "fieldId": 1000,
                         "fieldName": "metricid",
                         "fieldLabel": "指标序号",
-                        "value": 34
+                        "value": "34"
                     },
                     {
                         "fieldId": 1001,
@@ -4593,7 +4594,7 @@
                         "fieldId": 1000,
                         "fieldName": "metricid",
                         "fieldLabel": "指标序号",
-                        "value": 37
+                        "value": "37"
                     },
                     {
                         "fieldId": 1001,
@@ -4720,7 +4721,7 @@
                         "fieldId": 1000,
                         "fieldName": "metricid",
                         "fieldLabel": "指标序号",
-                        "value": 38
+                        "value": "38"
                     },
                     {
                         "fieldId": 1001,
@@ -4847,7 +4848,7 @@
                         "fieldId": 1000,
                         "fieldName": "metricid",
                         "fieldLabel": "指标序号",
-                        "value": 39
+                        "value": "39"
                     },
                     {
                         "fieldId": 1001,
@@ -5101,7 +5102,7 @@
                         "fieldId": 1000,
                         "fieldName": "metricid",
                         "fieldLabel": "指标序号",
-                        "value": 41
+                        "value": "41"
                     },
                     {
                         "fieldId": 1001,
@@ -5355,7 +5356,7 @@
                         "fieldId": 1000,
                         "fieldName": "metricid",
                         "fieldLabel": "指标序号",
-                        "value": 43
+                        "value": "43"
                     },
                     {
                         "fieldId": 1001,
@@ -5482,7 +5483,7 @@
                         "fieldId": 1000,
                         "fieldName": "metricid",
                         "fieldLabel": "指标序号",
-                        "value": 44
+                        "value": "44"
                     },
                     {
                         "fieldId": 1001,
@@ -5609,7 +5610,7 @@
                         "fieldId": 1000,
                         "fieldName": "metricid",
                         "fieldLabel": "指标序号",
-                        "value": 45
+                        "value": "45"
                     },
                     {
                         "fieldId": 1001,
@@ -5736,7 +5737,7 @@
                         "fieldId": 1000,
                         "fieldName": "metricid",
                         "fieldLabel": "指标序号",
-                        "value": 46
+                        "value": "46"
                     },
                     {
                         "fieldId": 1001,
@@ -5863,7 +5864,7 @@
                         "fieldId": 1000,
                         "fieldName": "metricid",
                         "fieldLabel": "指标序号",
-                        "value": 47
+                        "value": "47"
                     },
                     {
                         "fieldId": 1001,
@@ -5990,7 +5991,7 @@
                         "fieldId": 1000,
                         "fieldName": "metricid",
                         "fieldLabel": "指标序号",
-                        "value": 48
+                        "value": "48"
                     },
                     {
                         "fieldId": 1001,
@@ -6117,7 +6118,7 @@
                         "fieldId": 1000,
                         "fieldName": "metricid",
                         "fieldLabel": "指标序号",
-                        "value": 49
+                        "value": "49"
                     },
                     {
                         "fieldId": 1001,
@@ -6244,7 +6245,7 @@
                         "fieldId": 1000,
                         "fieldName": "metricid",
                         "fieldLabel": "指标序号",
-                        "value": 50
+                        "value": "50"
                     },
                     {
                         "fieldId": 1001,
@@ -6371,7 +6372,7 @@
                         "fieldId": 1000,
                         "fieldName": "metricid",
                         "fieldLabel": "指标序号",
-                        "value": 51
+                        "value": "51"
                     },
                     {
                         "fieldId": 1001,
@@ -6498,7 +6499,7 @@
                         "fieldId": 1000,
                         "fieldName": "metricid",
                         "fieldLabel": "指标序号",
-                        "value": 52
+                        "value": "52"
                     },
                     {
                         "fieldId": 1001,
@@ -6625,7 +6626,7 @@
                         "fieldId": 1000,
                         "fieldName": "metricid",
                         "fieldLabel": "指标序号",
-                        "value": 53
+                        "value": "53"
                     },
                     {
                         "fieldId": 1001,
@@ -6752,7 +6753,7 @@
                         "fieldId": 1000,
                         "fieldName": "metricid",
                         "fieldLabel": "指标序号",
-                        "value": 54
+                        "value": "54"
                     },
                     {
                         "fieldId": 1001,
@@ -6879,7 +6880,7 @@
                         "fieldId": 1000,
                         "fieldName": "metricid",
                         "fieldLabel": "指标序号",
-                        "value": 55
+                        "value": "55"
                     },
                     {
                         "fieldId": 1001,
@@ -7006,7 +7007,7 @@
                         "fieldId": 1000,
                         "fieldName": "metricid",
                         "fieldLabel": "指标序号",
-                        "value": 56
+                        "value": "56"
                     },
                     {
                         "fieldId": 1001,
@@ -7133,7 +7134,7 @@
                         "fieldId": 1000,
                         "fieldName": "metricid",
                         "fieldLabel": "指标序号",
-                        "value": 57
+                        "value": "57"
                     },
                     {
                         "fieldId": 1001,
@@ -7260,7 +7261,7 @@
                         "fieldId": 1000,
                         "fieldName": "metricid",
                         "fieldLabel": "指标序号",
-                        "value": 58
+                        "value": "58"
                     },
                     {
                         "fieldId": 1001,
@@ -7387,7 +7388,7 @@
                         "fieldId": 1000,
                         "fieldName": "metricid",
                         "fieldLabel": "指标序号",
-                        "value": 59
+                        "value": "59"
                     },
                     {
                         "fieldId": 1001,
@@ -7514,7 +7515,7 @@
                         "fieldId": 1000,
                         "fieldName": "metricid",
                         "fieldLabel": "指标序号",
-                        "value": 60
+                        "value": "60"
                     },
                     {
                         "fieldId": 1001,
@@ -7641,7 +7642,7 @@
                         "fieldId": 1000,
                         "fieldName": "metricid",
                         "fieldLabel": "指标序号",
-                        "value": 61
+                        "value": "61"
                     },
                     {
                         "fieldId": 1001,
@@ -7786,7 +7787,7 @@
                         "fieldId": 1003,
                         "fieldName": "totals.plan",
                         "fieldLabel": "本期计划",
-                        "value": 999
+                        "value": 0
                     },
                     {
                         "fieldId": 1004,
@@ -7804,7 +7805,7 @@
                         "fieldId": 2001,
                         "fieldName": "monthlyData.october.plan",
                         "fieldLabel": "10月-计划",
-                        "value": 999
+                        "value": 0
                     },
                     {
                         "fieldId": 2002,
@@ -7913,7 +7914,7 @@
                         "fieldId": 1003,
                         "fieldName": "totals.plan",
                         "fieldLabel": "本期计划",
-                        "value": 999
+                        "value": 0
                     },
                     {
                         "fieldId": 1004,
@@ -7931,7 +7932,7 @@
                         "fieldId": 2001,
                         "fieldName": "monthlyData.october.plan",
                         "fieldLabel": "10月-计划",
-                        "value": 999
+                        "value": 0
                     },
                     {
                         "fieldId": 2002,
@@ -8022,7 +8023,7 @@
                         "fieldId": 1000,
                         "fieldName": "metricid",
                         "fieldLabel": "指标序号",
-                        "value": 64
+                        "value": "64"
                     },
                     {
                         "fieldId": 1001,
@@ -8167,7 +8168,7 @@
                         "fieldId": 1003,
                         "fieldName": "totals.plan",
                         "fieldLabel": "本期计划",
-                        "value": 999
+                        "value": 0
                     },
                     {
                         "fieldId": 1004,
@@ -8185,7 +8186,7 @@
                         "fieldId": 2001,
                         "fieldName": "monthlyData.october.plan",
                         "fieldLabel": "10月-计划",
-                        "value": 999
+                        "value": 0
                     },
                     {
                         "fieldId": 2002,
@@ -8276,7 +8277,7 @@
                         "fieldId": 1000,
                         "fieldName": "metricid",
                         "fieldLabel": "指标序号",
-                        "value": 66
+                        "value": "66"
                     },
                     {
                         "fieldId": 1001,
@@ -8403,7 +8404,7 @@
                         "fieldId": 1000,
                         "fieldName": "metricid",
                         "fieldLabel": "指标序号",
-                        "value": 67
+                        "value": "67"
                     },
                     {
                         "fieldId": 1001,
@@ -8421,7 +8422,7 @@
                         "fieldId": 1003,
                         "fieldName": "totals.plan",
                         "fieldLabel": "本期计划",
-                        "value": 999
+                        "value": 0
                     },
                     {
                         "fieldId": 1004,
@@ -8439,7 +8440,7 @@
                         "fieldId": 2001,
                         "fieldName": "monthlyData.october.plan",
                         "fieldLabel": "10月-计划",
-                        "value": 999
+                        "value": 0
                     },
                     {
                         "fieldId": 2002,
@@ -8657,7 +8658,7 @@
                         "fieldId": 1000,
                         "fieldName": "metricid",
                         "fieldLabel": "指标序号",
-                        "value": 69
+                        "value": "69"
                     },
                     {
                         "fieldId": 1001,
@@ -8784,7 +8785,7 @@
                         "fieldId": 1000,
                         "fieldName": "metricid",
                         "fieldLabel": "指标序号",
-                        "value": 70
+                        "value": "70"
                     },
                     {
                         "fieldId": 1001,
@@ -8911,7 +8912,7 @@
                         "fieldId": 1000,
                         "fieldName": "metricid",
                         "fieldLabel": "指标序号",
-                        "value": 71
+                        "value": "71"
                     },
                     {
                         "fieldId": 1001,
@@ -9038,7 +9039,7 @@
                         "fieldId": 1000,
                         "fieldName": "metricid",
                         "fieldLabel": "指标序号",
-                        "value": 72
+                        "value": "72"
                     },
                     {
                         "fieldId": 1001,
@@ -9165,7 +9166,7 @@
                         "fieldId": 1000,
                         "fieldName": "metricid",
                         "fieldLabel": "指标序号",
-                        "value": 73
+                        "value": "73"
                     },
                     {
                         "fieldId": 1001,
@@ -9292,7 +9293,7 @@
                         "fieldId": 1000,
                         "fieldName": "metricid",
                         "fieldLabel": "指标序号",
-                        "value": 74
+                        "value": "74"
                     },
                     {
                         "fieldId": 1001,
@@ -10326,7 +10327,7 @@
                         "fieldId": 1003,
                         "fieldName": "totals.plan",
                         "fieldLabel": "本期计划",
-                        "value": null
+                        "value": 0
                     },
                     {
                         "fieldId": 1004,
@@ -10580,7 +10581,7 @@
                         "fieldId": 1003,
                         "fieldName": "totals.plan",
                         "fieldLabel": "本期计划",
-                        "value": null
+                        "value": 0
                     },
                     {
                         "fieldId": 1004,
@@ -11959,7 +11960,7 @@
                         "fieldId": 1000,
                         "fieldName": "metricid",
                         "fieldLabel": "指标序号",
-                        "value": 95
+                        "value": "95"
                     },
                     {
                         "fieldId": 1001,
@@ -12213,7 +12214,7 @@
                         "fieldId": 1000,
                         "fieldName": "metricid",
                         "fieldLabel": "指标序号",
-                        "value": 97
+                        "value": "97"
                     },
                     {
                         "fieldId": 1001,
@@ -12467,7 +12468,7 @@
                         "fieldId": 1000,
                         "fieldName": "metricid",
                         "fieldLabel": "指标序号",
-                        "value": 99
+                        "value": "99"
                     },
                     {
                         "fieldId": 1001,
@@ -12721,7 +12722,7 @@
                         "fieldId": 1000,
                         "fieldName": "metricid",
                         "fieldLabel": "指标序号",
-                        "value": 101
+                        "value": "101"
                     },
                     {
                         "fieldId": 1001,
@@ -12975,7 +12976,7 @@
                         "fieldId": 1000,
                         "fieldName": "metricid",
                         "fieldLabel": "指标序号",
-                        "value": 103
+                        "value": "103"
                     },
                     {
                         "fieldId": 1001,
@@ -13229,7 +13230,7 @@
                         "fieldId": 1000,
                         "fieldName": "metricid",
                         "fieldLabel": "指标序号",
-                        "value": 105
+                        "value": "105"
                     },
                     {
                         "fieldId": 1001,
@@ -13483,7 +13484,7 @@
                         "fieldId": 1000,
                         "fieldName": "metricid",
                         "fieldLabel": "指标序号",
-                        "value": 107
+                        "value": "107"
                     },
                     {
                         "fieldId": 1001,
@@ -13737,7 +13738,7 @@
                         "fieldId": 1000,
                         "fieldName": "metricid",
                         "fieldLabel": "指标序号",
-                        "value": 109
+                        "value": "109"
                     },
                     {
                         "fieldId": 1001,
@@ -13991,7 +13992,7 @@
                         "fieldId": 1000,
                         "fieldName": "metricid",
                         "fieldLabel": "指标序号",
-                        "value": 111
+                        "value": "111"
                     },
                     {
                         "fieldId": 1001,
@@ -14245,7 +14246,7 @@
                         "fieldId": 1000,
                         "fieldName": "metricid",
                         "fieldLabel": "指标序号",
-                        "value": 113
+                        "value": "113"
                     },
                     {
                         "fieldId": 1001,
@@ -14372,7 +14373,7 @@
                         "fieldId": 1000,
                         "fieldName": "metricid",
                         "fieldLabel": "指标序号",
-                        "value": 114
+                        "value": "114"
                     },
                     {
                         "fieldId": 1001,
