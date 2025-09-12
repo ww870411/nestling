@@ -1,6 +1,6 @@
 {
     "submit": {
-        "submittedAt": "2025-09-12T00:42:20.660Z",
+        "submittedAt": "2025-09-12T02:24:02.210Z",
         "table": {
             "id": "5",
             "name": "北海热电厂(热电联产)表",
@@ -8439,7 +8439,7 @@
                         "fieldId": 2001,
                         "fieldName": "monthlyData.october.plan",
                         "fieldLabel": "10月-计划",
-                        "value": "100"
+                        "value": 100
                     },
                     {
                         "fieldId": 2002,

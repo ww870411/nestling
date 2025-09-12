@@ -793,11 +793,29 @@ const _createPayload = () => {
     // 1. 转换 values 对象为数组，并加入字段的上下文信息
     const processedValues = Object.entries(row.values).map(([fieldId, value]) => {
       const fieldInfo = fieldConfig.value.find(f => f.id === parseInt(fieldId));
+      
+      let finalValue = value;
+      // 仅对数值类型的字段进行转换 (component 不是 'label')
+      if (fieldInfo && fieldInfo.component !== 'label') {
+        if (typeof value === 'string') {
+          const trimmedValue = value.trim();
+          if (trimmedValue === '') {
+            finalValue = 0; // 空字符串转为 0
+          } else {
+            const numericValue = Number(trimmedValue);
+            // 只有在转换后是有效数字时才赋值，否则保留原始字符串(例如，用户可能输入了无效字符)
+            if (!isNaN(numericValue)) {
+              finalValue = numericValue;
+            }
+          }
+        }
+      }
+
       return {
         fieldId: parseInt(fieldId),
         fieldName: fieldInfo ? fieldInfo.name : 'unknown',
         fieldLabel: fieldInfo ? fieldInfo.label : 'unknown',
-        value: value,
+        value: finalValue,
       };
     });
 

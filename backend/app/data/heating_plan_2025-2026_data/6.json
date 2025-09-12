@@ -1,6 +1,6 @@
 {
     "submit": {
-        "submittedAt": "2025-09-12T00:42:50.923Z",
+        "submittedAt": "2025-09-12T02:24:09.813Z",
         "table": {
             "id": "6",
             "name": "北海热电厂(水炉)表",
@@ -8439,7 +8439,7 @@
                         "fieldId": 2001,
                         "fieldName": "monthlyData.october.plan",
                         "fieldLabel": "10月-计划",
-                        "value": "888"
+                        "value": 888
                     },
                     {
                         "fieldId": 2002,
