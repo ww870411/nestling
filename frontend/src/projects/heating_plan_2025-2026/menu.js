@@ -60,7 +60,7 @@ export const menuData = [
         type: 'summary',
         subsidiaries: ['4', '8', '9','10'],
         aggregationExclusions: [],
-        properties: { productionMethod: ['thermoelectric','heating_company','boiler_room'], fuelType: ['coal','natural_gas'], businessModel: ['independent'] },
+        properties: { productionMethod: ['thermoelectric','heating_company','boiler_room'], fuelType: ['coal','natural_gas'], businessModel: ['independent'] ,special:['related-rarty transaction','steam']},
       },
       { 
         id: '3', 
@@ -72,7 +72,7 @@ export const menuData = [
         type: 'summary',
         subsidiaries: ['4'],
         aggregationExclusions: [],
-        properties: { productionMethod: ['thermoelectric','heating_company','boiler_room'], fuelType: ['coal','natural_gas'], businessModel: ['independent'] },
+        properties: { productionMethod: ['thermoelectric','heating_company','boiler_room'], fuelType: ['coal','natural_gas'], businessModel: ['independent'] ,special:['related-rarty transaction','steam']},
       },
     ]
   },
@@ -110,7 +110,7 @@ export const menuData = [
         templateName: 'subsidiaryTemplate', 
         type: 'subsidiary',
         beAggregatedExclusions: [67],
-        properties: { productionMethod: ['boiler_room'], fuelType: ['coal'], businessModel: ['non_independent'] },
+        properties: { productionMethod: ['elec_boiler_room'], fuelType: ['coal'], businessModel: ['non_independent'] },
       },
       { 
         id: '7', 
@@ -135,7 +135,7 @@ export const menuData = [
         template: subsidiaryTemplate, 
         templateName: 'subsidiaryTemplate', 
         type: 'subsidiary',
-        properties: { productionMethod: ['thermoelectric'], fuelType: ['coal','natural_gas'], businessModel: ['independent'] },
+        properties: { productionMethod: ['thermoelectric'], fuelType: ['coal'], businessModel: ['independent'] },
       } 
     ]
   },
@@ -150,7 +150,7 @@ export const menuData = [
         template: subsidiaryTemplate, 
         templateName: 'subsidiaryTemplate', 
         type: 'subsidiary',
-        properties: { productionMethod: ['heating_company'], fuelType: [], businessModel: ['independent'] },
+        properties: { productionMethod: ['heating_company'], fuelType: [], businessModel: ['independent'],special:['steam'] },
       },
       { 
         id: '10', 
@@ -160,7 +160,7 @@ export const menuData = [
         template: subsidiaryTemplate, 
         templateName: 'subsidiaryTemplate', 
         type: 'subsidiary',
-        properties: { productionMethod: ['boiler_room'], fuelType: ['electric'], businessModel: ['non_independent'] },
+        properties: { productionMethod: ['boiler_room'], fuelType: ['electric'], businessModel: ['semi_independent'] },
       },
     ]
   },
@@ -205,7 +205,7 @@ export const menuData = [
         template: subsidiaryTemplate, 
         templateName: 'subsidiaryTemplate', 
         type: 'subsidiary',
-        properties: { productionMethod: ['heating_company','boiler_room'], fuelType: ['coal'], businessModel: ['independent'] },
+        properties: { productionMethod: ['boiler_room'], fuelType: ['coal'], businessModel: ['independent'] ,special:['jinpu']},
       } 
     ]
   },
@@ -220,7 +220,7 @@ export const menuData = [
         template: subsidiaryTemplate, 
         templateName: 'subsidiaryTemplate', 
         type: 'subsidiary',
-        properties: { productionMethod: ['heating_company','boiler_room'], fuelType: ['coal','purchased_heat'], businessModel: ['independent'] },
+        properties: { productionMethod: ['boiler_room'], fuelType: ['coal','purchased_heat'], businessModel: ['independent'] },
       } 
     ]
   },

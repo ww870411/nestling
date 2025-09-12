@@ -89,7 +89,7 @@ export const reportTemplate = [
   { id: 5, category: '设备参数', name: '电锅炉/热泵装机容量', unit: 'MW', type: 'basic', formula: null, style: { fontWeight: 'normal' }, samePeriodEditable: false, requiredProperties: { fuelType: ['electric'] } },
   { id: 6, category: '产量', name: '发电量', unit: '万kWh', type: 'basic', formula: null, style: { fontWeight: 'normal' }, samePeriodEditable: false, requiredProperties: { productionMethod: ['thermoelectric'] } },
   { id: 7, category: '产量', name: '供热量', unit: 'GJ', type: 'calculated', formula: 'VAL(8)*2.951694+VAL(9)+VAL(10)+VAL(11)+VAL(12)', style: { fontWeight: 'bold' }, samePeriodEditable: false, requiredProperties: {} },
-  { id: 8, category: '产量', name: '其中：1.供汽量', unit: '吨', type: 'basic', formula: null, style: { fontWeight: 'normal' }, samePeriodEditable: false, requiredProperties: {} },
+  { id: 8, category: '产量', name: '其中：1.供汽量', unit: '吨', type: 'basic', formula: null, style: { fontWeight: 'normal' }, samePeriodEditable: false, requiredProperties: {productionMethod: ['thermoelectric']}  },
   { id: 9, category: '产量', name: '2.高温水供热量', unit: 'GJ', type: 'basic', formula: null, style: { fontWeight: 'normal' }, samePeriodEditable: false, requiredProperties: { productionMethod: ['thermoelectric'] } },
   { id: 10, category: '产量', name: '3.低真空供热量', unit: 'GJ', type: 'basic', formula: null, style: { fontWeight: 'normal' }, samePeriodEditable: false, requiredProperties: { productionMethod: ['thermoelectric'] } },
   { id: 11, category: '产量', name: '4.低温水供热量', unit: 'GJ', type: 'basic', formula: null, style: { fontWeight: 'normal' }, samePeriodEditable: false, requiredProperties: { productionMethod: ['boiler_room'] } },

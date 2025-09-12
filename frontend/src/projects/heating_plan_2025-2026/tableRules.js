@@ -37,6 +37,26 @@
  *    - 如果以上所有规则都未允许写入，单元格最终为【只读】。
  */
 export const getCellState = (row, field, currentTableConfig) => {
+  // 新增：检查指标的 requiredProperties 是否被当前表格的 properties 满足
+  const required = row.requiredProperties;
+  const provided = currentTableConfig?.properties || {};
+
+  if (required) {
+    let isRequirementMet = true;
+    for (const key in required) {
+      // 检查表格是否定义了该属性，以及定义的属性数组中是否至少包含一个指标需要的属性值
+      if (!provided[key] || !required[key].some(val => provided[key].includes(val))) {
+        isRequirementMet = false;
+        break; // 只要有一个条件不满足，即判定为失败
+      }
+    }
+
+    if (!isRequirementMet) {
+      // 如果要求不满足，则该行的所有单元格都应为只读
+      return 'READONLY_DISPLAY';
+    }
+  }
+
   const properties = currentTableConfig?.properties || {};
   const isAggregated = properties.isAggregated || false;
   const isGroupSummary = properties.isGroupSummary || false;
