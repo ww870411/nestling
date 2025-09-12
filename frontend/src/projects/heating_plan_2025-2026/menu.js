@@ -35,7 +35,7 @@ export const menuData = [
       { 
         id: '1', 
         name: '集团汇总表', 
-        samePeriodEditable: '',
+        samePeriodEditable: '',  //‘all’或'none'或[1,2,7]
         validation: false,
         template: subsidiaryTemplate, 
         templateName: 'subsidiaryTemplate', 

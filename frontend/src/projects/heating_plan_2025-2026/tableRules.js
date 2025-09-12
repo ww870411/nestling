@@ -99,9 +99,9 @@ export const getCellState = (row, field, currentTableConfig) => {
 
     // Check for table-level array setting
     if (Array.isArray(tableSetting)) {
-      if (tableSetting.includes(metricId)) {
-        return 'WRITABLE';
-      }
+      // If an array is provided, it acts as a strict allow-list.
+      // Only metrics in the array can be writable. All others are readonly.
+      return tableSetting.includes(metricId) ? 'WRITABLE' : 'READONLY';
     }
 
     // Fall back to metric-level setting

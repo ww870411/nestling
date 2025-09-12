@@ -396,7 +396,7 @@ const calculateAll = () => {
           const funcBody = formulaToUse.replace(/VAL\((\d+)\)/g, (match, id) => `(valResolver(${id}))`);
           result = new Function('valResolver', `return ${funcBody}`)(valResolver);
         }
-        row.values[field.id] = parseFloat(result.toFixed(2));
+        row.values[field.id] = parseFloat(result.toFixed(10));
       } catch (e) {
         console.error(`Error calculating column formula for field ${field.id} in row ${row.metricId}:`, e);
       }
@@ -432,7 +432,7 @@ const calculateAll = () => {
         try {
           const funcBody = metricToCalculate.formula.replace(/VAL\((\d+)\)/g, (match, id) => `(valResolver(${id}))`);
           const result = new Function('valResolver', `return ${funcBody}`)(valResolver);
-          const newValue = parseFloat(result.toFixed(2));
+          const newValue = parseFloat(result.toFixed(10));
           
           // Check if the value has changed, also handling NaN cases to prevent infinite loops
           if (targetRow.values[col.id] !== newValue && !(isNaN(targetRow.values[col.id]) && isNaN(newValue))) {
