@@ -294,10 +294,16 @@ async def get_table_data_recursive(project_id: str, table_id: str):
                 
                 sub_data_map = {row["metricId"]: row for row in sub_data.get("tableData", []) if row.get("metricId")}
 
+                sub_table_config = ALL_TABLES.get(sub_id, {})
+                be_aggregated_exclusions = set(sub_table_config.get("beAggregatedExclusions", []))
+
                 for agg_row in aggregated_payload.get("tableData", []):
                     metric_id = agg_row.get("metricId")
                     if not metric_id or metric_id in exclusion_set or metric_id in calculated_metric_ids: continue
                     
+                    # New check for beAggregatedExclusions
+                    if metric_id in be_aggregated_exclusions: continue
+
                     if metric_id in sub_data_map:
                         sub_row = sub_data_map[metric_id]
                         sub_cell_map = {cell["fieldId"]: cell.get("value", 0) for cell in sub_row.get("values", []) if cell.get("fieldId")}
@@ -310,7 +316,11 @@ async def get_table_data_recursive(project_id: str, table_id: str):
                                 current_val = agg_cell.get("value", 0)
                                 agg_cell["value"] = current_val + sub_cell_map.get(field_id, 0)
 
-            except Exception: continue
+            except Exception as e:
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail=f"Error processing subsidiary table '{sub_id}': {str(e)}"
+                )
 
         submissions_dir = Path(f"app/data/{project_id}_data")
         summary_file_path = submissions_dir / f"{table_id}.json"

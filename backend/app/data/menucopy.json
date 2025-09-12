@@ -113,6 +113,7 @@
         "validation": false,
         "templateName": "subsidiaryTemplate",
         "type": "subsidiary",
+        "beAggregatedExclusions": [67],
         "properties": {
           "productionMethod": ["boiler_room"],
           "fuelType": ["coal"],

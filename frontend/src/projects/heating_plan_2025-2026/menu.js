@@ -88,7 +88,7 @@ export const menuData = [
         templateName: 'subsidiaryTemplate', 
         type: 'summary',
         subsidiaries: ['5', '6', '7'],
-        aggregationExclusions: [97,105,107,109,111,113,114],
+        aggregationExclusions: [97,105,107,109,111,113,114],  //在表5,6,7中不必填写，因此默认为零，防止其将汇总表中填写的数据覆盖，并且在读取时引用本表自身的json数据。
         properties: { productionMethod: ['thermoelectric','boiler_room'], fuelType: ['coal','natural_gas'], businessModel: ['independent'] },
       },
       { 
@@ -109,6 +109,7 @@ export const menuData = [
         template: subsidiaryTemplate, 
         templateName: 'subsidiaryTemplate', 
         type: 'subsidiary',
+        beAggregatedExclusions: [67],
         properties: { productionMethod: ['boiler_room'], fuelType: ['coal'], businessModel: ['non_independent'] },
       },
       { 
