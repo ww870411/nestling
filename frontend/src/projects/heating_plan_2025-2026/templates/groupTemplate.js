@@ -197,6 +197,7 @@ export const reportTemplate = [
   { id: 113, category: '经济指标', name: '劳务费', unit: '万元', type: 'basic', formula: null, style: { fontWeight: 'normal' }, samePeriodEditable: false, requiredProperties: { businessModel: ['independent'] } },
   { id: 114, category: '经济指标', name: '抢修费', unit: '万元', type: 'basic', formula: null, style: { fontWeight: 'normal' }, samePeriodEditable: true, requiredProperties: { businessModel: ['independent'] } },
   { id: 115, category: '经济指标', name: '毛利', unit: '万元', type: 'calculated', formula: 'VAL(94)-VAL(103)-VAL(105)-VAL(107)-VAL(109)-VAL(111)-VAL(113)-VAL(114)', style: { fontWeight: 'bold' }, samePeriodEditable: false, requiredProperties: { businessModel: ['independent'] }, validation: { soft: [{ rule: 'totals.plan >= totals.samePeriod', message: '本期计划应不低于同期。' }] } },
+  { id: 191, category: '参考数据', name: '本月天数', unit: '天', type: 'basic', style: { fontWeight: 'bold' }, samePeriodEditable: false,visible:false}
 ];
 
 export const globalDisplayFormat =  { type: 'decimal', places: 2 };

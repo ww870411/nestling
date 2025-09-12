@@ -271,7 +271,7 @@ const softErrorsForDisplay = computed(() => Object.entries(errors.value).filter(
 const initializeTableData = async () => {
   if (!reportTemplate.value || !fieldConfig.value) return;
 
-  const data = reportTemplate.value.map(metric => {
+  const data = reportTemplate.value.filter(metric => metric.visible !== false).map(metric => {
     const rowData = {
       metricId: metric.id,
       style: metric.style,
