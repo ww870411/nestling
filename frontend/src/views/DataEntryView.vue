@@ -35,7 +35,7 @@
                   :width="childField.width * zoomLevel / 100"
                   :fixed="childField.fixed">
                   <template #default="{ row }">
-                    <div v-if="getCellState(row, childField, currentTableConfig) === 'WRITABLE'" class="cell-content">
+                    <div v-if="getCellState(row, childField, currentTableConfig, childToParentsMap.value, forcedParentMap.value) === 'WRITABLE'" class="cell-content">
                       <el-input 
                         v-model="row.values[childField.id]"
                         @blur="handleInputBlur(row, childField.id)" 
@@ -55,7 +55,7 @@
                 :width="field.width * zoomLevel / 100" 
                 :fixed="field.fixed">
                 <template #default="{ row }">
-                  <div v-if="getCellState(row, field, currentTableConfig) === 'WRITABLE'" class="cell-content">
+                  <div v-if="getCellState(row, field, currentTableConfig, childToParentsMap.value, forcedParentMap.value) === 'WRITABLE'" class="cell-content">
                     <el-input 
                       v-model="row.values[field.id]"
                       @blur="handleInputBlur(row, field.id)" 
@@ -263,6 +263,31 @@ const zoomStyle = computed(() => {
   };
 });
 
+const childToParentsMap = computed(() => {
+  const map = new Map();
+  if (!reportTemplate.value) return map;
+
+  const calculatedMetrics = reportTemplate.value.filter(m => m.type === 'calculated' && m.formula);
+
+  calculatedMetrics.forEach(parentMetric => {
+    const childIds = Array.from(parentMetric.formula.matchAll(/VAL\((\d+)\)/g)).map(m => Number(m[1]));
+    childIds.forEach(childId => {
+      if (!map.has(childId)) {
+        map.set(childId, []);
+      }
+      map.get(childId).push(parentMetric.id);
+    });
+  });
+
+  return map;
+});
+
+const forcedParentMap = computed(() => {
+  const set = new Set();
+  tableData.value.filter(r => r.isForced && r.type === 'calculated').forEach(r => set.add(r.metricId));
+  return set;
+});
+
 const hasHardErrors = computed(() => Object.values(errors.value).some(e => e && (e.type === 'A' || e.type === 'C')));
 const softErrorsForDisplay = computed(() => Object.entries(errors.value).filter(([, error]) => error.type === 'B'));
 
@@ -420,7 +445,7 @@ const calculateAll = () => {
       if (!targetRow) return;
 
       valueColumns.forEach(col => {
-        if (getCellState(targetRow, col, currentTableConfig.value) !== 'READONLY_CALCULATED') return;
+        if (getCellState(targetRow, col, currentTableConfig.value, childToParentsMap.value, forcedParentMap.value) !== 'READONLY_CALCULATED') return;
         // 若该行被标记为强制，仅屏蔽“同期值”列的自动计算，允许“计划值”等继续计算
         if (targetRow.isForced && typeof col.name === 'string' && col.name.endsWith('.samePeriod')) return;
 
@@ -693,7 +718,7 @@ const getCellClass = ({ row, column }) => {
     return 'is-error';
   }
 
-  const cellState = getCellState(row, field, currentTableConfig.value);
+  const cellState = getCellState(row, field, currentTableConfig.value, childToParentsMap.value, forcedParentMap.value);
   if (cellState === 'READONLY_AGGREGATED') {
     return 'is-readonly-aggregated';
   }
@@ -1093,7 +1118,7 @@ const handleExport = () => {
     // Handle row-level formulas (e.g., VAL(8)+VAL(9))
     if (metricDef && metricDef.type === 'calculated' && metricDef.formula) {
       fieldConfig.value.forEach((field, colIndex) => {
-        const cellState = getCellState(row, field, currentTableConfig.value);
+        const cellState = getCellState(row, field, currentTableConfig.value, childToParentsMap.value, forcedParentMap.value);
 
         // Only add formulas to cells that are meant to be calculated,
         // and respect the 'isForced' flag for samePeriod columns.

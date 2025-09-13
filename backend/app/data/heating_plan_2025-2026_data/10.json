@@ -2225,7 +2225,7 @@
                         "fieldId": 2002,
                         "fieldName": "monthlyData.october.samePeriod",
                         "fieldLabel": "10月-同期",
-                        "value": 4712.11
+                        "value": 0
                     },
                     {
                         "fieldId": 2003,
@@ -2237,7 +2237,7 @@
                         "fieldId": 2004,
                         "fieldName": "monthlyData.november.samePeriod",
                         "fieldLabel": "11月-同期",
-                        "value": 7592.0
+                        "value": 0
                     },
                     {
                         "fieldId": 2005,
@@ -2249,7 +2249,7 @@
                         "fieldId": 2006,
                         "fieldName": "monthlyData.december.samePeriod",
                         "fieldLabel": "12月-同期",
-                        "value": 7592.0
+                        "value": 0
                     },
                     {
                         "fieldId": 2007,
@@ -2261,7 +2261,7 @@
                         "fieldId": 2008,
                         "fieldName": "monthlyData.january.samePeriod",
                         "fieldLabel": "1月-同期",
-                        "value": 7592.0
+                        "value": 0
                     },
                     {
                         "fieldId": 2009,
@@ -2273,7 +2273,7 @@
                         "fieldId": 2010,
                         "fieldName": "monthlyData.february.samePeriod",
                         "fieldLabel": "2月-同期",
-                        "value": 7592.0
+                        "value": 0
                     },
                     {
                         "fieldId": 2011,
@@ -2285,7 +2285,7 @@
                         "fieldId": 2012,
                         "fieldName": "monthlyData.march.samePeriod",
                         "fieldLabel": "3月-同期",
-                        "value": 7592.0
+                        "value": 0
                     },
                     {
                         "fieldId": 2013,
@@ -2297,10 +2297,9 @@
                         "fieldId": 2014,
                         "fieldName": "monthlyData.april.samePeriod",
                         "fieldLabel": "4月-同期",
-                        "value": 7592.0
+                        "value": 0
                     }
-                ],
-                "force": true
+                ]
             },
             {
                 "metricId": 19,
@@ -2861,7 +2860,7 @@
                         "fieldId": 2002,
                         "fieldName": "monthlyData.october.samePeriod",
                         "fieldLabel": "10月-同期",
-                        "value": 0
+                        "value": 4712.11
                     },
                     {
                         "fieldId": 2003,
@@ -2873,7 +2872,7 @@
                         "fieldId": 2004,
                         "fieldName": "monthlyData.november.samePeriod",
                         "fieldLabel": "11月-同期",
-                        "value": 0
+                        "value": 7592
                     },
                     {
                         "fieldId": 2005,
@@ -2885,7 +2884,7 @@
                         "fieldId": 2006,
                         "fieldName": "monthlyData.december.samePeriod",
                         "fieldLabel": "12月-同期",
-                        "value": 0
+                        "value": 7592
                     },
                     {
                         "fieldId": 2007,
@@ -2897,7 +2896,7 @@
                         "fieldId": 2008,
                         "fieldName": "monthlyData.january.samePeriod",
                         "fieldLabel": "1月-同期",
-                        "value": 0
+                        "value": 7592
                     },
                     {
                         "fieldId": 2009,
@@ -2909,7 +2908,7 @@
                         "fieldId": 2010,
                         "fieldName": "monthlyData.february.samePeriod",
                         "fieldLabel": "2月-同期",
-                        "value": 0
+                        "value": 7592
                     },
                     {
                         "fieldId": 2011,
@@ -2921,7 +2920,7 @@
                         "fieldId": 2012,
                         "fieldName": "monthlyData.march.samePeriod",
                         "fieldLabel": "3月-同期",
-                        "value": 0
+                        "value": 7592
                     },
                     {
                         "fieldId": 2013,
@@ -2933,9 +2932,10 @@
                         "fieldId": 2014,
                         "fieldName": "monthlyData.april.samePeriod",
                         "fieldLabel": "4月-同期",
-                        "value": 0
+                        "value": 7592
                     }
-                ]
+                ],
+                "force":true
             },
             {
                 "metricId": 24,
@@ -6112,7 +6112,8 @@
                         "fieldLabel": "4月-同期",
                         "value": 35
                     }
-                ]
+                ],
+                "force":true
             },
             {
                 "metricId": 49,
@@ -6239,7 +6240,8 @@
                         "fieldLabel": "4月-同期",
                         "value": 0
                     }
-                ]
+                ],
+                "force":true
             },
             {
                 "metricId": 50,

@@ -36,7 +36,7 @@
  * 3. 默认状态:
  *    - 如果以上所有规则都未允许写入，单元格最终为【只读】。
  */
-export const getCellState = (row, field, currentTableConfig) => {
+export const getCellState = (row, field, currentTableConfig, childToParentsMap, forcedParentMap) => {
   // 新增：检查指标的 requiredProperties 是否被当前表格的 properties 满足
   const required = row.requiredProperties;
   const provided = currentTableConfig?.properties || {};
@@ -84,33 +84,53 @@ export const getCellState = (row, field, currentTableConfig) => {
 
   // 同期可写性仅作用于“月度同期”字段：monthlyData.*.samePeriod
   if (typeof field.name === 'string' && field.name.startsWith('monthlyData.') && field.name.endsWith('.samePeriod')) {
-    // If the row itself is a calculated metric, its samePeriod value should also be calculated.
+    // NEW: Highest priority rule: if a row is forced, its samePeriod cell is always readonly.
+    if (row.isForced) {
+      return 'READONLY';
+    }
+    
+    // Rule 0: Calculated metrics are never directly writable, they are calculated.
     if (row.type === 'calculated') {
       return 'READONLY_CALCULATED';
     }
 
+    // NEW: 'same as plan' rule.
+    if (currentTableConfig?.samePeriodEditable === 'same as plan') {
+      // The writability of 'plan' is determined by row.type === 'basic'.
+      const isPlanWritable = row.type === 'basic';
+      return isPlanWritable ? 'WRITABLE' : 'READONLY';
+    }
+
+    // Step 1: Determine if the cell would be writable based on the standard rules.
+    let isWritableByStandardRules = false;
     const tableSetting = currentTableConfig?.samePeriodEditable;
     const metricSetting = row.samePeriodEditable;
     const metricId = row.metricId;
 
-    // Check for table-level overrides that stop further checks
-    if (tableSetting === 'all') return 'WRITABLE';
-    if (tableSetting === 'none') return 'READONLY';
-
-    // Check for table-level array setting
-    if (Array.isArray(tableSetting)) {
-      // If an array is provided, it acts as a strict allow-list.
-      // Only metrics in the array can be writable. All others are readonly.
-      return tableSetting.includes(metricId) ? 'WRITABLE' : 'READONLY';
+    if (tableSetting === 'all') {
+      isWritableByStandardRules = true;
+    } else if (tableSetting === 'none') {
+      isWritableByStandardRules = false;
+    } else if (Array.isArray(tableSetting)) {
+      isWritableByStandardRules = tableSetting.includes(metricId);
+    } else if (metricSetting === true) {
+      isWritableByStandardRules = true;
     }
 
-    // Fall back to metric-level setting
-    if (metricSetting === true) {
+    // Step 2: Check for the forced parent override.
+    let hasForcedParent = false;
+    if (childToParentsMap && forcedParentMap && childToParentsMap.has(metricId)) {
+      const parentIds = childToParentsMap.get(metricId);
+      hasForcedParent = parentIds.some(pid => forcedParentMap.has(pid));
+    }
+
+    // Final Decision: The override only applies if both conditions are met.
+    if (hasForcedParent && isWritableByStandardRules) {
       return 'WRITABLE';
     }
 
-    // Final Default（除菜单或指标显式开放外，默认只读）
-    return 'READONLY';
+    // If the override doesn't apply, just return the standard decision.
+    return isWritableByStandardRules ? 'WRITABLE' : 'READONLY';
   }
 
   if (field.component === 'label') {

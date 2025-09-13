@@ -2554,7 +2554,8 @@
                         "fieldLabel": "4月-同期",
                         "value": 55000
                     }
-                ]
+                ],
+                "force":true
             },
             {
                 "metricId": 21,
@@ -2808,7 +2809,8 @@
                         "fieldLabel": "4月-同期",
                         "value": 1705017.81
                     }
-                ]
+                ],
+                "force":true
             },
             {
                 "metricId": 23,

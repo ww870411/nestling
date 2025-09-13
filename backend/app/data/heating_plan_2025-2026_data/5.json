@@ -4990,7 +4990,6 @@
                 "metricId": 40,
                 "metricName": "耗水量",
                 "type": "calculated",
-                "force": true,
                 "values": [
                     {
                         "fieldId": 1000,
@@ -5038,7 +5037,7 @@
                         "fieldId": 2002,
                         "fieldName": "monthlyData.october.samePeriod",
                         "fieldLabel": "10月-同期",
-                        "value": 23301
+                        "value": 0
                     },
                     {
                         "fieldId": 2003,
@@ -5050,7 +5049,7 @@
                         "fieldId": 2004,
                         "fieldName": "monthlyData.november.samePeriod",
                         "fieldLabel": "11月-同期",
-                        "value": 136317
+                        "value": 0
                     },
                     {
                         "fieldId": 2005,
@@ -5062,7 +5061,7 @@
                         "fieldId": 2006,
                         "fieldName": "monthlyData.december.samePeriod",
                         "fieldLabel": "12月-同期",
-                        "value": 155171
+                        "value": 0
                     },
                     {
                         "fieldId": 2007,
@@ -5074,7 +5073,7 @@
                         "fieldId": 2008,
                         "fieldName": "monthlyData.january.samePeriod",
                         "fieldLabel": "1月-同期",
-                        "value": 145687
+                        "value": 0
                     },
                     {
                         "fieldId": 2009,
@@ -5086,7 +5085,7 @@
                         "fieldId": 2010,
                         "fieldName": "monthlyData.february.samePeriod",
                         "fieldLabel": "2月-同期",
-                        "value": 126240
+                        "value": 0
                     },
                     {
                         "fieldId": 2011,
@@ -5098,7 +5097,7 @@
                         "fieldId": 2012,
                         "fieldName": "monthlyData.march.samePeriod",
                         "fieldLabel": "3月-同期",
-                        "value": 116668
+                        "value": 0
                     },
                     {
                         "fieldId": 2013,
@@ -5110,7 +5109,7 @@
                         "fieldId": 2014,
                         "fieldName": "monthlyData.april.samePeriod",
                         "fieldLabel": "4月-同期",
-                        "value": 32059
+                        "value": 0
                     }
                 ]
             },
@@ -5118,7 +5117,6 @@
                 "metricId": 41,
                 "metricName": "其中：1.电厂耗水量",
                 "type": "basic",
-                "force": true,
                 "values": [
                     {
                         "fieldId": 1000,
@@ -5240,7 +5238,8 @@
                         "fieldLabel": "4月-同期",
                         "value": 32059
                     }
-                ]
+                ],
+                "force":true
             },
             {
                 "metricId": 42,
@@ -5420,7 +5419,7 @@
                         "fieldId": 2002,
                         "fieldName": "monthlyData.october.samePeriod",
                         "fieldLabel": "10月-同期",
-                        "value": 0
+                        "value": 48942
                     },
                     {
                         "fieldId": 2003,
@@ -5432,7 +5431,7 @@
                         "fieldId": 2004,
                         "fieldName": "monthlyData.november.samePeriod",
                         "fieldLabel": "11月-同期",
-                        "value": 0
+                        "value": 102332
                     },
                     {
                         "fieldId": 2005,
@@ -5444,7 +5443,7 @@
                         "fieldId": 2006,
                         "fieldName": "monthlyData.december.samePeriod",
                         "fieldLabel": "12月-同期",
-                        "value": 0
+                        "value": 61794
                     },
                     {
                         "fieldId": 2007,
@@ -5456,7 +5455,7 @@
                         "fieldId": 2008,
                         "fieldName": "monthlyData.january.samePeriod",
                         "fieldLabel": "1月-同期",
-                        "value": 0
+                        "value": 64720
                     },
                     {
                         "fieldId": 2009,
@@ -5468,7 +5467,7 @@
                         "fieldId": 2010,
                         "fieldName": "monthlyData.february.samePeriod",
                         "fieldLabel": "2月-同期",
-                        "value": 0
+                        "value": 84278
                     },
                     {
                         "fieldId": 2011,
@@ -5480,7 +5479,7 @@
                         "fieldId": 2012,
                         "fieldName": "monthlyData.march.samePeriod",
                         "fieldLabel": "3月-同期",
-                        "value": 0
+                        "value": 92141
                     },
                     {
                         "fieldId": 2013,
@@ -5492,9 +5491,10 @@
                         "fieldId": 2014,
                         "fieldName": "monthlyData.april.samePeriod",
                         "fieldLabel": "4月-同期",
-                        "value": 0
+                        "value": 36299
                     }
-                ]
+                ],
+                "force":true
             },
             {
                 "metricId": 44,

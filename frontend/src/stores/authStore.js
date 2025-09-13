@@ -4,7 +4,7 @@ import { defineStore } from 'pinia';
 // In a real-world scenario, this list should be fetched from a dedicated API endpoint.
 const ALL_UNITS = [
   '集团公司', '主城区', '北海热电厂', '香海热电厂', '供热公司', 
-  '金州热电', '北方热电', '金普热电', '庄河热电', '研究院'
+  '金州热电', '北方热电', '金普热电', '庄河环海', '研究院'
 ];
 
 export const useAuthStore = defineStore('auth', {
