@@ -70,7 +70,7 @@ export const menuData = [
         template: subsidiaryTemplate, 
         templateName: 'subsidiaryTemplate', 
         type: 'summary',
-        subsidiaries: ['4'],
+        subsidiaries: ['4','9'],
         aggregationExclusions: [1,2,14,17,18,19,20,23,24,99,101],
         properties: { productionMethod: ['thermoelectric','heating_company','boiler_room'], fuelType: ['coal','natural_gas'], businessModel: ['independent'] ,special:['related-rarty transaction','steam','hotwater','low vacuum']},
       },
@@ -99,7 +99,7 @@ export const menuData = [
         template: subsidiaryTemplate, 
         templateName: 'subsidiaryTemplate', 
         type: 'subsidiary',
-        properties: { productionMethod: ['thermoelectric'], fuelType: ['coal'], businessModel: ['non_independent'],special:['steel ball','recycle_water',"steam"] },
+        properties: { productionMethod: ['thermoelectric'], fuelType: ['coal'], businessModel: ['non_independent'],special:['steel ball','recycle_water',"steam"],position:['downtown'] },
       },
       { 
         id: '6', 
@@ -135,7 +135,7 @@ export const menuData = [
         template: subsidiaryTemplate, 
         templateName: 'subsidiaryTemplate', 
         type: 'subsidiary',
-        properties: { productionMethod: ['thermoelectric'], fuelType: ['coal'], businessModel: ['independent'],special:['low vacuum','steam'] },
+        properties: { productionMethod: ['thermoelectric'], fuelType: ['coal'], businessModel: ['independent'],special:['low vacuum','steam'],position:['downtown'] },
       } 
     ]
   },
@@ -175,7 +175,7 @@ export const menuData = [
         template: subsidiaryTemplate, 
         templateName: 'subsidiaryTemplate', 
         type: 'subsidiary',
-        properties: { productionMethod: ['thermoelectric','heating_company'], fuelType: ['coal'], businessModel: ['independent'] ,special:['hotwater','low vacuum','not_only_boiler']},
+        properties: { productionMethod: ['thermoelectric','heating_company'], fuelType: ['coal'], businessModel: ['independent'] ,special:['hotwater','low vacuum','not_only_boiler'],position:['north']},
       } 
     ]
   },
@@ -190,7 +190,7 @@ export const menuData = [
         template: subsidiaryTemplate, 
         templateName: 'subsidiaryTemplate', 
         type: 'subsidiary',
-        properties: { productionMethod: ['thermoelectric','heating_company'], fuelType: ['coal'], businessModel: ['independent'] ,special:['hotwater','coarse powder','steel ball','recycle_water','not_only_boiler']},
+        properties: { productionMethod: ['thermoelectric','heating_company'], fuelType: ['coal'], businessModel: ['independent'] ,special:['hotwater','coarse powder','steel ball','recycle_water','not_only_boiler'],position:['north']},
       } 
     ]
   },

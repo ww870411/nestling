@@ -89,13 +89,21 @@ export const getCellState = (row, field, currentTableConfig, childToParentsMap, 
   // For basic data entry tables
   // 仅允许“月度计划”可写：monthlyData.*.plan，避免误将 totals.plan 判为可写
   if (typeof field.name === 'string' && field.name.startsWith('monthlyData.') && field.name.endsWith('.plan')) {
-    if (row.type === 'basic') {
+    // NEW: Also allow writing if it's an excluded row in a summary table
+    const isExcludedInSummary = currentTableConfig?.type === 'summary' && currentTableConfig.aggregationExclusions?.includes(row.metricId);
+    if (row.type === 'basic' || isExcludedInSummary) {
       return 'WRITABLE';
     }
   }
 
   // 同期可写性仅作用于“月度同期”字段：monthlyData.*.samePeriod
   if (typeof field.name === 'string' && field.name.startsWith('monthlyData.') && field.name.endsWith('.samePeriod')) {
+    // NEW: Highest priority rule for summary tables.
+    const isExcludedInSummary = currentTableConfig?.type === 'summary' && currentTableConfig.aggregationExclusions?.includes(row.metricId);
+    if (isExcludedInSummary) {
+      return 'WRITABLE';
+    }
+    
     // NEW: Highest priority rule: if a row is forced, its samePeriod cell is always readonly.
     if (row.isForced) {
       return 'READONLY';
