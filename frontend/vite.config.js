@@ -32,7 +32,7 @@ export default defineConfig({
       // '/foo': 'http://localhost:4567',
       // 选项写法
       '/api': {
-        target: 'http://backend:8000',
+        target: 'http://host.docker.internal:8000',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, '')
       },

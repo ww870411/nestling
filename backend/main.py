@@ -17,13 +17,21 @@ app.add_middleware(
 )
 
 # --- App Configuration ---
+# Use pathlib to create robust, absolute paths based on the script's location
+BASE_DIR = Path(__file__).resolve().parent
+DATA_DIR = BASE_DIR / "app" / "data"
 
-AUTH_FILE = "app/data/auth.json"
-# SUBMISSIONS_DIR is now dynamic, defined within each endpoint.
+AUTH_FILE = DATA_DIR / "auth.json"
 
 # Load menu data from the JSON file
-with open("app/data/menucopy.json", "r", encoding="utf-8") as f:
+MENU_FILE = DATA_DIR / "heating_plan_2025-2026_data" / "menucopy.json"
+with open(MENU_FILE, "r", encoding="utf-8") as f:
     MENU_DATA = json.load(f)
+
+# Load report template from JSON file
+TEMPLATE_FILE = DATA_DIR / "heating_plan_2025-2026_data" / "templatecopy.json"
+with open(TEMPLATE_FILE, "r", encoding="utf-8") as f:
+    REPORT_TEMPLATE = json.load(f)
 
 ALL_TABLES = {table["id"]: table for group in MENU_DATA for table in group["tables"]}
 
@@ -83,7 +91,7 @@ def _update_data_file(file_path: Path, key: str, payload: dict):
 
 @app.post("/project/{project_id}/table/{table_id}/submit")
 async def submit_data(project_id: str, table_id: str, payload: dict = Body(...)):
-    submissions_dir = Path(f"app/data/{project_id}_data")
+    submissions_dir = DATA_DIR / f"{project_id}_data"
     submissions_dir.mkdir(parents=True, exist_ok=True)
     file_path = submissions_dir / f"{table_id}.json"
     _update_data_file(file_path, "submit", payload)
@@ -91,7 +99,7 @@ async def submit_data(project_id: str, table_id: str, payload: dict = Body(...))
 
 @app.post("/project/{project_id}/table/{table_id}/save_draft")
 async def save_draft(project_id: str, table_id: str, payload: dict = Body(...)):
-    submissions_dir = Path(f"app/data/{project_id}_data")
+    submissions_dir = DATA_DIR / f"{project_id}_data"
     submissions_dir.mkdir(parents=True, exist_ok=True)
     file_path = submissions_dir / f"{table_id}.json"
     _update_data_file(file_path, "temp", payload)
@@ -106,66 +114,7 @@ async def get_table_0_data(project_id: str):
         return {}
 
     # Based on frontend/src/projects/heating_plan_2025-2026/templates/groupTemplate.js
-    report_template = [
-        {'id': 1, 'name': '月平均高温', 'unit': '℃'}, {'id': 2, 'name': '月平均低温', 'unit': '℃'},
-        {'id': 3, 'name': '发电机组容量', 'unit': '万kW'}, {'id': 4, 'name': '燃煤锅炉装机容量', 'unit': 'MW'},
-        {'id': 5, 'name': '电锅炉/热泵装机容量', 'unit': 'MW'}, {'id': 6, 'name': '发电量', 'unit': '万kWh'},
-        {'id': 7, 'name': '供热量', 'unit': 'GJ'}, {'id': 8, 'name': '其中：1.供汽量', 'unit': '吨'},
-        {'id': 9, 'name': '2.高温水供热量', 'unit': 'GJ'}, {'id': 10, 'name': '3.低真空供热量', 'unit': 'GJ'},
-        {'id': 11, 'name': '4.低温水供热量', 'unit': 'GJ'}, {'id': 12, 'name': '5.电锅炉/热泵供热量', 'unit': 'GJ'},
-        {'id': 13, 'name': '售电量', 'unit': '万kWh'}, {'id': 14, 'name': '售汽量', 'unit': '吨'},
-        {'id': 15, 'name': '关联交易汽量', 'unit': '吨'}, {'id': 16, 'name': '关联交易高温水量', 'unit': 'GJ'},
-        {'id': 17, 'name': '期末挂网面积', 'unit': '㎡'}, {'id': 18, 'name': '期末供暖收费面积', 'unit': '㎡'},
-        {'id': 19, 'name': '1.汽站面积', 'unit': '㎡'}, {'id': 20, 'name': '2.高温水站面积', 'unit': '㎡'},
-        {'id': 21, 'name': '3.低真空站面积', 'unit': '㎡'}, {'id': 22, 'name': '4.低温水供热面积', 'unit': '㎡'},
-        {'id': 23, 'name': '5.电锅炉/热泵面积', 'unit': '㎡'}, {'id': 24, 'name': '高温水销售量', 'unit': 'GJ'},
-        {'id': 25, 'name': '生产耗原煤量', 'unit': '吨'}, {'id': 26, 'name': '其中：1.发电耗原煤量', 'unit': '吨'},
-        {'id': 27, 'name': '2.供热耗原煤量', 'unit': '吨'}, {'id': 28, 'name': '耗标煤总量', 'unit': '吨'},
-        {'id': 29, 'name': '其中：1.发电耗标煤量', 'unit': '吨'}, {'id': 30, 'name': '1.1煤折标煤耗量', 'unit': '吨'},
-        {'id': 31, 'name': '1.2油折标煤耗量', 'unit': '吨'}, {'id': 32, 'name': '2.供热耗标煤量', 'unit': '吨'},
-        {'id': 33, 'name': '2.1煤折标煤耗量', 'unit': '吨'}, {'id': 34, 'name': '2.2油折标煤耗量', 'unit': '吨'},
-        {'id': 35, 'name': '煤折标煤耗量', 'unit': '吨'}, {'id': 36, 'name': '耗油量', 'unit': '吨'},
-        {'id': 37, 'name': '其中：1.发电耗油量', 'unit': '吨'}, {'id': 38, 'name': '2.供热耗油量', 'unit': '吨'},
-        {'id': 39, 'name': '外购热量', 'unit': 'GJ'}, {'id': 40, 'name': '耗水量', 'unit': '吨'},
-        {'id': 41, 'name': '其中：1.电厂耗水量', 'unit': '吨'}, {'id': 42, 'name': '2.电厂一次网补水量', 'unit': '吨'},
-        {'id': 43, 'name': '2.1高温水首站补水量', 'unit': '吨'}, {'id': 44, 'name': '2.2低真空补水量', 'unit': '吨'},
-        {'id': 45, 'name': '3.换热站补水量', 'unit': '吨'}, {'id': 46, 'name': '4.燃煤锅炉房耗水量', 'unit': '吨'},
-        {'id': 47, 'name': '5.电锅炉/热泵耗水量', 'unit': '吨'}, {'id': 48, 'name': '耗自来水量', 'unit': '吨'},
-        {'id': 49, 'name': '耗再生水/井水量', 'unit': '吨'}, {'id': 50, 'name': '耗酸量', 'unit': '吨'},
-        {'id': 51, 'name': '耗碱量', 'unit': '吨'}, {'id': 52, 'name': '耗石灰石量（粗）', 'unit': '吨'},
-        {'id': 53, 'name': '耗石灰石粉量（细）', 'unit': '吨'}, {'id': 54, 'name': '耗氨水量', 'unit': '吨'},
-        {'id': 55, 'name': '耗氧化镁量', 'unit': '吨'}, {'id': 56, 'name': '耗脱硝剂量', 'unit': '吨'},
-        {'id': 57, 'name': '耗阻垢剂量', 'unit': '吨'}, {'id': 58, 'name': '耗杀菌剂量', 'unit': '吨'},
-        {'id': 59, 'name': '耗钢球量', 'unit': '吨'}, {'id': 60, 'name': '耗天然气量', 'unit': '万m3'},
-        {'id': 61, 'name': '站内耗热量', 'unit': 'GJ'}, {'id': 62, 'name': '耗电量', 'unit': '万kWh'},
-        {'id': 63, 'name': '综合厂用电量', 'unit': '万kWh'}, {'id': 64, 'name': '其中：1.非生产厂用电量', 'unit': '万kWh'},
-        {'id': 65, 'name': '2.生产厂用电量', 'unit': '万kWh'}, {'id': 66, 'name': '2.1发电厂用电量', 'unit': '万kWh'},
-        {'id': 67, 'name': '2.2供热厂用电量', 'unit': '万kWh'}, {'id': 68, 'name': '外购电量', 'unit': '万kWh'},
-        {'id': 69, 'name': '其中：1.电厂外购电量', 'unit': '万kWh'}, {'id': 70, 'name': '2.燃煤锅炉房外购电量', 'unit': '万kWh'},
-        {'id': 71, 'name': '3.换热站外购电量', 'unit': '万kWh'}, {'id': 72, 'name': '4.电锅炉/热泵外购电量', 'unit': '万kWh'},
-        {'id': 73, 'name': '脱硫脱销耗水量', 'unit': '吨'}, {'id': 74, 'name': '脱硫脱硝耗电量', 'unit': '万kWh'},
-        {'id': 75, 'name': '生产产出率', 'unit': '%'}, {'id': 76, 'name': '综合产出率', 'unit': '%'},
-        {'id': 77, 'name': '全厂热效率', 'unit': '%'}, {'id': 78, 'name': '热电比', 'unit': '%'},
-        {'id': 79, 'name': '热分摊比', 'unit': '%'}, {'id': 80, 'name': '发电设备利用率', 'unit': '%'},
-        {'id': 81, 'name': '供热设备利用率', 'unit': '%'}, {'id': 82, 'name': '综合厂用电率', 'unit': '%'},
-        {'id': 83, 'name': '发电厂用电率', 'unit': '%'}, {'id': 84, 'name': '供热厂用电率', 'unit': 'kWh/GJ'},
-        {'id': 85, 'name': '发电标准煤耗率', 'unit': 'g/kWh'}, {'id': 86, 'name': '供电标准煤耗率', 'unit': 'g/kWh'},
-        {'id': 87, 'name': '供热标准煤耗率', 'unit': 'kg/GJ'}, {'id': 88, 'name': '发电水耗率', 'unit': '吨/万kWh'},
-        {'id': 89, 'name': '供热水耗率', 'unit': '吨/GJ'}, {'id': 90, 'name': '供暖热耗率', 'unit': 'GJ/㎡'},
-        {'id': 91, 'name': '供暖水耗率', 'unit': 'kg/㎡'}, {'id': 92, 'name': '供暖电耗率', 'unit': 'kWh/㎡'},
-        {'id': 93, 'name': '入炉煤低位发热量', 'unit': 'kJ/kg'}, {'id': 94, 'name': '供热发电收入', 'unit': '万元'},
-        {'id': 95, 'name': '暖收入', 'unit': '万元'}, {'id': 96, 'name': '暖单价', 'unit': '元/㎡'},
-        {'id': 97, 'name': '电收入', 'unit': '万元'}, {'id': 98, 'name': '电单价', 'unit': '元/kWh'},
-        {'id': 99, 'name': '售汽收入', 'unit': '万元'}, {'id': 100, 'name': '汽平均单价', 'unit': '元/吨'},
-        {'id': 101, 'name': '售高温水收入', 'unit': '万元'}, {'id': 102, 'name': '高温水平均单价', 'unit': '元/GJ'},
-        {'id': 103, 'name': '购热成本', 'unit': '万元'}, {'id': 104, 'name': '热单价', 'unit': '元/GJ'},
-        {'id': 105, 'name': '煤成本', 'unit': '万元'}, {'id': 106, 'name': '标煤单价', 'unit': '元/吨'},
-        {'id': 107, 'name': '购电成本', 'unit': '万元'}, {'id': 108, 'name': '购电单价', 'unit': '元/kWh'},
-        {'id': 109, 'name': '水成本', 'unit': '万元'}, {'id': 110, 'name': '水单价', 'unit': '元/吨'},
-        {'id': 111, 'name': '天然气成本', 'unit': '万元'}, {'id': 112, 'name': '购天然气单价', 'unit': '元/吨'},
-        {'id': 113, 'name': '劳务费', 'unit': '万元'}, {'id': 114, 'name': '抢修费', 'unit': '万元'},
-        {'id': 115, 'name': '毛利', 'unit': '万元'}
-    ]
+    report_template = REPORT_TEMPLATE
     
     field_config = [
         {'id': 1001, 'name': 'name'}, {'id': 1002, 'name': 'unit'},
@@ -260,7 +209,7 @@ async def get_table_data_recursive(project_id: str, table_id: str):
     }
 
     if table_config.get("type") != "summary" or not table_config.get("subsidiaries"):
-        submissions_dir = Path(f"app/data/{project_id}_data")
+        submissions_dir = DATA_DIR / f"{project_id}_data"
         file_path = submissions_dir / f"{table_id}.json"
         if not file_path.exists(): return {}
         try:
@@ -332,7 +281,7 @@ async def get_table_data_recursive(project_id: str, table_id: str):
                     detail=f"Error processing subsidiary table '{sub_id}': {str(e)}"
                 )
 
-        submissions_dir = Path(f"app/data/{project_id}_data")
+        submissions_dir = DATA_DIR / f"{project_id}_data"
         summary_file_path = submissions_dir / f"{table_id}.json"
         if summary_file_path.exists() and aggregated_payload is not None:
             try:
@@ -366,7 +315,7 @@ async def get_table_data(project_id: str, table_id: str):
 @app.post("/project/{project_id}/table_statuses")
 async def get_table_statuses(project_id: str, table_ids: list[str] = Body(...)):
     statuses = {}
-    submissions_dir = Path(f"app/data/{project_id}_data")
+    submissions_dir = DATA_DIR / f"{project_id}_data"
     for table_id in table_ids:
         file_path = submissions_dir / f"{table_id}.json"
         status_info = {"status": "new", "submittedAt": None, "submittedBy": None}
