@@ -299,18 +299,28 @@ async def get_table_data_recursive(project_id: str, table_id: str):
 
                 for agg_row in aggregated_payload.get("tableData", []):
                     metric_id = agg_row.get("metricId")
-                    if not metric_id or metric_id in exclusion_set or metric_id in calculated_metric_ids: continue
-                    
+                    if not metric_id or metric_id in exclusion_set:
+                        continue
+
                     # New check for beAggregatedExclusions
-                    if metric_id in be_aggregated_exclusions: continue
+                    if metric_id in be_aggregated_exclusions:
+                        continue
 
                     if metric_id in sub_data_map:
                         sub_row = sub_data_map[metric_id]
+
+                        # New logic: Skip calculated metrics unless they are 'forced'
+                        is_calculated = metric_id in calculated_metric_ids
+                        is_forced = sub_row.get("force") is True
+                        if is_calculated and not is_forced:
+                            continue
+
                         sub_cell_map = {cell["fieldId"]: cell.get("value", 0) for cell in sub_row.get("values", []) if cell.get("fieldId")}
                         
                         for agg_cell in agg_row.get("values", []):
                             field_id = agg_cell.get("fieldId")
-                            if not field_id or field_id in calculated_field_ids: continue
+                            if not field_id or field_id in calculated_field_ids:
+                                continue
 
                             if isinstance(agg_cell.get("value"), (int, float)):
                                 current_val = agg_cell.get("value", 0)
