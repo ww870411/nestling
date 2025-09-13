@@ -2297,8 +2297,7 @@
                         "fieldLabel": "4月-同期",
                         "value": 22177078.0
                     }
-                ],
-                "force": true
+                ]
             },
             {
                 "metricId": 19,
@@ -5474,8 +5473,7 @@
                         "fieldLabel": "4月-同期",
                         "value": 0
                     }
-                ],
-                "force": true
+                ]
             },
             {
                 "metricId": 44,
@@ -5729,8 +5727,7 @@
                         "fieldLabel": "4月-同期",
                         "value": 27504.0
                     }
-                ],
-                "force": true
+                ]
             },
             {
                 "metricId": 46,
@@ -7763,8 +7760,7 @@
                         "fieldLabel": "4月-同期",
                         "value": 173143.1446
                     }
-                ],
-                "force": true
+                ]
             },
             {
                 "metricId": 62,
@@ -7891,8 +7887,7 @@
                         "fieldLabel": "4月-同期",
                         "value": 195.6705852
                     }
-                ],
-                "force": true
+                ]
             },
             {
                 "metricId": 63,
@@ -8654,8 +8649,7 @@
                         "fieldLabel": "4月-同期",
                         "value": 195.6705852
                     }
-                ],
-                "force": true
+                ]
             },
             {
                 "metricId": 69,
@@ -9036,8 +9030,7 @@
                         "fieldLabel": "4月-同期",
                         "value": 195.6705852
                     }
-                ],
-                "force": true
+                ]
             },
             {
                 "metricId": 72,

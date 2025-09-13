@@ -1221,7 +1221,7 @@ const handleExport = () => {
 .error-item-hard { border-left: 3px solid #f56c6c; padding-left: 10px; }
 .error-item-soft { border-left: 3px solid #e6a23c; padding-left: 10px; }
 .footer-actions { flex-shrink: 0; display: flex; justify-content: space-between; align-items: center; padding-top: 20px; }
-.cell-content { cursor: pointer; min-height: 20px; padding: 2px 5px; }
+.cell-content { cursor: pointer; min-height: 20px; padding: 2px 1px; }
 .text-danger { color: #f56c6c; }
 .text-success { color: #67c23a; }
 </style>

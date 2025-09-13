@@ -397,7 +397,6 @@
                 "metricId": 4,
                 "metricName": "燃煤锅炉装机容量",
                 "type": "basic",
-                "force": true,
                 "values": [
                     {
                         "fieldId": 1000,
