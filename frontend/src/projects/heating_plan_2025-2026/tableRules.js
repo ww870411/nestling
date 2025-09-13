@@ -37,6 +37,18 @@
  *    - 如果以上所有规则都未允许写入，单元格最终为【只读】。
  */
 export const getCellState = (row, field, currentTableConfig, childToParentsMap, forcedParentMap) => {
+  // --- START: ADDED LOGIC FOR SUMMARY TABLES ---
+  // 如果是汇总表，则应用特殊只读逻辑
+  if (currentTableConfig?.type === 'summary' && field.component !== 'label') {
+    const isExcluded = currentTableConfig.aggregationExclusions?.includes(row.metricId);
+    // 如果指标行未被排除在汇总之外，则其所有数据单元格都应为只读
+    if (!isExcluded) {
+      return 'READONLY_CALCULATED';
+    }
+    // 如果指标行被排除了，则让逻辑继续向下执行，以应用常规的可写性规则
+  }
+  // --- END: ADDED LOGIC FOR SUMMARY TABLES ---
+
   // 新增：检查指标的 requiredProperties 是否被当前表格的 properties 满足
   const required = row.requiredProperties;
   const provided = currentTableConfig?.properties || {};
