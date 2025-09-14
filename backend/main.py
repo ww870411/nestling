@@ -262,12 +262,20 @@ async def get_table_data_recursive(project_id: str, table_id: str):
                     aggregated_payload["table"]["id"] = table_config.get("id")
                     aggregated_payload["table"]["name"] = table_config.get("name")
                 
-                # Zero out all numerical values for summation
+                # Clean the template: zero out numerical values and STRIP explanations
                 for row in aggregated_payload.get("tableData", []):
                     if row.get("metricId") not in exclusion_set:
+                        clean_values = []
                         for cell in row.get("values", []):
-                            if isinstance(cell.get("value"), (int, float)): cell["value"] = 0
-                            if "explanation" in cell: del cell["explanation"]
+                            field_id = cell.get("fieldId")
+                            # Default to a clean cell with a zeroed value
+                            new_cell = {"fieldId": field_id, "value": 0}
+                            # Preserve original values for non-numeric 'name' and 'unit' columns (assuming 1001/1002)
+                            if field_id == 1001 or field_id == 1002:
+                                new_cell["value"] = cell.get("value")
+                            clean_values.append(new_cell)
+                        # Replace the old list (which might have explanations) with the clean one
+                        row["values"] = clean_values
             
             sub_data_map = {row["metricId"]: row for row in sub_data.get("tableData", []) if row.get("metricId")}
             sub_table_config = ALL_TABLES.get(sub_id, {})

@@ -9566,12 +9566,7 @@
                         "fieldId": 1003,
                         "fieldName": "totals.plan",
                         "fieldLabel": "本期计划",
-                        "value": null,
-                        "explanation": {
-                            "ruleKey": "75-B-0",
-                            "message": "本期计划应不低于同期。",
-                            "content": "原因: 本期计划应不低于同期。"
-                        }
+                        "value": null
                     },
                     {
                         "fieldId": 1004,
@@ -9698,12 +9693,7 @@
                         "fieldId": 1003,
                         "fieldName": "totals.plan",
                         "fieldLabel": "本期计划",
-                        "value": null,
-                        "explanation": {
-                            "ruleKey": "76-B-0",
-                            "message": "本期计划应不低于同期。",
-                            "content": "原因: 本期计划应不低于同期。"
-                        }
+                        "value": null
                     },
                     {
                         "fieldId": 1004,
@@ -9830,12 +9820,7 @@
                         "fieldId": 1003,
                         "fieldName": "totals.plan",
                         "fieldLabel": "本期计划",
-                        "value": null,
-                        "explanation": {
-                            "ruleKey": "77-B-0",
-                            "message": "本期计划应不低于同期。",
-                            "content": "原因: 本期计划应不低于同期。"
-                        }
+                        "value": null
                     },
                     {
                         "fieldId": 1004,
@@ -10216,12 +10201,7 @@
                         "fieldId": 1003,
                         "fieldName": "totals.plan",
                         "fieldLabel": "本期计划",
-                        "value": null,
-                        "explanation": {
-                            "ruleKey": "80-B-0",
-                            "message": "本期计划应不低于同期。",
-                            "content": "原因: 本期计划应不低于同期。"
-                        }
+                        "value": null
                     },
                     {
                         "fieldId": 1004,

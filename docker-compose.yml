@@ -24,23 +24,7 @@ services:
       - "127.0.0.1:8000:8000"
     volumes:
       - ./backend:/app
-    environment:
-      - DATABASE_URL=postgresql://user:password@db/nestling_db
-    depends_on:
-      - db
     command: uvicorn main:app --host 0.0.0.0 --port 8000
 
-  db:
-    image: postgres:13
-    volumes:
-      - postgres_data:/var/lib/postgresql/data/
-    environment:
-      - POSTGRES_USER=ww870411
-      - POSTGRES_PASSWORD=w870411w
-      - POSTGRES_DB=nestling_db
-    ports:
-      - "5432:5432"
-
 volumes:
-  postgres_data:
   frontend_node_modules:
