@@ -123,7 +123,7 @@
     <template #footer>
       <span class="dialog-footer">
         <el-button @click="isExplanationsDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="handleUpdateExplanations">确认修改</el-button>
+        <el-button type="primary" @click="handleUpdateExplanations">修改并提交</el-button>
       </span>
     </template>
   </el-dialog>
@@ -690,9 +690,6 @@ const runValidation = ({ level = 'hard' } = {}) => {
   });
 
   errors.value = newErrors;
-  if (level === 'all' && softErrorsForDisplay.value.length > 0) {
-    isErrorPanelVisible.value = true;
-  }
 };
 
 
@@ -820,6 +817,7 @@ const handleShowExplanations = async () => {
             label: getErrorLabel(cell.explanation.ruleKey),
             message: cell.explanation.message,
             content: cell.explanation.content,
+            ruleKey: cell.explanation.ruleKey, // Store the key for mapping back
           });
         }
       });
@@ -1068,30 +1066,31 @@ const handleLoadDraft = () => {
 };
 
 const handleSubmit = async () => {
-  // Check if validation should be skipped for this table
-  const shouldValidate = currentTableConfig.value?.validation;
+  // Step 1: Run validation to find all errors.
+  runValidation({ level: 'all' });
 
-  if (shouldValidate !== false) {
-    runValidation({ level: 'all' });
-  } else {
-    // If validation is skipped, clear any existing errors
-    errors.value = {};
-  }
-
+  // Step 2: Check for hard errors.
   if (hasHardErrors.value) {
     ElMessage.error('提交失败，请修正所有红色错误后再试。');
     return;
   }
 
+  // Step 3: Handle soft errors.
   if (softErrorsForDisplay.value.length > 0) {
-    isErrorPanelVisible.value = true;
-    const allExplained = softErrorsForDisplay.value.every(([key]) => explanations.value[key]?.trim().length >= 10);
+    // Check if all found soft errors have explanations.
+    const allExplained = softErrorsForDisplay.value.every(([key]) => 
+      explanations.value[key] && explanations.value[key].trim().length >= 10
+    );
+
+    // If not all are explained, open the panel and stop.
     if (!allExplained) {
-        ElMessage.warning('检测到软性错误/警告，请为所有项目填写不少于10个字的说明后再提交。');
-        return;
+      isErrorPanelVisible.value = true; // Open panel only when needed.
+      ElMessage.warning('检测到软性错误/警告，请为所有项目填写不少于10个字的说明后再提交。');
+      return;
     }
   }
 
+  // Step 4: Proceed to create payload and submit.
   const payload = _createPayload();
 
   // --- 发送数据到后端 ---
