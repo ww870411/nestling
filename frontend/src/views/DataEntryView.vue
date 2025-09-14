@@ -110,15 +110,20 @@
   </div>
 
   <!-- 解释说明展示对话框 -->
-  <el-dialog v-model="isExplanationsDialogVisible" title="已提交的解释说明" width="50%">
+  <el-dialog v-model="isExplanationsDialogVisible" title="编辑解释说明" width="60%">
     <el-table :data="submittedExplanations" border style="width: 100%">
       <el-table-column prop="label" label="指标位置" width="220"></el-table-column>
       <el-table-column prop="message" label="错误原因" width="200"></el-table-column>
-      <el-table-column prop="content" label="说明内容"></el-table-column>
+      <el-table-column label="说明内容">
+        <template #default="{ row }">
+          <el-input v-model="row.content" type="textarea" :rows="2" />
+        </template>
+      </el-table-column>
     </el-table>
     <template #footer>
       <span class="dialog-footer">
-        <el-button @click="isExplanationsDialogVisible = false">关闭</el-button>
+        <el-button @click="isExplanationsDialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="handleUpdateExplanations">确认修改</el-button>
       </span>
     </template>
   </el-dialog>
@@ -359,6 +364,21 @@ const _fetchDataFromServer = async (silent = false) => {
 
     const data = await response.json();
     const payloadToApply = data.submit || data.temp;
+
+    // --- NEW CORE FIX ---
+    // Reset and pre-populate the central explanations state from the loaded data.
+    // This ensures that subsequent checks in handleSubmit will find the existing explanations.
+    explanations.value = {};
+    if (payloadToApply && payloadToApply.tableData) {
+      payloadToApply.tableData.forEach(row => {
+        row.values.forEach(cell => {
+          if (cell.explanation && cell.explanation.ruleKey) {
+            explanations.value[cell.explanation.ruleKey] = cell.explanation.content;
+          }
+        });
+      });
+    }
+    // --- END NEW CORE FIX ---
 
     // Logic for submission time display
     if (data.submit) {
@@ -1101,6 +1121,30 @@ const handleSubmit = async () => {
     console.error('Submission error:', error);
     ElMessage.error(`数据提交至后端失败: ${error.message}`);
   }
+};
+
+const handleUpdateExplanations = async () => {
+  // 1. Validate all explanations have at least 10 characters
+  const allValid = submittedExplanations.value.every(exp => exp.content && exp.content.trim().length >= 10);
+  if (!allValid) {
+    ElMessage.warning('请确保所有解释说明都不少于10个字。');
+    return;
+  }
+
+  // 2. Update the component's main 'explanations' state object
+  submittedExplanations.value.forEach(exp => {
+    if (exp.ruleKey) {
+      explanations.value[exp.ruleKey] = exp.content;
+    }
+  });
+
+  // 3. Close the dialog
+  isExplanationsDialogVisible.value = false;
+
+  // 4. Call handleSubmit, telling it to skip the interactive explanation check.
+  setTimeout(() => {
+    handleSubmit({ skipExplanationCheck: true });
+  }, 100);
 };
 
 const handleExport = () => {
