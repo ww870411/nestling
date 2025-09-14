@@ -358,11 +358,25 @@ const _fetchDataFromServer = async (silent = false) => {
     }
 
     const data = await response.json();
-    const payload = data.submit || data.temp;
+    const payloadToApply = data.submit || data.temp;
 
-    if (payload) {
-      _applyPayloadToTable(payload);
-      lastSubmittedAt.value = payload.submittedAt;
+    // Logic for submission time display
+    if (data.submit) {
+        const submittedBy = data.submit.submittedBy;
+        // Per backend logic, 'ww870411' is the god user whose submissions are "invisible"
+        const isGodSubmission = submittedBy && submittedBy.username === 'ww870411';
+
+        if (isGodSubmission) {
+            lastSubmittedAt.value = null; // Hide time for god user
+        } else {
+            lastSubmittedAt.value = data.submit.submittedAt; // Show time for normal users
+        }
+    } else {
+        lastSubmittedAt.value = null; // No submission, no time
+    }
+
+    if (payloadToApply) {
+      _applyPayloadToTable(payloadToApply);
       return true;
     } else {
       if (!silent) ElMessage.info('服务器上没有找到该表格的已提交数据。');
