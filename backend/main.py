@@ -108,23 +108,23 @@ async def save_draft(project_id: str, table_id: str, payload: dict = Body(...)):
 async def get_table_0_data(project_id: str):
     """
     Special function to aggregate data for Table 0.
+    Reads data directly from subsidiary JSON files and includes a fallback calculation for totals.
     """
     table_config = ALL_TABLES.get('0')
     if not table_config:
         return {}
 
-    # Based on frontend/src/projects/heating_plan_2025-2026/templates/groupTemplate.js
+    # Load templates and field configurations
     report_template = REPORT_TEMPLATE
-    
     GROUP_TEMPLATE_FILE = DATA_DIR / "heating_plan_2025-2026_data" / "groupTemplate.json"
     with open(GROUP_TEMPLATE_FILE, "r", encoding="utf-8") as f:
         field_config = json.load(f)
 
-    # Create maps from the subsidiary key (e.g., 'group') to the target fieldId
+    # Create maps from subsidiary key (e.g., 'group') to the target fieldId
     key_to_plan_field_id = { field['name'].split('.')[0]: field['id'] for field in field_config if '.plan' in field['name'] }
     key_to_same_period_field_id = { field['name'].split('.')[0]: field['id'] for field in field_config if '.samePeriod' in field['name'] }
 
-    # Initialize tableData
+    # Initialize tableData with default zero values
     table_data = []
     for row_template in report_template:
         new_row = {
@@ -135,17 +135,33 @@ async def get_table_0_data(project_id: str):
         }
         for field in field_config:
             field_id = field['id']
-            value = 0  # Default to 0 for all data cells
-
+            value = 0  # Default to 0
             if field_id == 1001: value = row_template['name']
             elif field_id == 1002: value = row_template['unit']
             new_row["values"].append({"fieldId": field_id, "value": value})
         table_data.append(new_row)
 
-    # Fetch and populate plan and samePeriod data
+    # Define field IDs for fallback calculation
+    PLAN_MONTHLY_IDS = {2001, 2003, 2005, 2007, 2009, 2011, 2013}
+    SAME_PERIOD_MONTHLY_IDS = {2002, 2004, 2006, 2008, 2010, 2012, 2014}
+
+    # --- MODIFIED LOGIC START ---
+    # Directly read subsidiary files and populate plan/samePeriod data
     subsidiaries_map = table_config.get("subsidiaries", {})
+    submissions_dir = DATA_DIR / f"{project_id}_data"
+
     for sub_key, sub_id in subsidiaries_map.items():
-        sub_content = await get_table_data_recursive(project_id, sub_id)
+        sub_content = {}
+        file_path = submissions_dir / f"{sub_id}.json"
+        if file_path.exists():
+            try:
+                with open(file_path, "r", encoding="utf-8") as f:
+                    content = f.read()
+                    if content:
+                        sub_content = json.loads(content)
+            except (json.JSONDecodeError, IOError):
+                sub_content = {} # Continue with empty content on error
+
         sub_data = sub_content.get("submit") or sub_content.get("temp")
         if not sub_data or not isinstance(sub_data.get("tableData"), list):
             continue
@@ -154,12 +170,30 @@ async def get_table_0_data(project_id: str):
         for row in sub_data.get("tableData", []):
             metric_id = row.get("metricId")
             if not metric_id: continue
-            plan_val, same_period_val = 0, 0
-            for cell in row.get("values", []):
-                if cell.get("fieldId") == 1003: plan_val = cell.get("value", 0)
-                if cell.get("fieldId") == 1004: same_period_val = cell.get("value", 0)
-            sub_values[metric_id] = {"plan": plan_val, "samePeriod": same_period_val}
 
+            plan_val, same_period_val = 0, 0
+            monthly_plan_sum, monthly_same_sum = 0, 0
+            
+            # Extract values and calculate monthly sums for fallback
+            for cell in row.get("values", []):
+                field_id = cell.get("fieldId")
+                value = cell.get("value", 0) if isinstance(cell.get("value"), (int, float)) else 0
+
+                if field_id == 1003: plan_val = value
+                if field_id == 1004: same_period_val = value
+                
+                if field_id in PLAN_MONTHLY_IDS:
+                    monthly_plan_sum += value
+                if field_id in SAME_PERIOD_MONTHLY_IDS:
+                    monthly_same_sum += value
+
+            # Fallback logic: if total is 0, use sum of monthly values
+            final_plan = plan_val if plan_val != 0 else monthly_plan_sum
+            final_same_period = same_period_val if same_period_val != 0 else monthly_same_sum
+            
+            sub_values[metric_id] = {"plan": final_plan, "samePeriod": final_same_period}
+
+        # --- Original population logic (unchanged) ---
         target_plan_id = key_to_plan_field_id.get(sub_key)
         target_same_period_id = key_to_same_period_field_id.get(sub_key)
         if not target_plan_id or not target_same_period_id: continue
@@ -172,6 +206,7 @@ async def get_table_0_data(project_id: str):
                         agg_cell["value"] = sub_values[metric_id]["plan"]
                     elif agg_cell.get("fieldId") == target_same_period_id:
                         agg_cell["value"] = sub_values[metric_id]["samePeriod"]
+    # --- MODIFIED LOGIC END ---
 
     aggregated_payload = {
         "table": {"id": table_config.get("id"), "name": table_config.get("name")},
@@ -264,7 +299,10 @@ async def get_table_data_recursive(project_id: str, table_id: str):
 
                             if isinstance(agg_cell.get("value"), (int, float)):
                                 current_val = agg_cell.get("value", 0)
-                                agg_cell["value"] = current_val + sub_cell_map.get(field_id, 0)
+                                val_to_add = sub_cell_map.get(field_id, 0)
+                                if not isinstance(val_to_add, (int, float)):
+                                    val_to_add = 0
+                                agg_cell["value"] = current_val + val_to_add
 
             except Exception as e:
                 raise HTTPException(
