@@ -108,7 +108,7 @@ async def save_draft(project_id: str, table_id: str, payload: dict = Body(...)):
 async def get_table_0_data(project_id: str):
     """
     Special function to aggregate data for Table 0.
-    Reads data directly from subsidiary JSON files and includes a fallback calculation for totals.
+    Reads data directly from subsidiary JSON files.
     """
     table_config = ALL_TABLES.get('0')
     if not table_config:
@@ -141,11 +141,6 @@ async def get_table_0_data(project_id: str):
             new_row["values"].append({"fieldId": field_id, "value": value})
         table_data.append(new_row)
 
-    # Define field IDs for fallback calculation
-    PLAN_MONTHLY_IDS = {2001, 2003, 2005, 2007, 2009, 2011, 2013}
-    SAME_PERIOD_MONTHLY_IDS = {2002, 2004, 2006, 2008, 2010, 2012, 2014}
-
-    # --- MODIFIED LOGIC START ---
     # Directly read subsidiary files and populate plan/samePeriod data
     subsidiaries_map = table_config.get("subsidiaries", {})
     submissions_dir = DATA_DIR / f"{project_id}_data"
@@ -172,26 +167,16 @@ async def get_table_0_data(project_id: str):
             if not metric_id: continue
 
             plan_val, same_period_val = 0, 0
-            monthly_plan_sum, monthly_same_sum = 0, 0
             
-            # Extract values and calculate monthly sums for fallback
+            # Extract plan and samePeriod values, no fallback
             for cell in row.get("values", []):
                 field_id = cell.get("fieldId")
                 value = cell.get("value", 0) if isinstance(cell.get("value"), (int, float)) else 0
 
                 if field_id == 1003: plan_val = value
                 if field_id == 1004: same_period_val = value
-                
-                if field_id in PLAN_MONTHLY_IDS:
-                    monthly_plan_sum += value
-                if field_id in SAME_PERIOD_MONTHLY_IDS:
-                    monthly_same_sum += value
-
-            # Fallback logic: if total is 0, use sum of monthly values
-            final_plan = plan_val if plan_val != 0 else monthly_plan_sum
-            final_same_period = same_period_val if same_period_val != 0 else monthly_same_sum
             
-            sub_values[metric_id] = {"plan": final_plan, "samePeriod": final_same_period}
+            sub_values[metric_id] = {"plan": plan_val, "samePeriod": same_period_val}
 
         # --- Original population logic (unchanged) ---
         target_plan_id = key_to_plan_field_id.get(sub_key)
@@ -206,7 +191,6 @@ async def get_table_0_data(project_id: str):
                         agg_cell["value"] = sub_values[metric_id]["plan"]
                     elif agg_cell.get("fieldId") == target_same_period_id:
                         agg_cell["value"] = sub_values[metric_id]["samePeriod"]
-    # --- MODIFIED LOGIC END ---
 
     aggregated_payload = {
         "table": {"id": table_config.get("id"), "name": table_config.get("name")},
@@ -219,7 +203,7 @@ async def get_table_0_data(project_id: str):
 
 
 async def get_table_data_recursive(project_id: str, table_id: str):
-    # Table 0 is the group summary table – aggregate from subsidiaries
+    # Table 0 is the group summary table – uses its own logic
     if table_id == '0':
         return await get_table_0_data(project_id)
 
@@ -227,94 +211,99 @@ async def get_table_data_recursive(project_id: str, table_id: str):
     if not table_config:
         return {}
 
-    calculated_field_ids = {1004, 1005} # REMOVED 1003
-    calculated_metric_ids = {
-        7, 18, 25, 28, 29, 32, 35, 36, 40, 42, 62, 63, 65, 68, 75, 76, 77, 78, 79, 80, 81, 
-        82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 96, 98, 100, 102, 104, 106, 
-        108, 110, 112, 115
-    }
+    # --- UNIFIED LOGIC: All tables read from files, no recursion --- 
 
+    submissions_dir = DATA_DIR / f"{project_id}_data"
+    file_path = submissions_dir / f"{table_id}.json"
+
+    # If the table is NOT a summary table, just read its own file and return.
     if table_config.get("type") != "summary" or not table_config.get("subsidiaries"):
-        submissions_dir = DATA_DIR / f"{project_id}_data"
-        file_path = submissions_dir / f"{table_id}.json"
         if not file_path.exists(): return {}
         try:
             with open(file_path, "r", encoding="utf-8") as f: return json.load(f)
         except Exception: return {}
 
+    # If the table IS a summary table, aggregate from direct subsidiary files.
     if table_config.get("type") == "summary" and isinstance(table_config.get("subsidiaries"), list):
         aggregated_payload = None
         subsidiary_ids = table_config.get("subsidiaries", [])
         exclusion_set = set(table_config.get("aggregationExclusions", []))
+        
+        # These calculated IDs are skipped during summation and recalculated in the frontend.
+        calculated_field_ids = {1004, 1005}
+        calculated_metric_ids = {
+            7, 18, 25, 28, 29, 32, 35, 36, 40, 42, 62, 63, 65, 68, 75, 76, 77, 78, 79, 80, 81, 
+            82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 96, 98, 100, 102, 104, 106, 
+            108, 110, 112, 115
+        }
 
         for sub_id in subsidiary_ids:
-            try:
-                sub_content = await get_table_data_recursive(project_id, sub_id)
-                sub_data = sub_content.get("submit") or sub_content.get("temp")
-                if not sub_data or not isinstance(sub_data.get("tableData"), list): continue
+            # --- MODIFICATION: Directly read file, no recursive call ---
+            sub_content = {}
+            sub_file_path = submissions_dir / f"{sub_id}.json"
+            if sub_file_path.exists():
+                try:
+                    with open(sub_file_path, "r", encoding="utf-8") as f:
+                        content = f.read()
+                        if content: sub_content = json.loads(content)
+                except (json.JSONDecodeError, IOError):
+                    sub_content = {}
+            # --- END MODIFICATION ---
 
-                if aggregated_payload is None:
-                    aggregated_payload = copy.deepcopy(sub_data)
-                    aggregated_payload["submittedAt"] = None
-                    aggregated_payload["submittedBy"] = None
-                    if aggregated_payload.get("table"):
-                        aggregated_payload["table"]["id"] = table_config.get("id")
-                        aggregated_payload["table"]["name"] = table_config.get("name")
-                    
-                    for row in aggregated_payload.get("tableData", []):
-                        if row.get("metricId") not in exclusion_set:
-                            for cell in row.get("values", []):
-                                if isinstance(cell.get("value"), (int, float)): cell["value"] = 0
-                                if "explanation" in cell: del cell["explanation"]
+            sub_data = sub_content.get("submit") or sub_content.get("temp")
+            if not sub_data or not isinstance(sub_data.get("tableData"), list): continue
+
+            if aggregated_payload is None:
+                # Initialize the payload with the structure of the first sub-table
+                aggregated_payload = copy.deepcopy(sub_data)
+                aggregated_payload["submittedAt"] = None
+                aggregated_payload["submittedBy"] = None
+                if aggregated_payload.get("table"):
+                    aggregated_payload["table"]["id"] = table_config.get("id")
+                    aggregated_payload["table"]["name"] = table_config.get("name")
                 
-                sub_data_map = {row["metricId"]: row for row in sub_data.get("tableData", []) if row.get("metricId")}
+                # Zero out all numerical values for summation
+                for row in aggregated_payload.get("tableData", []):
+                    if row.get("metricId") not in exclusion_set:
+                        for cell in row.get("values", []):
+                            if isinstance(cell.get("value"), (int, float)): cell["value"] = 0
+                            if "explanation" in cell: del cell["explanation"]
+            
+            sub_data_map = {row["metricId"]: row for row in sub_data.get("tableData", []) if row.get("metricId")}
+            sub_table_config = ALL_TABLES.get(sub_id, {})
+            be_aggregated_exclusions = set(sub_table_config.get("beAggregatedExclusions", []))
 
-                sub_table_config = ALL_TABLES.get(sub_id, {})
-                be_aggregated_exclusions = set(sub_table_config.get("beAggregatedExclusions", []))
+            for agg_row in aggregated_payload.get("tableData", []):
+                metric_id = agg_row.get("metricId")
+                if not metric_id or metric_id in exclusion_set or metric_id in be_aggregated_exclusions:
+                    continue
 
-                for agg_row in aggregated_payload.get("tableData", []):
-                    metric_id = agg_row.get("metricId")
-                    if not metric_id or metric_id in exclusion_set:
+                if metric_id in sub_data_map:
+                    sub_row = sub_data_map[metric_id]
+
+                    # Skip calculated metrics, they are handled by frontend
+                    if metric_id in calculated_metric_ids and not sub_row.get("force"): 
                         continue
 
-                    # New check for beAggregatedExclusions
-                    if metric_id in be_aggregated_exclusions:
-                        continue
-
-                    if metric_id in sub_data_map:
-                        sub_row = sub_data_map[metric_id]
-
-                        # New logic: Skip calculated metrics unless they are 'forced'
-                        is_calculated = metric_id in calculated_metric_ids
-                        is_forced = sub_row.get("force") is True
-                        if is_calculated and not is_forced:
+                    sub_cell_map = {cell["fieldId"]: cell.get("value", 0) for cell in sub_row.get("values", []) if cell.get("fieldId")}
+                    
+                    for agg_cell in agg_row.get("values", []):
+                        field_id = agg_cell.get("fieldId")
+                        if not field_id or field_id in calculated_field_ids:
                             continue
 
-                        sub_cell_map = {cell["fieldId"]: cell.get("value", 0) for cell in sub_row.get("values", []) if cell.get("fieldId")}
-                        
-                        for agg_cell in agg_row.get("values", []):
-                            field_id = agg_cell.get("fieldId")
-                            if not field_id or field_id in calculated_field_ids:
-                                continue
+                        # Perform summation with type checking
+                        if isinstance(agg_cell.get("value"), (int, float)):
+                            current_val = agg_cell.get("value", 0)
+                            val_to_add = sub_cell_map.get(field_id, 0)
+                            if not isinstance(val_to_add, (int, float)):
+                                val_to_add = 0
+                            agg_cell["value"] = current_val + val_to_add
 
-                            if isinstance(agg_cell.get("value"), (int, float)):
-                                current_val = agg_cell.get("value", 0)
-                                val_to_add = sub_cell_map.get(field_id, 0)
-                                if not isinstance(val_to_add, (int, float)):
-                                    val_to_add = 0
-                                agg_cell["value"] = current_val + val_to_add
-
-            except Exception as e:
-                raise HTTPException(
-                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                    detail=f"Error processing subsidiary table '{sub_id}': {str(e)}"
-                )
-
-        submissions_dir = DATA_DIR / f"{project_id}_data"
-        summary_file_path = submissions_dir / f"{table_id}.json"
-        if summary_file_path.exists() and aggregated_payload is not None:
+        # Override with manually entered data for the summary table itself, if any
+        if file_path.exists() and aggregated_payload is not None:
             try:
-                with open(summary_file_path, "r", encoding="utf-8") as f: summary_content = json.load(f)
+                with open(file_path, "r", encoding="utf-8") as f: summary_content = json.load(f)
                 summary_data = summary_content.get("submit") or summary_content.get("temp")
                 if summary_data and isinstance(summary_data.get("tableData"), list):
                     aggregated_payload["submittedAt"] = summary_data.get("submittedAt")

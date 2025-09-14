@@ -1,6 +1,6 @@
 {
     "submit": {
-        "submittedAt": "2025-09-14T02:41:43.310Z",
+        "submittedAt": "2025-09-14T04:06:21.835Z",
         "table": {
             "id": "1",
             "name": "集团汇总表",
@@ -39,7 +39,7 @@
                         "fieldId": 1003,
                         "fieldName": "totals.plan",
                         "fieldLabel": "本期计划",
-                        "value": 0
+                        "value": 14.2857142857
                     },
                     {
                         "fieldId": 1004,
@@ -57,7 +57,7 @@
                         "fieldId": 2001,
                         "fieldName": "monthlyData.october.plan",
                         "fieldLabel": "10月-计划",
-                        "value": 0
+                        "value": 100
                     },
                     {
                         "fieldId": 2002,
