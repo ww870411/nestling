@@ -41,8 +41,8 @@
             tabindex="3"
             @keyup.enter="handleLogin"
           />
-          <div class="captcha-image">
-            <p>1234</p>
+          <div class="captcha-image" @click="generateCaptcha" title="点击刷新">
+            <p>{{ captchaCode }}</p>
           </div>
         </div>
       </el-form-item>
@@ -55,7 +55,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/authStore';
 import { ElMessage } from 'element-plus';
@@ -66,20 +66,41 @@ const authStore = useAuthStore();
 const loginForm = ref({
   username: '',
   password: '',
-  captcha: '' // 验证码逻辑暂时保留UI，但不参与实际验证
+  captcha: ''
 });
+
+const captchaCode = ref('');
 
 const loginRules = ref({
   username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
-  password: [{ required: true, message: '请输入密码', trigger: 'blur' }]
+  password: [{ required: true, message: '请输入密码', trigger: 'blur' }],
+  captcha: [{ required: true, message: '请输入验证码', trigger: 'blur' }]
 });
 
 const loading = ref(false);
 const loginFormRef = ref(null);
 
+const generateCaptcha = () => {
+  let result = '';
+  for (let i = 0; i < 4; i++) {
+    result += Math.floor(Math.random() * 10).toString();
+  }
+  captchaCode.value = result;
+};
+
+onMounted(() => {
+  generateCaptcha();
+});
+
 const handleLogin = () => {
   loginFormRef.value.validate(async (valid) => {
     if (valid) {
+      if (loginForm.value.captcha !== captchaCode.value) {
+        ElMessage.error('验证码不正确');
+        generateCaptcha();
+        return;
+      }
+
       loading.value = true;
       try {
         const loginSuccess = await authStore.login(loginForm.value.username, loginForm.value.password);
@@ -88,9 +109,11 @@ const handleLogin = () => {
           router.push({ name: 'projects' });
         } else {
           ElMessage.error('用户名或密码错误');
+          generateCaptcha();
         }
       } catch (error) {
         ElMessage.error('登录请求失败，请稍后再试。');
+        generateCaptcha();
       } finally {
         loading.value = false;
       }
