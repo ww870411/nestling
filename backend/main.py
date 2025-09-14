@@ -1,5 +1,6 @@
 import json
 import copy
+import os
 from pathlib import Path
 from fastapi import FastAPI, HTTPException, status, Body
 from fastapi.middleware.cors import CORSMiddleware
@@ -17,19 +18,26 @@ app.add_middleware(
 )
 
 # --- App Configuration ---
-# Use pathlib to create robust, absolute paths based on the script's location
-BASE_DIR = Path(__file__).resolve().parent
-DATA_DIR = BASE_DIR / "app" / "data"
+# Path for USER-GENERATED data (submissions, auth file). From env var or default.
+data_dir_path = os.getenv('DATA_DIR_PATH', str(Path(__file__).resolve().parent / "app" / "data"))
+DATA_DIR = Path(data_dir_path)
+DATA_DIR.mkdir(parents=True, exist_ok=True)
 
+# Path for APPLICATION-LEVEL config files (templates, menu definitions). Always with the code.
+CONFIG_DIR = Path(__file__).resolve().parent / "app" / "data"
+
+# --- Update file paths ---
+
+# This is user data, so it uses the new DATA_DIR
 AUTH_FILE = DATA_DIR / "auth.json"
 
-# Load menu data from the JSON file
-MENU_FILE = DATA_DIR / "heating_plan_2025-2026_data" / "menucopy.json"
+# These are app configs, so they should use CONFIG_DIR
+MENU_FILE = CONFIG_DIR / "heating_plan_2025-2026_data" / "menucopy.json"
 with open(MENU_FILE, "r", encoding="utf-8") as f:
     MENU_DATA = json.load(f)
 
 # Load report template from JSON file
-TEMPLATE_FILE = DATA_DIR / "heating_plan_2025-2026_data" / "templatecopy.json"
+TEMPLATE_FILE = CONFIG_DIR / "heating_plan_2025-2026_data" / "templatecopy.json"
 with open(TEMPLATE_FILE, "r", encoding="utf-8") as f:
     REPORT_TEMPLATE = json.load(f)
 
@@ -116,7 +124,7 @@ async def get_table_0_data(project_id: str):
 
     # Load templates and field configurations
     report_template = REPORT_TEMPLATE
-    GROUP_TEMPLATE_FILE = DATA_DIR / "heating_plan_2025-2026_data" / "groupTemplate.json"
+    GROUP_TEMPLATE_FILE = CONFIG_DIR / "heating_plan_2025-2026_data" / "groupTemplate.json"
     with open(GROUP_TEMPLATE_FILE, "r", encoding="utf-8") as f:
         field_config = json.load(f)
 
