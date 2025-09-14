@@ -116,18 +116,9 @@ async def get_table_0_data(project_id: str):
     # Based on frontend/src/projects/heating_plan_2025-2026/templates/groupTemplate.js
     report_template = REPORT_TEMPLATE
     
-    field_config = [
-        {'id': 1001, 'name': 'name'}, {'id': 1002, 'name': 'unit'},
-        {'id': 1003, 'name': 'group.plan'}, {'id': 1004, 'name': 'group.samePeriod'}, {'id': 1005, 'name': 'group.diffRate'},
-        {'id': 1006, 'name': 'downtown.plan'}, {'id': 1007, 'name': 'downtown.samePeriod'}, {'id': 1008, 'name': 'downtown.diffRate'},
-        {'id': 1009, 'name': 'beihai.plan'}, {'id': 1010, 'name': 'beihai.samePeriod'}, {'id': 1011, 'name': 'beihai.diffRate'},
-        {'id': 1012, 'name': 'xianghai.plan'}, {'id': 1013, 'name': 'xianghai.samePeriod'}, {'id': 1014, 'name': 'xianghai.diffRate'},
-        {'id': 1015, 'name': 'jinzhou.plan'}, {'id': 1016, 'name': 'jinzhou.samePeriod'}, {'id': 1017, 'name': 'jinzhou.diffRate'},
-        {'id': 1018, 'name': 'beifang.plan'}, {'id': 1019, 'name': 'beifang.samePeriod'}, {'id': 1020, 'name': 'beifang.diffRate'},
-        {'id': 1021, 'name': 'jinpu.plan'}, {'id': 1022, 'name': 'jinpu.samePeriod'}, {'id': 1023, 'name': 'jinpu.diffRate'},
-        {'id': 1024, 'name': 'zhuanghe.plan'}, {'id': 1025, 'name': 'zhuanghe.samePeriod'}, {'id': 1026, 'name': 'zhuanghe.diffRate'},
-        {'id': 1027, 'name': 'research.plan'}, {'id': 1028, 'name': 'research.samePeriod'}, {'id': 1029, 'name': 'research.diffRate'}
-    ]
+    GROUP_TEMPLATE_FILE = DATA_DIR / "heating_plan_2025-2026_data" / "groupTemplate.json"
+    with open(GROUP_TEMPLATE_FILE, "r", encoding="utf-8") as f:
+        field_config = json.load(f)
 
     # Create maps from the subsidiary key (e.g., 'group') to the target fieldId
     key_to_plan_field_id = { field['name'].split('.')[0]: field['id'] for field in field_config if '.plan' in field['name'] }

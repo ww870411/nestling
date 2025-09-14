@@ -41,8 +41,9 @@
   { "id": 40, "name": "耗水量", "unit": "吨", "type": "calculated", "formula": "VAL(41) + VAL(45) + VAL(46) + VAL(47)" },
   { "id": 41, "name": "其中：1.电厂耗水量", "unit": "吨", "type": "basic" },
   { "id": 42, "name": "2.电厂一次网补水量", "unit": "吨", "type": "calculated", "formula": "VAL(43) + VAL(44)" },
-  { "id": 43, "name": "2.1高温水首站补水量", "unit": "吨", "type": "basic" },
-  { "id": 44, "name": "2.2低真空补水量", "unit": "吨", "type": "basic" },
+  { "id": 43, "name": "2.1主城区高温水首站补水量", "unit": "吨", "type": "basic" },
+  { "id": 44, "name": "2.2主城区低真空补水量", "unit": "吨", "type": "basic" },
+  { "id": 192, "name": "2.3北部单位热网补水量", "unit": "吨", "type": "basic" },
   { "id": 45, "name": "3.换热站补水量", "unit": "吨", "type": "basic" },
   { "id": 46, "name": "4.燃煤锅炉房耗水量", "unit": "吨", "type": "basic" },
   { "id": 47, "name": "5.电锅炉/热泵耗水量", "unit": "吨", "type": "basic" },
@@ -78,8 +79,8 @@
   { "id": 77, "name": "全厂热效率", "unit": "%", "type": "calculated", "formula": "((VAL(7) + VAL(6) * 3.6) / (VAL(28) * 29307 / 1000)) * 100" },
   { "id": 78, "name": "热电比", "unit": "%", "type": "calculated", "formula": "(VAL(7) / (VAL(7) + VAL(6) * 3.6)) * 100" },
   { "id": 79, "name": "热分摊比", "unit": "%", "type": "calculated", "formula": "(VAL(32) / VAL(28)) * 100" },
-  { "id": 80, "name": "发电设备利用率", "unit": "%", "type": "calculated", "formula": "(VAL(6) / (VAL(3) * 24 * 30)) * 100" },
-  { "id": 81, "name": "供热设备利用率", "unit": "%", "type": "calculated", "formula": "(VAL(7) / (VAL(4) * 0.7 * 24 * 30)) * 100" },
+  { "id": 80, "name": "发电设备利用率", "unit": "%", "type": "calculated", "formula":"VAL(6)/VAL(3)/VAL(191)/24" },
+  { "id": 81, "name": "供热设备利用率", "unit": "%", "type": "calculated", "formula": "(VAL(7)*1000-VAL(39))/(VAL(4)+VAL(5))/VAL(191)/24/3600" },
   { "id": 82, "name": "综合厂用电率", "unit": "%", "type": "calculated", "formula": "(VAL(63) / VAL(6)) * 100" },
   { "id": 83, "name": "发电厂用电率", "unit": "%", "type": "calculated", "formula": "(VAL(66) / VAL(6)) * 100" },
   { "id": 84, "name": "供热厂用电率", "unit": "kWh/GJ", "type": "calculated", "formula": "VAL(67) * 10000 / VAL(7)" },
@@ -113,5 +114,6 @@
   { "id": 112, "name": "购天然气单价", "unit": "元/吨", "type": "calculated", "formula": "VAL(111) * 10000 / (VAL(60) * 10000 * 1.38 / 1000)" },
   { "id": 113, "name": "劳务费", "unit": "万元", "type": "basic" },
   { "id": 114, "name": "抢修费", "unit": "万元", "type": "basic" },
-  { "id": 115, "name": "毛利", "unit": "万元", "type": "calculated", "formula": "VAL(94) - (VAL(103) + VAL(105) + VAL(107) + VAL(109) + VAL(111) + VAL(113) + VAL(114))" }
+  { "id": 115, "name": "毛利", "unit": "万元", "type": "calculated", "formula": "VAL(94) - (VAL(103) + VAL(105) + VAL(107) + VAL(109) + VAL(111) + VAL(113) + VAL(114))" },
+  { "id": 191, "name": "天数", "unit": "天", "type": "basic" }
 ]
