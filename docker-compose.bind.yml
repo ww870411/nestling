@@ -1,0 +1,20 @@
+services:
+  # 使用宿主机目录绑定挂载，替代命名卷，便于直接访问/复制
+  backend:
+    # 以宿主机用户身份运行，避免生成 root 拥有的文件
+    user: "${UID:-1000}:${GID:-1000}"
+    volumes:
+      # 改为本地目录 data/backend 挂载到容器内 /app/data
+      - ./data/backend:/app/data
+
+  web:
+    volumes:
+      # 将证书与验证目录也改为宿主机可见目录
+      - ./data/letsencrypt:/etc/letsencrypt
+      - ./data/certbot_www:/var/www/certbot
+
+  certbot:
+    volumes:
+      - ./data/letsencrypt:/etc/letsencrypt
+      - ./data/certbot_www:/var/www/certbot
+

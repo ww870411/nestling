@@ -7,7 +7,6 @@ services:
       dockerfile: Dockerfile.prod
     volumes:
       - backend-data:/app/data
-      - /home/ww870411/app/share:/app/data
     restart: unless-stopped
 
   # Web Service (Nginx + Frontend)
