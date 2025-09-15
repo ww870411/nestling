@@ -20,7 +20,6 @@ email="locookies12@gmail.com"
 staging=0
 
 # --- Advanced Configuration ---
-data_path="./data/certbot"
 rsa_key_size=4096
 compose_file="docker-compose-server.yml"
 
@@ -36,7 +35,8 @@ if ! command_exists docker-compose; then echo "Error: docker-compose is not inst
 if ! command_exists docker; then echo "Error: docker is not installed." >&2; exit 1; fi
 
 # Check if certificates already exist
-if [ -d "$data_path/conf/live/${domains[0]}" ]; then
+if docker-compose -f "$compose_file" run --rm --entrypoint "[ -d /etc/letsencrypt/live/${domains[0]} ]" certbot;
+then
   echo
   echo "### Found existing certificates for ${domains[0]}. Skipping creation. ###"
   echo "### To force renewal, run: docker-compose -f $compose_file run --rm --entrypoint \"certbot renew --force-renewal\" certbot ###"
@@ -47,12 +47,15 @@ fi
 # Create dummy certificate so Nginx can start
 echo "### Creating dummy certificate for ${domains[0]} ... ###"
 path="/etc/letsencrypt/live/${domains[0]}"
-mkdir -p "$data_path/conf/live/${domains[0]}"
+
 docker-compose -f "$compose_file" run --rm --entrypoint " \
+  sh -c 'mkdir -p $path && \
   openssl req -x509 -nodes -newkey rsa:$rsa_key_size -days 1 \
-    -keyout '$path/privkey.pem' \
-    -out '$path/fullchain.pem' \
-    -subj '/CN=localhost'" certbot
+    -keyout \"$path/privkey.pem\" \
+    -out \"$path/fullchain.pem\" \
+    -subj \"/CN=localhost\"'" certbot
+
+if [ $? -ne 0 ]; then echo "Error: Dummy certificate creation failed." >&2; exit 1; fi
 
 # Start all services (Nginx will start using the dummy cert)
 echo
@@ -85,6 +88,7 @@ docker-compose -f "$compose_file" run --rm --entrypoint " \
 
 if [ $? -ne 0 ]; then
     echo "Error: Let's Encrypt certificate request failed." >&2
+    # Optional: Add cleanup here if needed
     exit 1
 fi
 
