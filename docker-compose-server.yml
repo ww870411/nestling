@@ -6,7 +6,7 @@ services:
       context: ./backend
       dockerfile: Dockerfile.prod
     volumes:
-      - backend-data:/app/data
+      - /home/ww870411/app/data:/app/data
     restart: unless-stopped
 
   # Web Service (Nginx + Frontend)
@@ -38,6 +38,5 @@ services:
 
 # Volumes are still needed
 volumes:
-  backend-data:
   certbot_etc:
   certbot_www:

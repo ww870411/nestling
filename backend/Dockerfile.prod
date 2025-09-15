@@ -8,6 +8,10 @@ ENV PYTHONUNBUFFERED 1
 # Set the working directory in the container
 WORKDIR /app
 
+# 数据目录：容器内固定使用 /app/data（生产用绑定挂载覆盖此路径）
+ENV DATA_DIR_PATH=/app/data
+RUN mkdir -p /app/data
+
 # Copy the dependencies file to the working directory
 COPY requirements.txt .
 
