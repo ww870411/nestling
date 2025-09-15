@@ -34,7 +34,11 @@ command_exists() {
 if ! command_exists docker-compose; then echo "Error: docker-compose is not installed." >&2; exit 1; fi
 if ! command_exists docker; then echo "Error: docker is not installed." >&2; exit 1; fi
 
-# Check if certificates already exist
+# Clean up previous attempts to ensure a fresh start
+echo "### Cleaning up previous Docker environment... ###"
+docker-compose -f "$compose_file" down -v
+
+# Check if real certificates already exist
 if docker-compose -f "$compose_file" run --rm --entrypoint "[ -d /etc/letsencrypt/live/${domains[0]} ]" certbot;
 then
   echo
@@ -48,7 +52,8 @@ fi
 echo "### Creating dummy certificate for ${domains[0]} ... ###"
 path="/etc/letsencrypt/live/${domains[0]}"
 
-docker-compose -f "$compose_file" run --rm --entrypoint " \
+# IMPORTANT FIX: Run the command as root user (-u root) to ensure permissions
+docker-compose -f "$compose_file" run --rm -u root --entrypoint " \
   sh -c 'mkdir -p $path && \
   openssl req -x509 -nodes -newkey rsa:$rsa_key_size -days 1 \
     -keyout \"$path/privkey.pem\" \
@@ -71,7 +76,7 @@ staging_arg=""
 if [ "$staging" != "0" ]; then staging_arg="--staging"; fi
 
 # Command to remove the dummy certificate files
-docker-compose -f "$compose_file" run --rm --entrypoint " \
+docker-compose -f "$compose_file" run --rm -u root --entrypoint " \
   rm -Rf /etc/letsencrypt/live/${domains[0]} && \
   rm -Rf /etc/letsencrypt/archive/${domains[0]} && \
   rm -Rf /etc/letsencrypt/renewal/${domains[0]}.conf" certbot
@@ -88,7 +93,6 @@ docker-compose -f "$compose_file" run --rm --entrypoint " \
 
 if [ $? -ne 0 ]; then
     echo "Error: Let's Encrypt certificate request failed." >&2
-    # Optional: Add cleanup here if needed
     exit 1
 fi
 
