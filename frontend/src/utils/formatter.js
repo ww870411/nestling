@@ -9,31 +9,41 @@
  * @returns {string} 格式化后的字符串。
  */
 export function formatValue(value, format) {
-  if (value === null || value === undefined || isNaN(value)) {
-    return value; // Return original value if it's not a valid number
+  if (value === null || value === undefined) {
+    return value;
+  }
+
+  const numberValue = Number(value);
+  if (isNaN(numberValue)) {
+    return value; // Return original non-numeric value
   }
 
   if (!format || !format.type) {
     return value; // Return original value if no format is specified
   }
 
-  const numberValue = Number(value);
-
-  switch (format.type) {
-    case 'integer':
-      return Math.round(numberValue).toString();
-    
-    case 'decimal':
-      const decimalPlaces = format.places !== undefined ? format.places : 2;
-      return numberValue.toFixed(decimalPlaces);
-
-    case 'percentage':
-      const percentagePlaces = format.places !== undefined ? format.places : 2;
-      return `${(numberValue * 100).toFixed(percentagePlaces)}%`;
-
-    default:
-      return value; // Return original value for unknown format types
+  // Handle percentage separately to exactly match existing output (e.g., '55.00%')
+  if (format.type === 'percentage') {
+    const percentagePlaces = format.places !== undefined ? format.places : 2;
+    return `${(numberValue * 100).toFixed(percentagePlaces)}%`;
   }
+
+  // Use Intl.NumberFormat for integer and decimal types
+  const options = {
+    useGrouping: format.thousandSeparator || false, // This enables the comma separator
+  };
+
+  if (format.type === 'integer') {
+    options.minimumFractionDigits = 0;
+    options.maximumFractionDigits = 0;
+  } else if (format.type === 'decimal') {
+    options.minimumFractionDigits = format.places !== undefined ? format.places : 2;
+    options.maximumFractionDigits = format.places !== undefined ? format.places : 2;
+  } else {
+    return value; // Return original for unknown types
+  }
+
+  return new Intl.NumberFormat('en-US', options).format(numberValue);
 }
 
 /**

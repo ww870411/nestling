@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  # Backend Service (FastAPI)
+  backend:
+    container_name: nestling-backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.prod
+    volumes:
+      # Mount a named volume to persist the JSON data
+      - backend-data:/app/data
+    networks:
+      - nestling-net
+    restart: unless-stopped
+
+  # Web Service (Nginx + Frontend)
+  web:
+    container_name: nestling-web
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+    ports:
+      # Map host port 80 to container port 80
+      - "80:80"
+    networks:
+      - nestling-net
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+# Define the network
+networks:
+  nestling-net:
+    driver: bridge
+
+# Define the volume for data persistence
+volumes:
+  backend-data:
+    driver: local

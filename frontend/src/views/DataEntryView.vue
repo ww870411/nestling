@@ -36,8 +36,9 @@
                   :fixed="childField.fixed">
                   <template #default="{ row }">
                     <div v-if="getCellState(row, childField, currentTableConfig, childToParentsMap.value, forcedParentMap.value) === 'WRITABLE'" class="cell-content">
-                      <el-input 
+                      <FormattedInput 
                         v-model="row.values[childField.id]"
+                        :format-options="getFormatOptions(row, childField)"
                         @blur="handleInputBlur(row, childField.id)" 
                         @keyup.enter="handleInputBlur(row, childField.id)" />
                     </div>
@@ -56,8 +57,9 @@
                 :fixed="field.fixed">
                 <template #default="{ row }">
                   <div v-if="getCellState(row, field, currentTableConfig, childToParentsMap.value, forcedParentMap.value) === 'WRITABLE'" class="cell-content">
-                    <el-input 
+                    <FormattedInput 
                       v-model="row.values[field.id]"
+                      :format-options="getFormatOptions(row, field)"
                       @blur="handleInputBlur(row, field.id)" 
                       @keyup.enter="handleInputBlur(row, field.id)" />
                   </div>
@@ -140,6 +142,7 @@ import * as XLSX from 'xlsx';
 import { validationSchemes, getCellState } from '@/projects/heating_plan_2025-2026/tableRules.js';
 import { validationRules } from '@/utils/validator.js'; // Import the whole rules object
 import { formatValue, formatDateTime } from '@/utils/formatter.js';
+import FormattedInput from '@/components/FormattedInput.vue';
 
 import { useAuthStore } from '@/stores/authStore';
 
@@ -232,17 +235,28 @@ const processedFieldConfig = computed(() => {
 
 const globalDisplayFormat = computed(() => currentTableConfig.value?.template?.globalDisplayFormat || null);
 
+const getFormatOptions = (row, field) => {
+  const fieldFormat = field.displayFormat;
+  const metric = reportTemplate.value.find(m => m.id === row.metricId);
+  const metricFormat = metric?.displayFormat;
+  const globalFormat = globalDisplayFormat.value;
+  // Return the most specific format found, or a default for numeric inputs.
+  return fieldFormat || metricFormat || globalFormat || { type: 'decimal', places: 2 };
+};
+
 const getFormattedValue = (row, field) => {
   const value = row.values[field.id];
   if (field.component === 'label') {
       return value;
   }
-  const fieldFormat = field.displayFormat;
-  const metric = reportTemplate.value.find(m => m.id === row.metricId);
-  const metricFormat = metric?.displayFormat;
-  const globalFormat = globalDisplayFormat.value;
+  
+  const formatToApply = getFormatOptions(row, field);
 
-  const formatToApply = fieldFormat || metricFormat || globalFormat;
+  // Automatically enable thousand separators for numeric display formats.
+  if (formatToApply && (formatToApply.type === 'integer' || formatToApply.type === 'decimal')) {
+    const optionsWithSeparator = { ...formatToApply, thousandSeparator: true };
+    return formatValue(value, optionsWithSeparator);
+  }
 
   return formatValue(value, formatToApply);
 };
