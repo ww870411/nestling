@@ -8,7 +8,6 @@ services:
       context: ./backend
       dockerfile: Dockerfile.prod
     volumes:
-      # Mount a named volume to persist the JSON data
       - backend-data:/app/data
     networks:
       - nestling-net
@@ -21,20 +20,38 @@ services:
       context: .
       dockerfile: Dockerfile.web
     ports:
-      # Map host port 80 to container port 80
       - "80:80"
+      - "443:443"
+    volumes:
+      # Mount volumes for certbot to share certificates and challenge files
+      - certbot_etc:/etc/letsencrypt
+      - certbot_www:/var/www/certbot
     networks:
       - nestling-net
     depends_on:
       - backend
     restart: unless-stopped
 
-# Define the network
+  # Certbot Service for Let's Encrypt
+  certbot:
+    image: certbot/certbot
+    container_name: nestling-certbot
+    volumes:
+      - certbot_etc:/etc/letsencrypt
+      - certbot_www:/var/www/certbot
+    # The command will be overridden by the init script on first run
+    # After that, it defaults to checking for renewal twice a day
+    command: renew --quiet
+
+# Define networks
 networks:
   nestling-net:
     driver: bridge
 
-# Define the volume for data persistence
+# Define volumes
 volumes:
   backend-data:
     driver: local
+  # Volumes for Let's Encrypt data
+  certbot_etc:
+  certbot_www:
