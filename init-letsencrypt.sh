@@ -26,16 +26,6 @@ docker-compose -f "$compose_file" run --rm -u root --entrypoint " \
 echo "### Starting all services ... ###"
 docker-compose -f "$compose_file" up --force-recreate -d
 
-# --- DEBUGGING PAUSE ---
-echo
-echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-echo "    PAUSING FOR DEBUGGING. Services are up."
-echo "    Please run 'docker-compose ps' and 'sudo ss -tlnp' in another terminal."
-echo "    Press Enter to continue and request the real certificate..."
-echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-read -p ""
-# --- END DEBUGGING PAUSE ---
-
 # Request real certificate
 echo "### Deleting dummy certificate and requesting real certificate for ${domains[0]} ... ###"
 staging_arg=""

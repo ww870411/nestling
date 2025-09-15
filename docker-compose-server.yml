@@ -5,10 +5,9 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile.prod
+    network_mode: "host"
     volumes:
       - backend-data:/app/data
-    networks:
-      - nestling-net
     restart: unless-stopped
 
   # Web Service (Nginx + Frontend)
@@ -17,15 +16,10 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.web
-    ports:
-      - "80:80"
-      - "443:443"
+    network_mode: "host"
     volumes:
-      # Mount volumes for certbot to share certificates and challenge files
       - certbot_etc:/etc/letsencrypt
       - certbot_www:/var/www/certbot
-    networks:
-      - nestling-net
     depends_on:
       - backend
     restart: unless-stopped
@@ -34,22 +28,15 @@ services:
   certbot:
     image: certbot/certbot
     container_name: nestling-certbot
+    # Certbot commands need access to the webroot volume
     volumes:
       - certbot_etc:/etc/letsencrypt
       - certbot_www:/var/www/certbot
-    # The command will be overridden by the init script on first run
-    # After that, it defaults to checking for renewal twice a day
+    # It doesn't need network, but we leave it simple
     command: renew --quiet
 
-# Define networks
-networks:
-  nestling-net:
-    driver: bridge
-
-# Define volumes
+# Volumes are still needed
 volumes:
   backend-data:
-    driver: local
-  # Volumes for Let's Encrypt data
   certbot_etc:
   certbot_www:
