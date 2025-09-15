@@ -1,0 +1,51 @@
+ww870411@instance-20250906-2216:~/app/nestling$ chmod +x init-letsencrypt.sh
+ww870411@instance-20250906-2216:~/app/nestling$ ./init-letsencrypt.sh
+### Cleaning up previous Docker environment... ###
+Stopping nestling-web     ... done
+Stopping nestling-backend ... done
+Removing nestling-web     ... done
+Removing nestling-certbot ... done
+Removing nestling-backend ... done
+Removing network nestling_default
+Removing volume nestling_backend-data
+Removing volume nestling_certbot_etc
+Removing volume nestling_certbot_www
+### Creating dummy certificate for platform.smartview.top ... ###
+Creating network "nestling_default" with the default driver
+Creating volume "nestling_backend-data" with default driver
+Creating volume "nestling_certbot_etc" with default driver
+Creating volume "nestling_certbot_www" with default driver
+Creating nestling_certbot_run ... done
+...+............+..+......+....+.....+......+.+......+........+....+..+.+...+..+.......+++++++++++++++++++++++++++++++++++++++++++++*.+.+..+...+......+...+.........................+............+...+..+.+........+....+..+++++++++++++++++++++++++++++++++++++++++++++*................+.........+..+++++
+....+...+..+......+............+.+..+....+...........+...+.......+.....+...+++++++++++++++++++++++++++++++++++++++++++++*....+.............+...+......+...+.....+...+...+.......+.....+.......+..+...+.+...........+...+.+......+.........+..+...+......+.........+++++++++++++++++++++++++++++++++++++++++++++*....+..+......+.............+..+....+..............+.........+.......+...+.....+...+.............+............+...+......+.........+.................+....+...+..+.+.........+.......................+...+.......+..+....+.....+......+.+.................+......+.+...+...+...+...........+...................+...........+..........+.....+....+..+.........+.+.....+....+...........+....+...+.....+.............+...+............+..+..........+.....+.......+......+.....+..........+..+.+......+...+.....+...........................+................+..+...+....+...+...+.....+...+.+.....+.............+........+............+...+..........+.................+.......+.....+.........................+.........+..+...+.........+.+..+...............+...+.........+...+....+.....+...+.+............+........+....+..+......+........................+...+.+...........+...+++++
+-----
+### Starting all services ... ###
+Creating nestling-backend ... done
+Creating nestling-certbot ... done
+Creating nestling-web     ... done
+### Deleting dummy certificate and requesting real certificate for platform.smartview.top ... ###
+Creating nestling_certbot_run ... done
+Creating nestling_certbot_run ... done
+Saving debug log to /var/log/letsencrypt/letsencrypt.log
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+Would you be willing, once your first certificate is successfully issued, to
+share your email address with the Electronic Frontier Foundation, a founding
+partner of the Let's Encrypt project and the non-profit organization that
+develops Certbot? We'd like to send you email about our work encrypting the web,
+EFF news, campaigns, and ways to support digital freedom.
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+(Y)es/(N)o: y
+Account registered.
+Requesting a certificate for platform.smartview.top
+
+Certbot failed to authenticate some domains (authenticator: webroot). The Certificate Authority reported these problems:
+  Domain: platform.smartview.top
+  Type:   connection
+  Detail: 141.147.159.220: Fetching http://platform.smartview.top/.well-known/acme-challenge/ktZwMtALGmOtqAxDxGrTztPZ4LxPPRkMCzBaofzKVLU: Connection refused
+
+Hint: The Certificate Authority failed to download the temporary challenge files created by Certbot. Ensure that the listed domains serve their content from the provided --webroot-path/-w and that files created there can be downloaded from the internet.
+
+Some challenges have failed.
+Ask for help or search for solutions at https://community.letsencrypt.org. See the logfile /var/log/letsencrypt/letsencrypt.log or re-run Certbot with -v for more details.
+ERROR: 1
