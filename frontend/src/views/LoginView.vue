@@ -26,6 +26,7 @@
         <el-input
           v-model="loginForm.password"
           type="password"
+          show-password
           placeholder="密码"
           name="password"
           tabindex="2"
