@@ -1,7 +1,9 @@
-import json
+﻿import json
 import copy
 import os
+from datetime import datetime
 from pathlib import Path
+from zoneinfo import ZoneInfo
 from fastapi import FastAPI, HTTPException, status, Body
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -22,6 +24,7 @@ app.add_middleware(
 data_dir_path = os.getenv('DATA_DIR_PATH', str(Path(__file__).resolve().parent / "app" / "data"))
 DATA_DIR = Path(data_dir_path)
 DATA_DIR.mkdir(parents=True, exist_ok=True)
+BEIJING_TZ = ZoneInfo("Asia/Shanghai")
 
 # Path for APPLICATION-LEVEL config files (templates, menu definitions). Always with the code.
 CONFIG_DIR = Path(__file__).resolve().parent / "app" / "data"
@@ -97,12 +100,65 @@ def _update_data_file(file_path: Path, key: str, payload: dict):
             detail=f"An unexpected error occurred during file write: {str(e)}"
         )
 
+
+def _append_history_record(submissions_dir: Path, project_id: str, table_id: str, payload: dict, action: str):
+    payload = payload if isinstance(payload, dict) else {}
+    table_info = payload.get("table") if isinstance(payload.get("table"), dict) else {}
+    timestamp = payload.get("submittedAt") if isinstance(payload.get("submittedAt"), str) else None
+    if not timestamp:
+        timestamp = datetime.now(BEIJING_TZ).isoformat()
+
+    record = {
+        "projectId": project_id,
+        "tableId": table_id,
+        "tableName": table_info.get("name"),
+        "action": action,
+        "timestamp": timestamp,
+        "submittedBy": payload.get("submittedBy"),
+    }
+
+    table_template = table_info.get("template")
+    if table_template:
+        record["tableTemplate"] = table_template
+
+    fallback_table = ALL_TABLES.get(str(table_id))
+    if fallback_table and not record.get("tableName"):
+        record["tableName"] = fallback_table.get("name")
+    if fallback_table and "tableTemplate" not in record:
+        template_name = fallback_table.get("templateName")
+        if template_name:
+            record["tableTemplate"] = template_name
+
+    history_file = submissions_dir / "history.json"
+    history = []
+
+    if history_file.exists():
+        try:
+            with open(history_file, "r", encoding="utf-8") as f:
+                existing = json.load(f)
+                if isinstance(existing, list):
+                    history = existing
+        except (json.JSONDecodeError, IOError):
+            history = []
+
+    history.append(record)
+
+    try:
+        with open(history_file, "w", encoding="utf-8") as f:
+            json.dump(history, f, ensure_ascii=False, indent=4)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to update history file: {str(e)}"
+        )
+
 @app.post("/project/{project_id}/table/{table_id}/submit")
 async def submit_data(project_id: str, table_id: str, payload: dict = Body(...)):
     submissions_dir = DATA_DIR / f"{project_id}_data"
     submissions_dir.mkdir(parents=True, exist_ok=True)
     file_path = submissions_dir / f"{table_id}.json"
     _update_data_file(file_path, "submit", payload)
+    _append_history_record(submissions_dir, project_id, table_id, payload, "submit")
     return {"message": f"Data for table ID '{table_id}' submitted successfully."}
 
 @app.post("/project/{project_id}/table/{table_id}/save_draft")
@@ -111,6 +167,7 @@ async def save_draft(project_id: str, table_id: str, payload: dict = Body(...)):
     submissions_dir.mkdir(parents=True, exist_ok=True)
     file_path = submissions_dir / f"{table_id}.json"
     _update_data_file(file_path, "temp", payload)
+    _append_history_record(submissions_dir, project_id, table_id, payload, "save_draft")
     return {"message": f"Draft for table ID '{table_id}' saved successfully."}
 
 async def get_table_0_data(project_id: str):

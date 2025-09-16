@@ -4,6 +4,7 @@ import csv
 import json
 from pathlib import Path
 import datetime
+from zoneinfo import ZoneInfo
 import traceback
 
 # --- Configuration copied from frontend/srcs/projects/heating_plan_2025-2026/templates/subsidiaryTemplate.js ---
@@ -236,7 +237,7 @@ class HistoryImporterApp:
             # --- Assemble final payload ---
             payload = {
                 "submit": {
-                    "submittedAt": datetime.datetime.now().isoformat(),
+                    "submittedAt": datetime.datetime.now(ZoneInfo("Asia/Shanghai")).isoformat(),
                     "table": {
                         "id": output_id,
                         "name": f"Imported History for Table {output_id}",

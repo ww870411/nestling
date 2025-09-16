@@ -1,4 +1,4 @@
-/**
+﻿/**
  * @file 格式化工具函数
  */
 
@@ -8,6 +8,39 @@
  * @param {object} format - 格式化选项对象, e.g., { type: 'integer' }, { type: 'decimal', places: 2 }, { type: 'percentage', places: 2 }。
  * @returns {string} 格式化后的字符串。
  */
+const BEIJING_TIMEZONE = 'Asia/Shanghai';
+
+function getBeijingDateTimeParts(date) {
+  const formatter = new Intl.DateTimeFormat('zh-CN', {
+    timeZone: BEIJING_TIMEZONE,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false,
+    hourCycle: 'h23'
+  });
+
+  return formatter.formatToParts(date).reduce((acc, part) => {
+    if (part.type !== 'literal') {
+      acc[part.type] = part.value;
+    }
+    return acc;
+  }, {});
+}
+
+function padMilliseconds(ms) {
+  return ms.toString().padStart(3, '0');
+}
+
+export function getBeijingISODateString(date = new Date()) {
+  const parts = getBeijingDateTimeParts(date);
+  const milliseconds = padMilliseconds(date.getMilliseconds());
+
+  return `${parts.year}-${parts.month}-${parts.day}T${parts.hour}:${parts.minute}:${parts.second}.${milliseconds}+08:00`;
+}
 export function formatValue(value, format) {
   if (value === null || value === undefined) {
     return value;
@@ -57,32 +90,21 @@ export function formatDateTime(isoString, format = 'full') {
 
   const date = new Date(isoString);
   if (isNaN(date.getTime())) {
-    return ''; // Invalid date
+    return '';
   }
 
-  const options = {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-    hour12: false, // Use 24-hour format
-  };
+  const parts = getBeijingDateTimeParts(date);
+  const year = parts.year;
+  const month = parts.month;
+  const day = parts.day;
 
-  // For some reason, toLocaleString with options doesn't always produce the desired YYYY-MM-DD format.
-  // A manual approach is more reliable.
-  const year = date.getFullYear();
-  const month = (date.getMonth() + 1).toString().padStart(2, '0');
-  const day = date.getDate().toString().padStart(2, '0');
-  
   if (format === 'date') {
     return `${year}-${month}-${day}`;
   }
 
-  const hours = date.getHours().toString().padStart(2, '0');
-  const minutes = date.getMinutes().toString().padStart(2, '0');
-  const seconds = date.getSeconds().toString().padStart(2, '0');
+  const hours = parts.hour;
+  const minutes = parts.minute;
+  const seconds = parts.second;
 
   return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 }

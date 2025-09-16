@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="data-entry-container">
     <div class="title-container">
       <h2 class="page-title">{{ pageTitle }}</h2>
@@ -141,7 +141,7 @@ import { Close, Loading, Download } from '@element-plus/icons-vue'; // Import Do
 import * as XLSX from 'xlsx';
 import { validationSchemes, getCellState } from '@/projects/heating_plan_2025-2026/tableRules.js';
 import { validationRules } from '@/utils/validator.js'; // Import the whole rules object
-import { formatValue, formatDateTime } from '@/utils/formatter.js';
+import { formatValue, formatDateTime, getBeijingISODateString } from '@/utils/formatter.js';
 import FormattedInput from '@/components/FormattedInput.vue';
 
 import { useAuthStore } from '@/stores/authStore';
@@ -920,7 +920,7 @@ const _createPayload = () => {
   });
 
   return {
-    submittedAt: new Date().toISOString(),
+    submittedAt: getBeijingISODateString(),
     table: {
       id: currentTableConfig.value?.id,
       name: currentTableConfig.value?.name,
