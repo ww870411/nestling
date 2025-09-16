@@ -275,20 +275,23 @@ const pageTitle = computed(() => {
 
 const zoomStyle = computed(() => {
   const scale = zoomLevel.value / 100;
-  const fontScale = scale * 1.06;
   const baseFontSize = 14; // Element Plus 默认字号
   const baseCellPadding = 12;
   const baseInputHeight = 32;
+  const baseInputPaddingX = 4;
 
-  const fontSize = baseFontSize * fontScale;
+  const fontSize = baseFontSize * scale;
   const inputHeight = baseInputHeight * scale;
+  const inputPaddingX = baseInputPaddingX * scale;
   return {
     '--table-font-size': `${fontSize}px`,
     '--table-cell-vertical-padding': `${baseCellPadding * scale}px`,
     '--table-input-height': `${inputHeight}px`,
+    '--table-input-horizontal-padding': `${inputPaddingX}px`,
     '--el-font-size-base': `${fontSize}px`,
     '--el-input-height': `${inputHeight}px`,
     '--el-input-font-size': `${fontSize}px`,
+    '--el-input-padding-horizontal': `${inputPaddingX}px`,
     fontSize: `${fontSize}px`,
     lineHeight: `${inputHeight}px`,
   };
@@ -1258,12 +1261,15 @@ const handleExport = () => {
   height: var(--table-input-height, 32px) !important;
   line-height: var(--table-input-height, 32px) !important;
   font-size: var(--table-font-size, 14px) !important;
+  border-radius: 0;
+  width: 100%;
 }
 :deep(.el-input__wrapper input),
 :deep(.el-input__wrapper .el-input__inner) {
   font-size: var(--table-font-size, 14px) !important;
   height: var(--table-input-height, 32px);
   line-height: var(--table-input-height, 32px);
+  padding: 0 var(--table-input-horizontal-padding, 4px);
   text-align: center;
 }
 .el-table th.el-table__cell, .el-table td.el-table__cell { border-right: 1px solid #ebeef5; border-bottom: 1px solid #ebeef5; font-size: var(--table-font-size, 14px); padding: var(--table-cell-vertical-padding, 12px) 0; }
@@ -1326,9 +1332,10 @@ const handleExport = () => {
 .cell-content {
   cursor: pointer;
   min-height: var(--table-input-height, 32px);
-  padding: 2px 1px;
+  padding: 1px 0;
   font-size: var(--table-font-size, 14px) !important;
   line-height: var(--table-input-height, 32px);
+  width: 100%;
 }
 .cell-content span { font-size: inherit; }
 .text-danger { color: #f56c6c; }
