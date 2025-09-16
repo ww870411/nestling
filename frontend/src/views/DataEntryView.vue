@@ -276,9 +276,21 @@ const pageTitle = computed(() => {
 const zoomStyle = computed(() => {
   const scale = zoomLevel.value / 100;
   const fontScale = scale * 1.06;
+  const baseFontSize = 14; // Element Plus 默认字号
+  const baseCellPadding = 12;
+  const baseInputHeight = 32;
+
+  const fontSize = baseFontSize * fontScale;
+  const inputHeight = baseInputHeight * scale;
   return {
-    '--table-font-size': `${12 * fontScale}px`,
-    '--table-cell-vertical-padding': `${5 * scale}px`,
+    '--table-font-size': `${fontSize}px`,
+    '--table-cell-vertical-padding': `${baseCellPadding * scale}px`,
+    '--table-input-height': `${inputHeight}px`,
+    '--el-font-size-base': `${fontSize}px`,
+    '--el-input-height': `${inputHeight}px`,
+    '--el-input-font-size': `${fontSize}px`,
+    fontSize: `${fontSize}px`,
+    lineHeight: `${inputHeight}px`,
   };
 });
 
@@ -1234,7 +1246,26 @@ const handleExport = () => {
 <style>
 .el-table { border-left: 1px solid #ebeef5; border-top: 1px solid #ebeef5; }
 .el-table .el-input__inner { text-align: center; }
-:deep(.el-input__wrapper) { padding: 0; box-shadow: none !important; }
+:deep(.el-input) {
+  font-size: var(--table-font-size, 14px) !important;
+  height: var(--table-input-height, 32px) !important;
+  line-height: var(--table-input-height, 32px) !important;
+}
+:deep(.el-input__wrapper) {
+  padding: 0;
+  box-shadow: none !important;
+  min-height: var(--table-input-height, 32px);
+  height: var(--table-input-height, 32px) !important;
+  line-height: var(--table-input-height, 32px) !important;
+  font-size: var(--table-font-size, 14px) !important;
+}
+:deep(.el-input__wrapper input),
+:deep(.el-input__wrapper .el-input__inner) {
+  font-size: var(--table-font-size, 14px) !important;
+  height: var(--table-input-height, 32px);
+  line-height: var(--table-input-height, 32px);
+  text-align: center;
+}
 .el-table th.el-table__cell, .el-table td.el-table__cell { border-right: 1px solid #ebeef5; border-bottom: 1px solid #ebeef5; font-size: var(--table-font-size, 14px); padding: var(--table-cell-vertical-padding, 12px) 0; }
 .el-table th.el-table__cell { background-color: #fafafa; }
 .is-error .cell-content { box-shadow: 0 0 0 1px #f56c6c inset !important; border-radius: 4px; }
@@ -1292,7 +1323,14 @@ const handleExport = () => {
 .error-item-hard { border-left: 3px solid #f56c6c; padding-left: 10px; }
 .error-item-soft { border-left: 3px solid #e6a23c; padding-left: 10px; }
 .footer-actions { flex-shrink: 0; display: flex; justify-content: space-between; align-items: center; padding-top: 20px; }
-.cell-content { cursor: pointer; min-height: 20px; padding: 2px 1px; }
+.cell-content {
+  cursor: pointer;
+  min-height: var(--table-input-height, 32px);
+  padding: 2px 1px;
+  font-size: var(--table-font-size, 14px) !important;
+  line-height: var(--table-input-height, 32px);
+}
+.cell-content span { font-size: inherit; }
 .text-danger { color: #f56c6c; }
 .text-success { color: #67c23a; }
 </style>
