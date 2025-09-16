@@ -97,7 +97,7 @@
       <div class="table-controls">
         <label style="margin-right: 10px; font-size: 14px; color: #606266;">表格缩放:</label>
         <el-radio-group v-model="zoomLevel" size="small">
-          
+          <el-radio-button :label="60">60%</el-radio-button>
           <el-radio-button :label="75">75%</el-radio-button>
           <el-radio-button :label="100">100%</el-radio-button>
         </el-radio-group>
@@ -275,7 +275,7 @@ const pageTitle = computed(() => {
 
 const zoomStyle = computed(() => {
   const scale = zoomLevel.value / 100;
-  const fontScale = (1 + scale) / 2;
+  const fontScale = scale * 1.06;
   return {
     '--table-font-size': `${12 * fontScale}px`,
     '--table-cell-vertical-padding': `${5 * scale}px`,
