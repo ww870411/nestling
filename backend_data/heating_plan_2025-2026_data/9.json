@@ -1,15 +1,15 @@
 {
     "submit": {
-        "submittedAt": "2025-09-16T10:24:45.554+08:00",
+        "submittedAt": "2025-09-16T12:13:38.548+08:00",
         "table": {
             "id": "9",
             "name": "供热公司表",
             "template": "subsidiaryTemplate"
         },
         "submittedBy": {
-            "username": "group_admin",
-            "unit": "集团公司",
-            "globalRole": "super_admin"
+            "username": "ww870411",
+            "unit": "系统管理员",
+            "globalRole": "god"
         },
         "tableData": [
             {

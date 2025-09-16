@@ -26,6 +26,11 @@
                 <span v-else></span>
               </div>
 
+              <!-- 提交历史 -->
+              <div v-else-if="column.type === 'history'">
+                <el-button type="primary" link @click="openHistoryDialog(row)">查看</el-button>
+              </div>
+
               <!-- 操作列 -->
               <div v-else-if="column.type === 'actions'">
                 <el-button type="primary" link @click="goToReport(row.id)">
@@ -43,6 +48,28 @@
         </template>
       </el-table>
     </div>
+    <el-dialog v-model="historyDialogVisible" :title="historyDialogTitle" width="560px">
+      <div v-if="historyLoading" class="history-dialog__loading">正在加载历史记录...</div>
+      <div v-else>
+        <div v-if="historyError" class="history-dialog__error">{{ historyError }}</div>
+        <div v-else-if="historyRecords.length === 0" class="history-dialog__empty">暂无历史记录</div>
+        <el-table v-else :data="historyRecords" border style="width: 100%;">
+          <el-table-column prop="action" label="操作类型" width="120">
+            <template #default="{ row }">{{ historyActionLabel(row.action) }}</template>
+          </el-table-column>
+          <el-table-column prop="timestamp" label="操作时间" width="200">
+            <template #default="{ row }">{{ formatDateTime(row.timestamp) }}</template>
+          </el-table-column>
+          <el-table-column prop="submittedBy" label="操作人">
+            <template #default="{ row }">
+              <div>{{ row.submittedBy?.username || '-' }}</div>
+              <div v-if="row.submittedBy?.unit" class="history-dialog__unit">{{ row.submittedBy.unit }}</div>
+            </template>
+          </el-table-column>
+        </el-table>
+      </div>
+    </el-dialog>
+
   </div>
 </template>
 
@@ -67,6 +94,13 @@ const { accessibleUnits } = storeToRefs(authStore);
 const config = ref(dashboardConfig);
 const reportInfo = ref({});
 const isLoading = ref(false);
+
+const historyDialogVisible = ref(false);
+const historyRecords = ref([]);
+const historyLoading = ref(false);
+const historyError = ref('');
+const historyTableName = ref('');
+const historyDialogTitle = computed(() => historyTableName.value ? `${historyTableName.value} 提交历史` : '提交历史');
 
 // 将菜单数据和状态数据结合，并根据权限过滤
 const allReports = computed(() => {
@@ -122,6 +156,41 @@ const fetchReportStatuses = async () => {
     ElMessage.error('无法从服务器加载报表状态。');
   } finally {
     isLoading.value = false;
+  }
+};
+
+const historyActionLabel = (action) => {
+  if (action === 'submit') return '提交';
+  if (action === 'save_draft') return '暂存';
+  return action || '';
+};
+
+const openHistoryDialog = async (table) => {
+  historyDialogVisible.value = true;
+  historyTableName.value = table.name || '';
+  historyRecords.value = [];
+  historyError.value = '';
+  historyLoading.value = true;
+
+  const projectId = route.params.projectId;
+  if (!projectId) {
+    historyLoading.value = false;
+    historyError.value = '缺少项目 ID，无法获取历史记录。';
+    return;
+  }
+
+  try {
+    const response = await fetch(`/api/project/${projectId}/table/${table.id}/history`);
+    if (!response.ok) {
+      throw new Error('failed to fetch history');
+    }
+    const data = await response.json();
+    historyRecords.value = Array.isArray(data) ? data : [];
+  } catch (error) {
+    console.error('Error fetching history records:', error);
+    historyError.value = '获取历史记录失败，请稍后重试。';
+  } finally {
+    historyLoading.value = false;
   }
 };
 
@@ -183,5 +252,23 @@ const goToReport = (reportId) => {
 
 .status-submitted {
   color: #67c23a;
+}
+
+.history-dialog__loading,
+.history-dialog__empty {
+  text-align: center;
+  padding: 20px 0;
+  color: #606266;
+}
+
+.history-dialog__error {
+  text-align: center;
+  padding: 20px 0;
+  color: #f56c6c;
+}
+
+.history-dialog__unit {
+  font-size: 12px;
+  color: #909399;
 }
 </style>

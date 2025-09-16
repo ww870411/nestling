@@ -134,7 +134,7 @@ def _append_history_record(submissions_dir: Path, project_id: str, table_id: str
 
     if history_file.exists():
         try:
-            with open(history_file, "r", encoding="utf-8") as f:
+            with open(history_file, "r", encoding="utf-8-sig") as f:
                 existing = json.load(f)
                 if isinstance(existing, list):
                     history = existing
@@ -398,6 +398,56 @@ async def get_table_data_recursive(project_id: str, table_id: str):
     
     return {}
 
+
+@app.get("/project/{project_id}/table/{table_id}/history")
+async def get_table_history(project_id: str, table_id: str):
+    submissions_dir = DATA_DIR / f"{project_id}_data"
+    history_file = submissions_dir / "history.json"
+
+    if not history_file.exists():
+        return []
+
+    try:
+        with open(history_file, "r", encoding="utf-8-sig") as f:
+            records = json.load(f)
+        if not isinstance(records, list):
+            return []
+    except Exception:
+        return []
+
+    filtered = []
+    table_id_str = str(table_id)
+    fallback_table = ALL_TABLES.get(table_id_str)
+
+    for record in records:
+        if not isinstance(record, dict):
+            continue
+        if str(record.get("tableId")) != table_id_str:
+            continue
+
+        submitted_by = record.get("submittedBy")
+        if submitted_by and (
+            submitted_by.get("globalRole") == "god" or
+            submitted_by.get("username") == "ww870411"
+        ):
+            continue
+
+        entry = {
+            "projectId": record.get("projectId"),
+            "tableId": table_id_str,
+            "tableName": record.get("tableName"),
+            "action": record.get("action"),
+            "timestamp": record.get("timestamp"),
+            "submittedBy": submitted_by,
+        }
+
+        if not entry["tableName"] and fallback_table:
+            entry["tableName"] = fallback_table.get("name")
+
+        filtered.append(entry)
+
+    filtered.sort(key=lambda item: item.get("timestamp") or "", reverse=True)
+    return filtered
 
 @app.get("/project/{project_id}/data/table/{table_id}")
 async def get_table_data(project_id: str, table_id: str):
