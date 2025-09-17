@@ -118,14 +118,14 @@
       <el-table-column prop="message" label="错误原因" width="200"></el-table-column>
       <el-table-column label="说明内容">
         <template #default="{ row }">
-          <el-input v-model="row.content" type="textarea" :rows="2" />
+          <el-input v-model="row.content" type="textarea" :rows="2" :disabled="isExplanationsReadOnly" />
         </template>
       </el-table-column>
     </el-table>
     <template #footer>
       <span class="dialog-footer">
         <el-button @click="isExplanationsDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="handleUpdateExplanations">修改并提交</el-button>
+        <el-button v-if="!isExplanationsReadOnly" type="primary" @click="handleUpdateExplanations">修改并提交</el-button>
       </span>
     </template>
   </el-dialog>
@@ -173,6 +173,7 @@ const checkLocalDraft = () => {
 // --- Explanations Feature State ---
 const isExplanationsDialogVisible = ref(false);
 const submittedExplanations = ref([]);
+const isExplanationsReadOnly = ref(false);
 
 // --- Dynamically load table configuration ---
 const currentTableConfig = computed(() => {
@@ -343,6 +344,7 @@ const initializeTableData = async () => {
       columnFormulaOverrides: metric.columnFormulaOverrides, // Pass overrides
       aggregationExclusions: currentTableConfig.value?.aggregationExclusions, // Pass aggregation exclusions
       values: {},
+      cellIssues: {},
     };
 
     fieldConfig.value.forEach(field => {
@@ -767,26 +769,32 @@ const getCellClass = ({ row, column }) => {
   const field = fieldConfig.value.find(f => f.name === column.property);
   if (!field) return '';
 
+  const classes = [];
+
   // Find if there is any hard error ('A' or 'C') associated with this specific cell
-  const hasCellError = Object.values(errors.value).some(error => 
-    error.metricId === row.metricId && 
+  const hasCellError = Object.values(errors.value).some(error =>
+    error.metricId === row.metricId &&
     error.fieldId === field.id &&
     (error.type === 'A' || error.type === 'C')
   );
 
   if (hasCellError) {
-    return 'is-error';
+    classes.push('is-error');
+  }
+
+  const aggregatedIssues = row.cellIssues?.[field.id];
+  if (Array.isArray(aggregatedIssues) && aggregatedIssues.some(issue => issue && (issue.type === 'B' || issue.type === 'C'))) {
+    classes.push('has-soft-issue');
   }
 
   const cellState = getCellState(row, field, currentTableConfig.value, childToParentsMap.value, forcedParentMap.value);
   if (cellState === 'READONLY_AGGREGATED') {
-    return 'is-readonly-aggregated';
-  }
-  if (cellState !== 'WRITABLE') {
-    return 'is-readonly-shadow';
+    classes.push('is-readonly-aggregated');
+  } else if (cellState !== 'WRITABLE') {
+    classes.push('is-readonly-shadow');
   }
 
-  return '';
+  return classes.join(' ');
 };
 
 const getErrorLabel = (key) => {
@@ -824,47 +832,76 @@ const getErrorLabel = (key) => {
     return '未知错误';
 };
 
+
+
 const handleShowExplanations = async () => {
   const { projectId, tableId } = route.params;
   if (!tableId || !projectId) return;
 
+  isExplanationsReadOnly.value = false;
+
   try {
     const response = await fetch(`/api/project/${projectId}/data/table/${tableId}`);
     if (!response.ok) throw new Error('Failed to fetch data for explanations.');
-    
+
     const data = await response.json();
-    if (!data || !data.submit || !data.submit.tableData) {
-      ElMessage.info('尚未提交任何解释说明。');
-      return;
+    const explanationsList = [];
+    const summaryItems = Array.isArray(data?.explanationSummary)
+      ? data.explanationSummary
+      : Array.isArray(data?.submit?.explanationSummary)
+        ? data.submit.explanationSummary
+        : [];
+
+    if (summaryItems.length > 0) {
+      isExplanationsReadOnly.value = true;
+      summaryItems.forEach(item => {
+        const parts = [];
+        if (item?.type) parts.push(`[${item.type}]`);
+        if (item?.sourceTableName || item?.sourceTableId) {
+          parts.push(item.sourceTableName || `表 ${item.sourceTableId}`);
+        }
+        if (item?.metricName) parts.push(item.metricName);
+        if (item?.fieldLabel) {
+          parts.push(item.fieldLabel);
+        } else if (item?.fieldId) {
+          parts.push(`字段 ${item.fieldId}`);
+        }
+        explanationsList.push({
+          label: parts.join(' / ') || '未知指标',
+          message: item?.message || '',
+          content: item?.content || '',
+          ruleKey: item?.ruleKey,
+        });
+      });
+    } else if (data?.submit?.tableData) {
+      isExplanationsReadOnly.value = false;
+      data.submit.tableData.forEach(row => {
+        row.values.forEach(cell => {
+          if (cell.explanation) {
+            explanationsList.push({
+              label: getErrorLabel(cell.explanation.ruleKey),
+              message: cell.explanation.message,
+              content: cell.explanation.content,
+              ruleKey: cell.explanation.ruleKey, // Store the key for mapping back
+            });
+          }
+        });
+      });
     }
 
-    const explanationsList = [];
-    data.submit.tableData.forEach(row => {
-      row.values.forEach(cell => {
-        if (cell.explanation) {
-          explanationsList.push({
-            label: getErrorLabel(cell.explanation.ruleKey),
-            message: cell.explanation.message,
-            content: cell.explanation.content,
-            ruleKey: cell.explanation.ruleKey, // Store the key for mapping back
-          });
-        }
-      });
-    });
-
     if (explanationsList.length === 0) {
-      ElMessage.info('当前报表没有已提交的解释说明。');
+      ElMessage.info('当前表格没有可用的解释说明。');
       return;
     }
 
     submittedExplanations.value = explanationsList;
     isExplanationsDialogVisible.value = true;
-
   } catch (error) {
     console.error('Error loading explanations:', error);
     ElMessage.error('加载解释说明失败。');
   }
 };
+
 
 // --- Actions (Save, Load, Submit, Export) ---
 
@@ -962,6 +999,7 @@ const _applyPayloadToTable = (payload) => {
 
     // Reset force flag before applying new data
     localRow.isForced = false;
+    localRow.cellIssues = {};
 
     if (loadedMetric) {
       // Apply the force flag from the payload
@@ -971,10 +1009,24 @@ const _applyPayloadToTable = (payload) => {
 
       // 仅对 basic 行直接应用所有加载数据；
       // 若是被强制的 calculated 行，仅应用“各月的同期值”（monthlyData.*.samePeriod），不覆盖计划值和其他计算列。
-      const loadedValuesMap = new Map(loadedMetric.values.map(v => [v.fieldId, v.value]));
+      const loadedValuesMap = new Map();
+      const loadedIssuesMap = new Map();
+
+      if (Array.isArray(loadedMetric.values)) {
+        loadedMetric.values.forEach(cell => {
+          if (!cell || cell.fieldId == null) return;
+          loadedValuesMap.set(cell.fieldId, cell.value);
+          if (Array.isArray(cell.issues) && cell.issues.length > 0) {
+            loadedIssuesMap.set(cell.fieldId, cell.issues);
+          }
+        });
+      }
+
+
       if (localRow.type === 'basic') {
         Object.keys(localRow.values).forEach(fieldId => {
           const numericFieldId = parseInt(fieldId);
+          if (Number.isNaN(numericFieldId)) return;
           // Do not overwrite the sequential number column (ID 1000)
           if (numericFieldId === 1000) return;
 
@@ -985,12 +1037,19 @@ const _applyPayloadToTable = (payload) => {
       } else if (localRow.isForced) {
         Object.keys(localRow.values).forEach(fieldId => {
           const numericFieldId = parseInt(fieldId);
+          if (Number.isNaN(numericFieldId)) return;
           const fieldDef = fieldConfig.value.find(f => f.id === numericFieldId);
           if (!fieldDef || typeof fieldDef.name !== 'string') return;
           const isMonthlySamePeriod = fieldDef.name.startsWith('monthlyData.') && fieldDef.name.endsWith('.samePeriod');
           if (isMonthlySamePeriod && loadedValuesMap.has(numericFieldId)) {
             localRow.values[numericFieldId] = loadedValuesMap.get(numericFieldId);
           }
+        });
+      }
+
+      if (loadedIssuesMap.size > 0) {
+        loadedIssuesMap.forEach((issues, fieldId) => {
+          localRow.cellIssues[fieldId] = issues;
         });
       }
     }
@@ -1152,6 +1211,10 @@ const handleSubmit = async () => {
 };
 
 const handleUpdateExplanations = async () => {
+  if (isExplanationsReadOnly.value) {
+    isExplanationsDialogVisible.value = false;
+    return;
+  }
   // 1. Validate all explanations have at least 10 characters
   const allValid = submittedExplanations.value.every(exp => exp.content && exp.content.trim().length >= 10);
   if (!allValid) {
@@ -1275,6 +1338,7 @@ const handleExport = () => {
 .el-table th.el-table__cell, .el-table td.el-table__cell { border-right: 1px solid #ebeef5; border-bottom: 1px solid #ebeef5; font-size: var(--table-font-size, 14px); padding: var(--table-cell-vertical-padding, 12px) 0; }
 .el-table th.el-table__cell { background-color: #fafafa; }
 .is-error .cell-content { box-shadow: 0 0 0 1px #f56c6c inset !important; border-radius: 4px; }
+.has-soft-issue .cell-content { box-shadow: 0 0 0 1px #409eff inset !important; border-radius: 4px; }
 .is-warning .el-input__wrapper, .is-warning .cell-content { box-shadow: 0 0 0 1px #e6a23c inset !important; border-radius: 4px; }
 .is-readonly-shadow { background-color: #fafafa; box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.05); }
 .is-readonly-aggregated { background-color: #f0f9eb; }

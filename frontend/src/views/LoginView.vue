@@ -10,6 +10,7 @@
       <div class="visual-overlay">
         <h1 class="visual-title">大连洁净能源集团有限公司</h1>
         <p class="visual-subtitle" style="text-align: center" >生产数据在线填报系统</p>
+        <p class="visual-description" style="text-align: center" >准确&nbsp&nbsp规范&nbsp&nbsp高效</p>
 
       </div>
     </div>

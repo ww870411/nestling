@@ -89,5 +89,70 @@
             "globalRole": "god"
         },
         "tableTemplate": "subsidiaryTemplate"
+    },
+    {
+        "projectId": "heating_plan_2025-2026",
+        "tableId": "11",
+        "tableName": "金州热电表",
+        "action": "submit",
+        "timestamp": "2025-09-17T10:52:02.888+08:00",
+        "submittedBy": {
+            "username": "ww870411",
+            "unit": "系统管理员",
+            "globalRole": "god"
+        },
+        "tableTemplate": "subsidiaryTemplate"
+    },
+    {
+        "projectId": "heating_plan_2025-2026",
+        "tableId": "11",
+        "tableName": "金州热电表",
+        "action": "submit",
+        "timestamp": "2025-09-17T10:53:05.454+08:00",
+        "submittedBy": {
+            "username": "group_admin",
+            "unit": "集团公司",
+            "globalRole": "super_admin"
+        },
+        "tableTemplate": "subsidiaryTemplate"
+    },
+    {
+        "projectId": "heating_plan_2025-2026",
+        "tableId": "11",
+        "tableName": "金州热电表",
+        "action": "submit",
+        "timestamp": "2025-09-17T11:06:43.003+08:00",
+        "submittedBy": {
+            "username": "group_admin",
+            "unit": "集团公司",
+            "globalRole": "super_admin"
+        },
+        "tableTemplate": "subsidiaryTemplate"
+    },
+    {
+        "projectId": "heating_plan_2025-2026",
+        "tableId": "11",
+        "tableName": "金州热电表",
+        "action": "submit",
+        "timestamp": "2025-09-17T11:23:03.201+08:00",
+        "submittedBy": {
+            "username": "ww870411",
+            "unit": "系统管理员",
+            "globalRole": "god"
+        },
+        "tableTemplate": "subsidiaryTemplate"
+    },
+    {
+        "projectId": "heating_plan_2025-2026",
+        "tableId": "11",
+        "tableName": "金州热电表",
+        "action": "submit",
+        "timestamp": "2025-09-17T11:25:53.537+08:00",
+        "submittedBy": {
+            "username": "ww870411",
+            "unit": "系统管理员",
+            "globalRole": "god"
+        },
+        "tableTemplate": "subsidiaryTemplate"
     }
 ]

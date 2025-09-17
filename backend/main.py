@@ -1,6 +1,7 @@
 ﻿import json
 import copy
 import os
+from collections import defaultdict
 from datetime import datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
@@ -170,10 +171,11 @@ async def save_draft(project_id: str, table_id: str, payload: dict = Body(...)):
     _append_history_record(submissions_dir, project_id, table_id, payload, "save_draft")
     return {"message": f"Draft for table ID '{table_id}' saved successfully."}
 
+
 async def get_table_0_data(project_id: str):
     """
     Special function to aggregate data for Table 0.
-    Reads data directly from subsidiary JSON files.
+    Reads data directly from subsidiary JSON files and surfaces soft/calculated issue metadata.
     """
     table_config = ALL_TABLES.get('0')
     if not table_config:
@@ -185,9 +187,15 @@ async def get_table_0_data(project_id: str):
     with open(GROUP_TEMPLATE_FILE, "r", encoding="utf-8") as f:
         field_config = json.load(f)
 
+    field_label_map = {field['id']: field.get('label') for field in field_config}
+    metric_name_map = {row['id']: row['name'] for row in report_template}
+
+    issue_map = defaultdict(list)
+    explanation_summary = []
+
     # Create maps from subsidiary key (e.g., 'group') to the target fieldId
-    key_to_plan_field_id = { field['name'].split('.')[0]: field['id'] for field in field_config if '.plan' in field['name'] }
-    key_to_same_period_field_id = { field['name'].split('.')[0]: field['id'] for field in field_config if '.samePeriod' in field['name'] }
+    key_to_plan_field_id = {field['name'].split('.')[0]: field['id'] for field in field_config if '.plan' in field['name']}
+    key_to_same_period_field_id = {field['name'].split('.')[0]: field['id'] for field in field_config if '.samePeriod' in field['name']}
 
     # Initialize tableData with default zero values
     table_data = []
@@ -201,8 +209,10 @@ async def get_table_0_data(project_id: str):
         for field in field_config:
             field_id = field['id']
             value = 0  # Default to 0
-            if field_id == 1001: value = row_template['name']
-            elif field_id == 1002: value = row_template['unit']
+            if field_id == 1001:
+                value = row_template['name']
+            elif field_id == 1002:
+                value = row_template['unit']
             new_row["values"].append({"fieldId": field_id, "value": value})
         table_data.append(new_row)
 
@@ -220,42 +230,88 @@ async def get_table_0_data(project_id: str):
                     if content:
                         sub_content = json.loads(content)
             except (json.JSONDecodeError, IOError):
-                sub_content = {} # Continue with empty content on error
+                sub_content = {}  # Continue with empty content on error
 
         sub_data = sub_content.get("submit") or sub_content.get("temp")
         if not sub_data or not isinstance(sub_data.get("tableData"), list):
             continue
 
+        target_plan_id = key_to_plan_field_id.get(sub_key)
+        target_same_period_id = key_to_same_period_field_id.get(sub_key)
+        if not target_plan_id or not target_same_period_id:
+            continue
+
         sub_values = {}
         for row in sub_data.get("tableData", []):
             metric_id = row.get("metricId")
-            if not metric_id: continue
+            if not metric_id:
+                continue
 
             plan_val, same_period_val = 0, 0
-            
+
             # Extract plan and samePeriod values, no fallback
             for cell in row.get("values", []):
                 field_id = cell.get("fieldId")
                 value = cell.get("value", 0) if isinstance(cell.get("value"), (int, float)) else 0
 
-                if field_id == 1003: plan_val = value
-                if field_id == 1004: same_period_val = value
-            
+                if field_id == 1003:
+                    plan_val = value
+                if field_id == 1004:
+                    same_period_val = value
+
             sub_values[metric_id] = {"plan": plan_val, "samePeriod": same_period_val}
 
-        # --- Original population logic (unchanged) ---
-        target_plan_id = key_to_plan_field_id.get(sub_key)
-        target_same_period_id = key_to_same_period_field_id.get(sub_key)
-        if not target_plan_id or not target_same_period_id: continue
+            # Capture explanations on the totals columns (soft/calc issues)
+            for cell in row.get("values", []):
+                field_id = cell.get("fieldId")
+                if field_id not in (1003, 1004):
+                    continue
+                explanation = cell.get("explanation")
+                if not explanation or not isinstance(explanation, dict):
+                    continue
+                rule_key = explanation.get("ruleKey")
+                if not rule_key:
+                    continue
+                parts = str(rule_key).split("-")
+                if len(parts) < 2:
+                    continue
+                issue_type = parts[1]
+                if issue_type not in {"B", "C"}:
+                    continue
+
+                dest_field_id = target_plan_id if field_id == 1003 else target_same_period_id
+                issue_detail = {
+                    "type": issue_type,
+                    "message": explanation.get("message"),
+                    "content": explanation.get("content"),
+                    "ruleKey": rule_key,
+                    "metricId": metric_id,
+                    "metricName": row.get("metricName") or metric_name_map.get(metric_id),
+                    "fieldId": dest_field_id,
+                    "fieldLabel": field_label_map.get(dest_field_id),
+                    "sourceTableId": str(sub_id),
+                    "sourceTableName": ALL_TABLES.get(str(sub_id), {}).get("name"),
+                }
+                issue_map[(metric_id, dest_field_id)].append(issue_detail)
+                explanation_summary.append(issue_detail)
 
         for agg_row in table_data:
             metric_id = agg_row.get("metricId")
             if metric_id in sub_values:
                 for agg_cell in agg_row.get("values", []):
-                    if agg_cell.get("fieldId") == target_plan_id:
+                    field_id = agg_cell.get("fieldId")
+                    if field_id == target_plan_id:
                         agg_cell["value"] = sub_values[metric_id]["plan"]
-                    elif agg_cell.get("fieldId") == target_same_period_id:
+                    elif field_id == target_same_period_id:
                         agg_cell["value"] = sub_values[metric_id]["samePeriod"]
+
+    # Attach aggregated issue metadata back onto the table
+    for agg_row in table_data:
+        metric_id = agg_row.get("metricId")
+        for cell in agg_row.get("values", []):
+            key = (metric_id, cell.get("fieldId"))
+            if key in issue_map:
+                cell["issues"] = issue_map[key]
 
     aggregated_payload = {
         "table": {"id": table_config.get("id"), "name": table_config.get("name")},
@@ -264,7 +320,10 @@ async def get_table_0_data(project_id: str):
         "submittedBy": None
     }
 
-    return {"submit": aggregated_payload}
+    if explanation_summary:
+        aggregated_payload["explanationSummary"] = explanation_summary
+
+    return {"submit": aggregated_payload, "explanationSummary": aggregated_payload.get("explanationSummary", [])}
 
 
 async def get_table_data_recursive(project_id: str, table_id: str):
