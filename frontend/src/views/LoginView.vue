@@ -145,7 +145,7 @@ const handleLogin = () => {
 .login-page {
   min-height: 100vh;
   display: flex;
-  background: linear-gradient(135deg, #3c7ade 0%, #66a7ff 45%, #9ed6ff 100%);
+  background: linear-gradient(135deg, #1a56b7 0%, #4b89df 45%, #9ed6ff 100%);
   color: #fff;
 }
 
