@@ -145,7 +145,7 @@ const handleLogin = () => {
 .login-page {
   min-height: 100vh;
   display: flex;
-  background: linear-gradient(135deg, #1a56b7 0%, #4b89df 45%, #9ed6ff 100%);
+  background: linear-gradient(135deg, #3876da 0%, #4b89df 45%, #9ed6ff 100%);
   color: #fff;
 }
 
@@ -325,11 +325,14 @@ const handleLogin = () => {
 
 .form-footer {
   position: absolute;
-  right: 40px;
   bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
   font-size: 12px;
   color: #5a6c82;
   letter-spacing: 0.5px;
+  text-align: center;
+  white-space: nowrap;
 }
 
 @keyframes float-slow {

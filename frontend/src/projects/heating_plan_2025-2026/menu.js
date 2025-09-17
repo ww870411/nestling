@@ -41,7 +41,7 @@ export const menuData = [
         templateName: 'subsidiaryTemplate', 
         type: 'summary',
         subsidiaries: ['2', '11', '12', '13', '14', '15'],
-        aggregationExclusions: [],
+        aggregationExclusions: [1,2],
         properties: { productionMethod: ['thermoelectric','heating_company','boiler_room'], fuelType: ['coal','natural_gas','purchased_heat'], businessModel: ['independent'] },
         actions: { submit: true, save: false },
       },
