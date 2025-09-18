@@ -1,5 +1,63 @@
 <template>
   <div class="dashboard-container">
+    <el-dialog
+      v-model="instructionDialogVisible"
+      class="guide-dialog"
+      width="860px"
+      top="9vh"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
+      :show-close="false"
+    >
+      <template #header>
+        <div class="guide-dialog__header">
+          <el-icon class="guide-dialog__header-icon" :size="28">
+            <Notebook />
+          </el-icon>
+          <div>
+            <div class="guide-dialog__title">系统使用简要说明</div>
+            <div class="guide-dialog__subtitle">请仔细阅读以下指引后开始填报工作</div>
+          </div>
+        </div>
+      </template>
+      <div class="guide-dialog__content">
+        <ol class="guide-dialog__list">
+          <li class="guide-dialog__item">
+            <span class="guide-dialog__index">1</span>
+            <p>欢迎您使用本系统！本系统由大连洁净能源集团有限公司-经济运行部自主开发并维护，以期为您提供便捷的生产数据计划与统计服务。</p>
+          </li>
+          <li class="guide-dialog__item">
+            <span class="guide-dialog__index">2</span>
+            <p>在左侧栏目中，您可以看到 <span style="color:red;">【需要您负责填报的】</span>单位及表格，表格名称显示为红色的表示未填报、黄色表示已暂存、绿色表示已提交。在右侧的主要区域中，您可以看到表格提交的时间、提交人等信息，也可以点击查看提交历史，同时提供了方便的表格入口。</p>
+          </li>
+          <li class="guide-dialog__item">
+            <span class="guide-dialog__index">3</span>
+            <p>进入填表页面后，仅需您填写可编辑的指标，当前表格<span style="color:red;">不适用</span>的统计指标均 <span style="color:red;">【不能修改】</span>，效率等计算指标、供暖期累计指标及区域汇总表也<span style="color:red;">【不需您填写】</span>，由系统自动计算。同期值已尽可能填好，但可能仍不完全，未填的还请您补充，但不要修改已填同期数据，如有特殊情况请联系管理员。</p>
+          </li>
+          <li class="guide-dialog__item">
+            <span class="guide-dialog__index">4</span>
+            <p>您可以随时使用 <span style="color:red;">【暂存】</span>功能，将当前页面中的表格数据暂存在浏览器缓存中，并可随时取回，暂存功能不进行数据校验。</p>
+          </li>
+          <li class="guide-dialog__item">
+            <span class="guide-dialog__index">5</span>
+            <p>您可以随时使用填表页面上提供的 <span style="color:red;">【导出至本地】</span>功能，可方便地将目前页面中的表格数据以EXCEL表格的形式导出，导出的表格内含计算公式，方便您使用。</p>
+          </li>
+          <li class="guide-dialog__item">
+            <span class="guide-dialog__index">6</span>
+            <p>当数据填好并经您所在单位领导审核后，便可以点击 <span style="color:red;">【提交】</span>按钮，将数据提交至服务器上，您所在区域的管理员便可看到相应的数据（如集团、主城区管理员）。在提交时，会进行数据有效性校验，请确保填写的数字合法，且与同期值之间的关系符合本工作的通知要求，若有特殊情况，必须撰写情况<span style="color:red;">【解释说明】</span>并提交审核。</p>
+          </li>
+          <li class="guide-dialog__item">
+            <span class="guide-dialog__index">7</span>
+            <p>本系统仍处于试用阶段，可能存在不足和bug，目前正在积极完善中，欢迎您在使用中随时提出宝贵的意见和建议！</p>
+          </li>
+        </ol>
+      </div>
+      <template #footer>
+        <div class="guide-dialog__footer">
+          <el-button type="primary" size="large" @click="markInstructionRead">已阅读</el-button>
+        </div>
+      </template>
+    </el-dialog>
     <h2 class="dashboard-title">{{ config.title }}</h2>
     <div class="table-container">
       <el-table :data="allReports" stripe style="width: 100%" v-loading="isLoading">
@@ -74,7 +132,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, nextTick } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { useProjectStore } from '@/stores/projectStore';
@@ -82,6 +140,7 @@ import { useAuthStore } from '@/stores/authStore';
 import { dashboardConfig } from '@/projects/heating_plan_2025-2026/dashboardData.js';
 import { formatDateTime } from '@/utils/formatter.js';
 import { ElMessage } from 'element-plus';
+import { Notebook } from '@element-plus/icons-vue';
 
 const router = useRouter();
 const route = useRoute();
@@ -94,6 +153,9 @@ const { accessibleUnits } = storeToRefs(authStore);
 const config = ref(dashboardConfig);
 const reportInfo = ref({});
 const isLoading = ref(false);
+
+const instructionDialogVisible = ref(false);
+const instructionStorageKey = 'dashboardGuideAcknowledged';
 
 const historyDialogVisible = ref(false);
 const historyRecords = ref([]);
@@ -159,6 +221,13 @@ const fetchReportStatuses = async () => {
   }
 };
 
+const markInstructionRead = () => {
+  if (typeof window !== 'undefined') {
+    localStorage.setItem(instructionStorageKey, 'true');
+  }
+  instructionDialogVisible.value = false;
+};
+
 const historyActionLabel = (action) => {
   if (action === 'submit') return '提交';
   if (action === 'save_draft') return '暂存';
@@ -195,6 +264,27 @@ const openHistoryDialog = async (table) => {
 };
 
 onMounted(() => {
+  const forceGuideFromQuery = route.query.showGuide === '1' || route.query.showGuide === true;
+
+  if (forceGuideFromQuery) {
+    instructionDialogVisible.value = true;
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(instructionStorageKey, 'true');
+    }
+
+    nextTick(() => {
+      const cleanedQuery = { ...route.query };
+      delete cleanedQuery.showGuide;
+      const cleanedParams = { ...route.params };
+      router.replace({ name: route.name || 'dashboard', params: cleanedParams, query: cleanedQuery });
+    });
+  } else if (typeof window !== 'undefined') {
+    const hasAcknowledged = localStorage.getItem(instructionStorageKey);
+    if (!hasAcknowledged) {
+      instructionDialogVisible.value = true;
+    }
+  }
+
   // Ensure menuData is loaded before fetching statuses
   if (menuData.value.length > 0) {
     fetchReportStatuses();
@@ -271,4 +361,109 @@ const goToReport = (reportId) => {
   font-size: 12px;
   color: #909399;
 }
+.guide-dialog :deep(.el-dialog) {
+  border-radius: 18px;
+  overflow: hidden;
+}
+
+.guide-dialog :deep(.el-dialog__header) {
+  margin: 0;
+  padding: 0;
+}
+
+.guide-dialog :deep(.el-dialog__body) {
+  padding: 0;
+  background: #fff;
+}
+
+.guide-dialog :deep(.el-dialog__footer) {
+  padding: 0;
+}
+
+.guide-dialog__header {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 24px 32px 18px;
+  background: linear-gradient(135deg, #f3f6ff 0%, #ffffff 90%);
+  border-bottom: 1px solid #ebeef5;
+}
+
+.guide-dialog__header-icon {
+  color: #3a70ff;
+}
+
+.guide-dialog__title {
+  font-size: 24px;
+  font-weight: 600;
+  color: #1f2d3d;
+}
+
+.guide-dialog__subtitle {
+  margin-top: 6px;
+  font-size: 14px;
+  color: #909399;
+}
+
+.guide-dialog__content {
+  max-height: 560px;
+  overflow-y: auto;
+  padding: 26px 36px;
+  background-color: #fff;
+}
+
+.guide-dialog__list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 18px;
+}
+
+.guide-dialog__item {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 22px;
+  align-items: flex-start;
+  padding: 16px 22px;
+  background: #f7f9fc;
+  border: 1px solid #eef2fb;
+  border-radius: 14px;
+  box-shadow: 0 10px 24px rgba(63, 99, 188, 0.1);
+}
+
+.guide-dialog__index {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3a70ff 0%, #60a5fa 100%);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 18px;
+}
+
+.guide-dialog__item p {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.8;
+  color: #4a5568;
+}
+
+.guide-dialog__footer {
+  display: flex;
+  justify-content: center;
+  padding: 22px 0 30px;
+  background: #fff;
+  border-top: 1px solid #f0f2f5;
+}
+
+.guide-dialog__footer :deep(.el-button) {
+  min-width: 200px;
+  font-size: 18px;
+  letter-spacing: 1px;
+}
+
 </style>
