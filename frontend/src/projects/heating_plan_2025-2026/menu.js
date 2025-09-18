@@ -41,7 +41,7 @@ export const menuData = [
         templateName: 'subsidiaryTemplate', 
         type: 'summary',
         subsidiaries: ['2', '11', '12', '13', '14', '15'],
-        aggregationExclusions: [1,2],
+        aggregationExclusions: [1,2,191],
         properties: { productionMethod: ['thermoelectric','heating_company','boiler_room'], fuelType: ['coal','natural_gas','purchased_heat'], businessModel: ['independent'] },
         actions: { submit: true, save: false },
       },
@@ -59,7 +59,7 @@ export const menuData = [
         templateName: 'subsidiaryTemplate', 
         type: 'summary',
         subsidiaries: ['4', '8', '9','10'],
-        aggregationExclusions: [1,2,15,16],
+        aggregationExclusions: [1,2,15,16,191],
         properties: { productionMethod: ['thermoelectric','heating_company','boiler_room'], fuelType: ['coal','natural_gas'], businessModel: ['independent'] ,special:['related-rarty transaction','steam','hotwater','low vacuum']},
       },
       { 
@@ -71,7 +71,7 @@ export const menuData = [
         templateName: 'subsidiaryTemplate', 
         type: 'summary',
         subsidiaries: ['4','9'],
-        aggregationExclusions: [1,2,14,17,18,19,20,23,24,99,101],
+        aggregationExclusions: [1,2,14,17,18,19,20,23,24,99,101,191],
         properties: { productionMethod: ['thermoelectric','heating_company','boiler_room'], fuelType: ['coal','natural_gas'], businessModel: ['independent'] ,special:['related-rarty transaction','steam','hotwater','low vacuum']},
       },
     ]
@@ -88,7 +88,7 @@ export const menuData = [
         templateName: 'subsidiaryTemplate', 
         type: 'summary',
         subsidiaries: ['5', '6', '7'],
-        aggregationExclusions: [1,2,97,105,107,109,111,113,114],  //在表5,6,7中不必填写，因此默认为零，防止其将汇总表中填写的数据覆盖，并且在读取时引用本表自身的json数据。
+        aggregationExclusions: [1,2,97,105,107,109,111,113,114,191],  //在表5,6,7中不必填写，因此默认为零，防止其将汇总表中填写的数据覆盖，并且在读取时引用本表自身的json数据。
         properties: { productionMethod: ['thermoelectric','boiler_room'], fuelType: ['coal','natural_gas'], businessModel: ['independent'] },
       },
       { 
