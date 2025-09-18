@@ -71,7 +71,7 @@ export const menuData = [
         templateName: 'subsidiaryTemplate', 
         type: 'summary',
         subsidiaries: ['4','9'],
-        aggregationExclusions: [1,2,14,17,18,19,20,23,24,99,101,191],
+        aggregationExclusions: [1,2,14,17,18,19,20,23,24,95,99,101,191],
         properties: { productionMethod: ['thermoelectric','heating_company','boiler_room'], fuelType: ['coal','natural_gas'], businessModel: ['independent'] ,special:['related-rarty transaction','steam','hotwater','low vacuum']},
       },
     ]

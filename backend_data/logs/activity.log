@@ -62,3 +62,4 @@
 {"timestamp": "2025-09-18T23:56:12.254331+08:00", "action": "load_table", "username": "ww870411", "ip": "172.18.0.1", "details": {"projectId": "heating_plan_2025-2026", "tableId": "3", "hasTemp": false, "hasSubmit": true}}
 {"timestamp": "2025-09-18T23:56:15.970211+08:00", "action": "load_table", "username": "ww870411", "ip": "172.18.0.1", "details": {"projectId": "heating_plan_2025-2026", "tableId": "3", "hasTemp": false, "hasSubmit": true}}
 {"timestamp": "2025-09-18T23:58:04.619862+08:00", "action": "load_table", "username": "ww870411", "ip": "172.18.0.1", "details": {"projectId": "heating_plan_2025-2026", "tableId": "3", "hasTemp": false, "hasSubmit": true}}
+{"timestamp": "2025-09-19T00:05:01.219059+08:00", "action": "load_table", "username": "ww870411", "ip": "172.18.0.1", "details": {"projectId": "heating_plan_2025-2026", "tableId": "3", "hasTemp": false, "hasSubmit": true}}
