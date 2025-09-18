@@ -16,10 +16,10 @@ export const fieldConfig = [
   {
     id: 1000,
     name: 'metricid', 
-    label: '指标序号',
+    label: '序号',
     type: 'basic',
     component: 'label',
-    width: 74,
+    width: 75, // 调整：加大约5%以避免换行
     fixed: true,
   },
   {
