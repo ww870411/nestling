@@ -206,5 +206,18 @@
             "globalRole": "god"
         },
         "tableTemplate": "subsidiaryTemplate"
+    },
+    {
+        "projectId": "heating_plan_2025-2026",
+        "tableId": "7",
+        "tableName": "北海热电厂(天然气炉)表",
+        "action": "submit",
+        "timestamp": "2025-09-18T11:16:27.023+08:00",
+        "submittedBy": {
+            "username": "ww870411",
+            "unit": "系统管理员",
+            "globalRole": "god"
+        },
+        "tableTemplate": "subsidiaryTemplate"
     }
 ]

@@ -1,0 +1,3 @@
+{"timestamp": "2025-09-18T11:16:18.651285+08:00", "action": "load_table", "username": "ww870411", "ip": "172.18.0.1", "details": {"projectId": "heating_plan_2025-2026", "tableId": "7", "hasTemp": false, "hasSubmit": true}}
+{"timestamp": "2025-09-18T11:16:27.211590+08:00", "action": "submit", "username": "ww870411", "ip": "172.18.0.1", "details": {"projectId": "heating_plan_2025-2026", "tableId": "7"}}
+{"timestamp": "2025-09-18T11:16:59.875762+08:00", "action": "login", "username": "ww870411", "ip": "172.18.0.1", "details": {"result": "success"}}

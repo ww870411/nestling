@@ -5,7 +5,7 @@ from collections import defaultdict
 from datetime import datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
-from fastapi import FastAPI, HTTPException, status, Body
+from fastapi import FastAPI, HTTPException, status, Body, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
@@ -26,6 +26,10 @@ data_dir_path = os.getenv('DATA_DIR_PATH', str(Path(__file__).resolve().parent /
 DATA_DIR = Path(data_dir_path)
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 BEIJING_TZ = ZoneInfo("Asia/Shanghai")
+
+LOG_DIR = DATA_DIR / "logs"
+LOG_DIR.mkdir(parents=True, exist_ok=True)
+LOG_FILE = LOG_DIR / "activity.log"
 
 # Path for APPLICATION-LEVEL config files (templates, menu definitions). Always with the code.
 CONFIG_DIR = Path(__file__).resolve().parent / "app" / "data"
@@ -55,11 +59,12 @@ class UserLogin(BaseModel):
 # --- API Endpoints ---
 
 @app.post("/login")
-def login(user_login: UserLogin):
+def login(user_login: UserLogin, request: Request):
     try:
         with open(AUTH_FILE, "r", encoding="utf-8") as f:
             users = json.load(f)
     except FileNotFoundError:
+        _log_action("login", request, username=user_login.username, details={"result": "failed", "reason": "auth_file_missing"})
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Authentication file not found on the server."
@@ -69,8 +74,10 @@ def login(user_login: UserLogin):
         if user["username"] == user_login.username and user["password"] == user_login.password:
             user_info = user.copy()
             del user_info["password"]
+            _log_action("login", request, username=user_info.get("username") or user_login.username, details={"result": "success"})
             return {"message": "Login successful", "user": user_info}
 
+    _log_action("login", request, username=user_login.username, details={"result": "failed", "reason": "invalid_credentials"})
     raise HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Incorrect username or password",
@@ -100,6 +107,59 @@ def _update_data_file(file_path: Path, key: str, payload: dict):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"An unexpected error occurred during file write: {str(e)}"
         )
+
+
+
+def _get_client_ip(request):
+    if request is None:
+        return None
+    forwarded = request.headers.get('x-forwarded-for') if hasattr(request, 'headers') else None
+    if forwarded:
+        return forwarded.split(',')[0].strip()
+    client = getattr(request, 'client', None)
+    return getattr(client, 'host', None) if client else None
+
+
+def _extract_username(payload=None, request=None):
+    username = None
+
+    if isinstance(payload, dict):
+        submitted_by = payload.get('submittedBy')
+        if isinstance(submitted_by, dict):
+            username = submitted_by.get('username') or username
+        if not username:
+            username = payload.get('username') or payload.get('user')
+        if isinstance(username, dict):
+            username = username.get('username')
+
+    if (not username) and request is not None:
+        if hasattr(request, 'headers'):
+            for header in ('x-user-name', 'x-username', 'x-auth-user', 'x-actor'):
+                header_value = request.headers.get(header)
+                if header_value:
+                    username = header_value.strip()
+                    if username:
+                        break
+
+    return username
+
+
+def _log_action(action, request=None, username=None, details=None):
+    try:
+        entry = {
+            'timestamp': datetime.now(BEIJING_TZ).isoformat(),
+            'action': action,
+            'username': username,
+            'ip': _get_client_ip(request),
+        }
+        if details:
+            entry['details'] = details
+
+        LOG_DIR.mkdir(parents=True, exist_ok=True)
+        with open(LOG_FILE, 'a', encoding='utf-8') as log_file:
+            log_file.write(json.dumps(entry, ensure_ascii=False) + '\n')
+    except Exception:
+        pass
 
 
 def _append_history_record(submissions_dir: Path, project_id: str, table_id: str, payload: dict, action: str):
@@ -154,21 +214,23 @@ def _append_history_record(submissions_dir: Path, project_id: str, table_id: str
         )
 
 @app.post("/project/{project_id}/table/{table_id}/submit")
-async def submit_data(project_id: str, table_id: str, payload: dict = Body(...)):
+async def submit_data(project_id: str, table_id: str, request: Request, payload: dict = Body(...)):
     submissions_dir = DATA_DIR / f"{project_id}_data"
     submissions_dir.mkdir(parents=True, exist_ok=True)
     file_path = submissions_dir / f"{table_id}.json"
     _update_data_file(file_path, "submit", payload)
     _append_history_record(submissions_dir, project_id, table_id, payload, "submit")
+    _log_action("submit", request, username=_extract_username(payload, request), details={"projectId": project_id, "tableId": table_id})
     return {"message": f"Data for table ID '{table_id}' submitted successfully."}
 
 @app.post("/project/{project_id}/table/{table_id}/save_draft")
-async def save_draft(project_id: str, table_id: str, payload: dict = Body(...)):
+async def save_draft(project_id: str, table_id: str, request: Request, payload: dict = Body(...)):
     submissions_dir = DATA_DIR / f"{project_id}_data"
     submissions_dir.mkdir(parents=True, exist_ok=True)
     file_path = submissions_dir / f"{table_id}.json"
     _update_data_file(file_path, "temp", payload)
     _append_history_record(submissions_dir, project_id, table_id, payload, "save_draft")
+    _log_action("save_draft", request, username=_extract_username(payload, request), details={"projectId": project_id, "tableId": table_id})
     return {"message": f"Draft for table ID '{table_id}' saved successfully."}
 
 
@@ -509,8 +571,21 @@ async def get_table_history(project_id: str, table_id: str):
     return filtered
 
 @app.get("/project/{project_id}/data/table/{table_id}")
-async def get_table_data(project_id: str, table_id: str):
-    return await get_table_data_recursive(project_id, table_id)
+async def get_table_data(project_id: str, table_id: str, request: Request):
+    result = await get_table_data_recursive(project_id, table_id)
+    username = _extract_username(None, request)
+    has_temp = isinstance(result, dict) and bool(result.get('temp'))
+    has_submit = isinstance(result, dict) and bool(result.get('submit'))
+    details = {
+        'projectId': project_id,
+        'tableId': table_id,
+        'hasTemp': has_temp,
+        'hasSubmit': has_submit,
+    }
+    _log_action('load_table', request, username=username, details=details)
+    if has_temp:
+        _log_action('retrieve_draft', request, username=username, details=details)
+    return result
 
 @app.post("/project/{project_id}/table_statuses")
 async def get_table_statuses(project_id: str, table_ids: list[str] = Body(...)):

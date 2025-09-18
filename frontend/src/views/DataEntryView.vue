@@ -150,6 +150,12 @@ import { useAuthStore } from '@/stores/authStore';
 const route = useRoute();
 const projectStore = useProjectStore();
 const authStore = useAuthStore(); // Get auth store
+
+const buildUserHeaders = () => {
+  const username = authStore.user?.username;
+  return username ? { 'X-User-Name': username } : {};
+};
+
 const { menuData } = storeToRefs(projectStore);
 
 const isGodUser = computed(() => authStore.user?.globalRole === 'god');
@@ -387,7 +393,9 @@ const _fetchDataFromServer = async (silent = false) => {
   isLoading.value = true;
   lastSubmittedAt.value = null; // Reset before fetching
   try {
-    const response = await fetch(`/api/project/${projectId}/data/table/${tableId}`);
+    const response = await fetch(`/api/project/${projectId}/data/table/${tableId}`, {
+      headers: buildUserHeaders()
+    });
     if (!response.ok) {
       if (response.status !== 404) {
         throw new Error('Failed to load data from server');
@@ -843,7 +851,9 @@ const handleShowExplanations = async () => {
   isExplanationsReadOnly.value = false;
 
   try {
-    const response = await fetch(`/api/project/${projectId}/data/table/${tableId}`);
+    const response = await fetch(`/api/project/${projectId}/data/table/${tableId}`, {
+      headers: buildUserHeaders()
+    });
     if (!response.ok) throw new Error('Failed to fetch data for explanations.');
 
     const data = await response.json();
@@ -1128,7 +1138,10 @@ const handleSave = async () => {
     // Fire and forget
     fetch(`/api/project/${projectId}/table/${tableId}/save_draft`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        ...buildUserHeaders()
+      },
       body: JSON.stringify(payload)
     });
   } catch (error) {
@@ -1162,7 +1175,9 @@ const handleLoadDraft = async () => {
 
   try {
     isLoading.value = true;
-    const response = await fetch(`/api/project/${projectId}/data/table/${tableId}`);
+    const response = await fetch(`/api/project/${projectId}/data/table/${tableId}`, {
+      headers: buildUserHeaders()
+    });
     if (response.status === 404) {
       ElMessage.warning('未找到本地暂存数据');
       return;
@@ -1246,7 +1261,10 @@ const handleSubmit = async () => {
 
     const response = await fetch(`/api/project/${projectId}/table/${tableId}/submit`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        ...buildUserHeaders()
+      },
       body: JSON.stringify(payload)
     });
 

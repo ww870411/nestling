@@ -70,6 +70,11 @@ const route = useRoute(); // 使用 useRoute
 const projectStore = useProjectStore();
 const authStore = useAuthStore();
 
+const buildUserHeaders = () => {
+  const username = authStore.user?.username;
+  return username ? { 'X-User-Name': username } : {};
+};
+
 const { menuData, isProjectLoaded, systemMessages } = storeToRefs(projectStore);
 const { accessibleUnits } = storeToRefs(authStore);
 
@@ -98,7 +103,10 @@ const fetchReportStatuses = async () => {
   try {
     const response = await fetch(`/api/project/${currentProjectId.value}/table_statuses`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        ...buildUserHeaders()
+      },
       body: JSON.stringify(tableIds)
     });
     if (response.ok) {

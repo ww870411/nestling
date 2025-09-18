@@ -4,7 +4,7 @@
       v-model="instructionDialogVisible"
       class="guide-dialog"
       width="860px"
-      top="9vh"
+      top="6vh"
       :close-on-click-modal="false"
       :close-on-press-escape="false"
       :show-close="false"
@@ -150,6 +150,11 @@ const authStore = useAuthStore();
 const { menuData } = storeToRefs(projectStore);
 const { accessibleUnits } = storeToRefs(authStore);
 
+const buildUserHeaders = () => {
+  const username = authStore.user?.username;
+  return username ? { 'X-User-Name': username } : {};
+};
+
 const config = ref(dashboardConfig);
 const reportInfo = ref({});
 const isLoading = ref(false);
@@ -202,7 +207,10 @@ const fetchReportStatuses = async () => {
   try {
     const response = await fetch(`/api/project/${projectId}/table_statuses`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        ...buildUserHeaders()
+      },
       body: JSON.stringify(tableIds)
     });
 
@@ -249,7 +257,9 @@ const openHistoryDialog = async (table) => {
   }
 
   try {
-    const response = await fetch(`/api/project/${projectId}/table/${table.id}/history`);
+    const response = await fetch(`/api/project/${projectId}/table/${table.id}/history`, {
+      headers: buildUserHeaders()
+    });
     if (!response.ok) {
       throw new Error('failed to fetch history');
     }
@@ -364,6 +374,7 @@ const goToReport = (reportId) => {
 .guide-dialog :deep(.el-dialog) {
   border-radius: 18px;
   overflow: hidden;
+  max-height: min(88vh, 700px);
 }
 
 .guide-dialog :deep(.el-dialog__header) {
@@ -374,6 +385,7 @@ const goToReport = (reportId) => {
 .guide-dialog :deep(.el-dialog__body) {
   padding: 0;
   background: #fff;
+  max-height: calc(min(88vh, 700px) - 110px);
 }
 
 .guide-dialog :deep(.el-dialog__footer) {
@@ -406,7 +418,7 @@ const goToReport = (reportId) => {
 }
 
 .guide-dialog__content {
-  max-height: 560px;
+  max-height: calc(min(88vh, 700px) - 180px);
   overflow-y: auto;
   padding: 26px 36px;
   background-color: #fff;
