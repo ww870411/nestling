@@ -46,7 +46,7 @@ export const fieldConfig = [
     id: 1003,
     name: 'totals.plan',
     label: '本期计划',
-    type: 'calculated',
+    type: 'totals',
     component: 'display',
     width: 120,
     // 公式: 累加所有月份的“计划”值 (ID: 2001, 2003, 2005, ...)
@@ -56,7 +56,7 @@ export const fieldConfig = [
     id: 1004,
     name: 'totals.samePeriod',
     label: '同期完成',
-    type: 'calculated',
+    type: 'totals',
     component: 'display',
     width: 120,
     // 公式: 累加所有月份的“同期”值 (ID: 2002, 2004, 2006, ...)
@@ -66,7 +66,7 @@ export const fieldConfig = [
     id: 1005,
     name: 'totals.diffRate',
     label: '差异率',
-    type: 'calculated',
+    type: 'diffs',
     component: 'display',
     width: 100,
     displayFormat: { type: 'percentage', places: 2 },

@@ -5,5 +5,5 @@ export const projectConfig = {
 
 export const systemMessages = {
   title: '系统消息',
-  content: '欢迎使用数据填报平台！\n请各单位按时提交产销计划。'
+  content: '欢迎使用数据填报平台！\n请各单位按时提交生产计划。'
 };

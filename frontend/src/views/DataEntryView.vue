@@ -464,7 +464,7 @@ const calculateAll = () => {
   const getRowByMetricId = (metricId) => tableData.value.find(r => r.metricId === metricId);
 
   // --- 列内计算 (Column-level formulas) ---
-  const colCalculatedFields = fieldConfig.value.filter(f => f.type === 'calculated' && f.formula);
+  const colCalculatedFields = fieldConfig.value.filter(f => ['calculated', 'totals'].includes(f.type) && f.formula);
   tableData.value.forEach(row => {
     const metricDef = reportTemplate.value.find(m => m.id === row.metricId);
 
@@ -505,7 +505,8 @@ const calculateAll = () => {
 
   // --- 行内计算 (Row-level formulas) ---
   const rowCalculatedFields = reportTemplate.value.filter(f => f.type === 'calculated' && f.formula);
-  const valueColumns = fieldConfig.value.filter(fc => fc.component === 'input' || fc.component === 'display');
+
+  const valueColumns = fieldConfig.value.filter(fc => (fc.component === 'input' || fc.component === 'display') && fc.type !== 'diffs');
 
   const MAX_ITERATIONS = 10; // Safety break for circular dependencies
   let iteration = 0;
@@ -549,6 +550,21 @@ const calculateAll = () => {
     });
 
   } while (changedInPass && iteration < MAX_ITERATIONS);
+
+  // 行级计算完成后，刷新差异类列，确保引用更新后的 totals
+  const diffColumns = fieldConfig.value.filter(fc => fc.type === 'diffs' && fc.formula);
+  tableData.value.forEach(row => {
+    diffColumns.forEach(field => {
+      const valResolver = (columnId) => parseFloat(row.values[columnId]) || 0;
+      try {
+        const funcBody = field.formula.replace(/VAL\((\d+)\)/g, (match, id) => `(valResolver(${id}))`);
+        const result = new Function('valResolver', `return ${funcBody}`)(valResolver);
+        row.values[field.id] = parseFloat(result.toFixed(10));
+      } catch (e) {
+        console.error(`Error calculating diff formula for field ${field.id} in row ${row.metricId}:`, e);
+      }
+    });
+  });
 
   if (iteration >= MAX_ITERATIONS) {
       console.warn("Calculation reached max iterations. Check for circular dependencies in formulas.");
