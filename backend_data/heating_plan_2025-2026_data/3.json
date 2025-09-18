@@ -14773,13 +14773,13 @@
                         "fieldId": 1003,
                         "fieldName": "totals.plan",
                         "fieldLabel": "本期计划",
-                        "value": 456
+                        "value": 152
                     },
                     {
                         "fieldId": 1004,
                         "fieldName": "totals.samePeriod",
                         "fieldLabel": "同期完成",
-                        "value": 456
+                        "value": 152
                     },
                     {
                         "fieldId": 1005,
@@ -14803,73 +14803,73 @@
                         "fieldId": 2003,
                         "fieldName": "monthlyData.november.plan",
                         "fieldLabel": "11月-计划",
-                        "value": 78
+                        "value": 26
                     },
                     {
                         "fieldId": 2004,
                         "fieldName": "monthlyData.november.samePeriod",
                         "fieldLabel": "11月-同期",
-                        "value": 78
+                        "value": 26
                     },
                     {
                         "fieldId": 2005,
                         "fieldName": "monthlyData.december.plan",
                         "fieldLabel": "12月-计划",
-                        "value": 93
+                        "value": 31
                     },
                     {
                         "fieldId": 2006,
                         "fieldName": "monthlyData.december.samePeriod",
                         "fieldLabel": "12月-同期",
-                        "value": 93
+                        "value": 31
                     },
                     {
                         "fieldId": 2007,
                         "fieldName": "monthlyData.january.plan",
                         "fieldLabel": "1月-计划",
-                        "value": 93
+                        "value": 31
                     },
                     {
                         "fieldId": 2008,
                         "fieldName": "monthlyData.january.samePeriod",
                         "fieldLabel": "1月-同期",
-                        "value": 93
+                        "value": 31
                     },
                     {
                         "fieldId": 2009,
                         "fieldName": "monthlyData.february.plan",
                         "fieldLabel": "2月-计划",
-                        "value": 84
+                        "value": 28
                     },
                     {
                         "fieldId": 2010,
                         "fieldName": "monthlyData.february.samePeriod",
                         "fieldLabel": "2月-同期",
-                        "value": 84
+                        "value": 28
                     },
                     {
                         "fieldId": 2011,
                         "fieldName": "monthlyData.march.plan",
                         "fieldLabel": "3月-计划",
-                        "value": 93
+                        "value": 31
                     },
                     {
                         "fieldId": 2012,
                         "fieldName": "monthlyData.march.samePeriod",
                         "fieldLabel": "3月-同期",
-                        "value": 93
+                        "value": 31
                     },
                     {
                         "fieldId": 2013,
                         "fieldName": "monthlyData.april.plan",
                         "fieldLabel": "4月-计划",
-                        "value": 15
+                        "value": 5
                     },
                     {
                         "fieldId": 2014,
                         "fieldName": "monthlyData.april.samePeriod",
                         "fieldLabel": "4月-同期",
-                        "value": 15
+                        "value": 5
                     }
                 ]
             }

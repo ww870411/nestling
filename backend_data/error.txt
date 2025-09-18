@@ -1,0 +1,93 @@
+[2025-09-18T23:24:51.223425+08:00] [API] /project/heating_plan_2025-2026/data/table/0 被调用 from=172.18.0.1 user=ww870411
+[2025-09-18T23:24:51.227405+08:00] [GD] 取数开始 project_id=heating_plan_2025-2026 table_id=0
+[2025-09-18T23:24:51.230375+08:00] [GD] 进入表0专用逻辑
+[2025-09-18T23:24:51.233042+08:00] [T0] 聚合开始 project_id=heating_plan_2025-2026
+[2025-09-18T23:24:51.235855+08:00] [T0] 环境: DATA_DIR=/app/data CONFIG_DIR=/app/app/data AUTH_FILE=/app/data/auth.json
+[2025-09-18T23:24:51.238696+08:00] [T0] 载入 groupTemplate.json 成功: /app/app/data/heating_plan_2025-2026_data/groupTemplate.json
+[2025-09-18T23:24:51.241512+08:00] [T0] 列位映射: plan_keys=['group', 'downtown', 'gufenbenbu', 'beihai', 'xianghai', 'jinzhou', 'beifang', 'jinpu', 'zhuanghe', 'research'] same_keys=['group', 'downtown', 'gufenbenbu', 'beihai', 'xianghai', 'jinzhou', 'beifang', 'jinpu', 'zhuanghe', 'research']
+[2025-09-18T23:24:51.247256+08:00] [T0] 子表映射: {'group': '1', 'downtown': '2', 'gufenbenbu': '3', 'beihai': '4', 'xianghai': '8', 'jinzhou': '11', 'beifang': '12', 'jinpu': '13', 'zhuanghe': '14', 'research': '15'}
+[2025-09-18T23:24:51.250962+08:00] [T0] 子表数据目录: /app/data/heating_plan_2025-2026_data exists=True
+[2025-09-18T23:24:51.254563+08:00] [T0] 读取子表 sub_key=group sub_id=1 文件=/app/data/heating_plan_2025-2026_data/1.json exists=True
+[2025-09-18T23:24:51.297924+08:00] [T0] 子表有效数据 sub_id=1 rows=117 来源=submit
+[2025-09-18T23:24:51.304454+08:00] [T0] 读取子表 sub_key=downtown sub_id=2 文件=/app/data/heating_plan_2025-2026_data/2.json exists=True
+[2025-09-18T23:24:51.324358+08:00] [T0] 子表有效数据 sub_id=2 rows=117 来源=submit
+[2025-09-18T23:24:51.332286+08:00] [T0] 读取子表 sub_key=gufenbenbu sub_id=3 文件=/app/data/heating_plan_2025-2026_data/3.json exists=True
+[2025-09-18T23:24:51.350559+08:00] [T0] 子表有效数据 sub_id=3 rows=117 来源=submit
+[2025-09-18T23:24:51.356117+08:00] [T0] 读取子表 sub_key=beihai sub_id=4 文件=/app/data/heating_plan_2025-2026_data/4.json exists=True
+[2025-09-18T23:24:51.373402+08:00] [T0] 子表有效数据 sub_id=4 rows=117 来源=submit
+[2025-09-18T23:24:51.378364+08:00] [T0] 读取子表 sub_key=xianghai sub_id=8 文件=/app/data/heating_plan_2025-2026_data/8.json exists=True
+[2025-09-18T23:24:51.392525+08:00] [T0] 子表有效数据 sub_id=8 rows=117 来源=submit
+[2025-09-18T23:24:51.397229+08:00] [T0] 读取子表 sub_key=jinzhou sub_id=11 文件=/app/data/heating_plan_2025-2026_data/11.json exists=True
+[2025-09-18T23:24:51.410932+08:00] [T0] 子表有效数据 sub_id=11 rows=117 来源=submit
+[2025-09-18T23:24:51.415211+08:00] [T0] 读取子表 sub_key=beifang sub_id=12 文件=/app/data/heating_plan_2025-2026_data/12.json exists=True
+[2025-09-18T23:24:51.430158+08:00] [T0] 子表有效数据 sub_id=12 rows=117 来源=submit
+[2025-09-18T23:24:51.434826+08:00] [T0] 读取子表 sub_key=jinpu sub_id=13 文件=/app/data/heating_plan_2025-2026_data/13.json exists=True
+[2025-09-18T23:24:51.447985+08:00] [T0] 子表有效数据 sub_id=13 rows=117 来源=submit
+[2025-09-18T23:24:51.452521+08:00] [T0] 读取子表 sub_key=zhuanghe sub_id=14 文件=/app/data/heating_plan_2025-2026_data/14.json exists=True
+[2025-09-18T23:24:51.465955+08:00] [T0] 子表有效数据 sub_id=14 rows=117 来源=submit
+[2025-09-18T23:24:51.470745+08:00] [T0] 读取子表 sub_key=research sub_id=15 文件=/app/data/heating_plan_2025-2026_data/15.json exists=True
+[2025-09-18T23:24:51.482350+08:00] [T0] 子表有效数据 sub_id=15 rows=117 来源=submit
+[2025-09-18T23:24:51.485680+08:00] [T0] 聚合完成 rows=117 issues=0
+[2025-09-18T23:24:51.488734+08:00] [API] 返回结果 has_submit=True has_temp=False
+[2025-09-18T23:29:28.838298+08:00] [API] /project/heating_plan_2025-2026/data/table/0 被调用 from=172.18.0.1 user=ww870411
+[2025-09-18T23:29:28.840962+08:00] [GD] 取数开始 project_id=heating_plan_2025-2026 table_id=0
+[2025-09-18T23:29:28.843438+08:00] [GD] 进入表0专用逻辑
+[2025-09-18T23:29:28.846468+08:00] [T0] 聚合开始 project_id=heating_plan_2025-2026
+[2025-09-18T23:29:28.849062+08:00] [T0] 环境: DATA_DIR=/app/data CONFIG_DIR=/app/app/data AUTH_FILE=/app/data/auth.json
+[2025-09-18T23:29:28.852971+08:00] [T0] 载入 groupTemplate.json 成功: /app/app/data/heating_plan_2025-2026_data/groupTemplate.json
+[2025-09-18T23:29:28.855704+08:00] [T0] 列位映射: plan_keys=['group', 'downtown', 'gufenbenbu', 'beihai', 'xianghai', 'jinzhou', 'beifang', 'jinpu', 'zhuanghe', 'research'] same_keys=['group', 'downtown', 'gufenbenbu', 'beihai', 'xianghai', 'jinzhou', 'beifang', 'jinpu', 'zhuanghe', 'research']
+[2025-09-18T23:29:28.860095+08:00] [T0] 子表映射: {'group': '1', 'downtown': '2', 'gufenbenbu': '3', 'beihai': '4', 'xianghai': '8', 'jinzhou': '11', 'beifang': '12', 'jinpu': '13', 'zhuanghe': '14', 'research': '15'}
+[2025-09-18T23:29:28.864338+08:00] [T0] 子表数据目录: /app/data/heating_plan_2025-2026_data exists=True
+[2025-09-18T23:29:28.869379+08:00] [T0] 读取子表 sub_key=group sub_id=1 文件=/app/data/heating_plan_2025-2026_data/1.json exists=True
+[2025-09-18T23:29:28.887937+08:00] [T0] 子表有效数据 sub_id=1 rows=117 来源=submit
+[2025-09-18T23:29:28.900315+08:00] [T0] 读取子表 sub_key=downtown sub_id=2 文件=/app/data/heating_plan_2025-2026_data/2.json exists=True
+[2025-09-18T23:29:28.927525+08:00] [T0] 子表有效数据 sub_id=2 rows=117 来源=submit
+[2025-09-18T23:29:28.934383+08:00] [T0] 读取子表 sub_key=gufenbenbu sub_id=3 文件=/app/data/heating_plan_2025-2026_data/3.json exists=True
+[2025-09-18T23:29:28.952124+08:00] [T0] 子表有效数据 sub_id=3 rows=117 来源=submit
+[2025-09-18T23:29:28.959155+08:00] [T0] 读取子表 sub_key=beihai sub_id=4 文件=/app/data/heating_plan_2025-2026_data/4.json exists=True
+[2025-09-18T23:29:28.977273+08:00] [T0] 子表有效数据 sub_id=4 rows=117 来源=submit
+[2025-09-18T23:29:28.985491+08:00] [T0] 读取子表 sub_key=xianghai sub_id=8 文件=/app/data/heating_plan_2025-2026_data/8.json exists=True
+[2025-09-18T23:29:29.002548+08:00] [T0] 子表有效数据 sub_id=8 rows=117 来源=submit
+[2025-09-18T23:29:29.008201+08:00] [T0] 读取子表 sub_key=jinzhou sub_id=11 文件=/app/data/heating_plan_2025-2026_data/11.json exists=True
+[2025-09-18T23:29:29.025531+08:00] [T0] 子表有效数据 sub_id=11 rows=117 来源=submit
+[2025-09-18T23:29:29.030847+08:00] [T0] 读取子表 sub_key=beifang sub_id=12 文件=/app/data/heating_plan_2025-2026_data/12.json exists=True
+[2025-09-18T23:29:29.044357+08:00] [T0] 子表有效数据 sub_id=12 rows=117 来源=submit
+[2025-09-18T23:29:29.048961+08:00] [T0] 读取子表 sub_key=jinpu sub_id=13 文件=/app/data/heating_plan_2025-2026_data/13.json exists=True
+[2025-09-18T23:29:29.065273+08:00] [T0] 子表有效数据 sub_id=13 rows=117 来源=submit
+[2025-09-18T23:29:29.070585+08:00] [T0] 读取子表 sub_key=zhuanghe sub_id=14 文件=/app/data/heating_plan_2025-2026_data/14.json exists=True
+[2025-09-18T23:29:29.083531+08:00] [T0] 子表有效数据 sub_id=14 rows=117 来源=submit
+[2025-09-18T23:29:29.088983+08:00] [T0] 读取子表 sub_key=research sub_id=15 文件=/app/data/heating_plan_2025-2026_data/15.json exists=True
+[2025-09-18T23:29:29.102679+08:00] [T0] 子表有效数据 sub_id=15 rows=117 来源=submit
+[2025-09-18T23:29:29.106633+08:00] [T0] 聚合完成 rows=117 issues=0
+[2025-09-18T23:29:29.109364+08:00] [API] 返回结果 has_submit=True has_temp=False
+[2025-09-18T23:37:32.727037+08:00] [API] /project/heating_plan_2025-2026/data/table/0 被调用 from=172.18.0.1 user=ww870411
+[2025-09-18T23:37:32.729593+08:00] [GD] 取数开始 project_id=heating_plan_2025-2026 table_id=0
+[2025-09-18T23:37:32.732747+08:00] [GD] 进入表0专用逻辑
+[2025-09-18T23:37:32.735270+08:00] [T0] 聚合开始 project_id=heating_plan_2025-2026
+[2025-09-18T23:37:32.737763+08:00] [T0] 环境: DATA_DIR=/app/data CONFIG_DIR=/app/app/data AUTH_FILE=/app/data/auth.json
+[2025-09-18T23:37:32.740376+08:00] [T0] 载入 groupTemplate.json 成功: /app/app/data/heating_plan_2025-2026_data/groupTemplate.json
+[2025-09-18T23:37:32.743167+08:00] [T0] 列位映射: plan_keys=['group', 'downtown', 'gufenbenbu', 'beihai', 'xianghai', 'jinzhou', 'beifang', 'jinpu', 'zhuanghe', 'research'] same_keys=['group', 'downtown', 'gufenbenbu', 'beihai', 'xianghai', 'jinzhou', 'beifang', 'jinpu', 'zhuanghe', 'research']
+[2025-09-18T23:37:32.748275+08:00] [T0] 子表映射: {'group': '1', 'downtown': '2', 'gufenbenbu': '3', 'beihai': '4', 'xianghai': '8', 'jinzhou': '11', 'beifang': '12', 'jinpu': '13', 'zhuanghe': '14', 'research': '15'}
+[2025-09-18T23:37:32.752384+08:00] [T0] 子表数据目录: /app/data/heating_plan_2025-2026_data exists=True
+[2025-09-18T23:37:32.755726+08:00] [T0] 读取子表 sub_key=group sub_id=1 文件=/app/data/heating_plan_2025-2026_data/1.json exists=True
+[2025-09-18T23:37:32.807892+08:00] [T0] 子表有效数据 sub_id=1 rows=117 来源=submit
+[2025-09-18T23:37:32.814839+08:00] [T0] 读取子表 sub_key=downtown sub_id=2 文件=/app/data/heating_plan_2025-2026_data/2.json exists=True
+[2025-09-18T23:37:32.843509+08:00] [T0] 子表有效数据 sub_id=2 rows=117 来源=submit
+[2025-09-18T23:37:32.853905+08:00] [T0] 读取子表 sub_key=gufenbenbu sub_id=3 文件=/app/data/heating_plan_2025-2026_data/3.json exists=True
+[2025-09-18T23:37:32.871317+08:00] [T0] 子表有效数据 sub_id=3 rows=117 来源=submit
+[2025-09-18T23:37:32.877939+08:00] [T0] 读取子表 sub_key=beihai sub_id=4 文件=/app/data/heating_plan_2025-2026_data/4.json exists=True
+[2025-09-18T23:37:32.902104+08:00] [T0] 子表有效数据 sub_id=4 rows=117 来源=submit
+[2025-09-18T23:37:32.906468+08:00] [T0] 读取子表 sub_key=xianghai sub_id=8 文件=/app/data/heating_plan_2025-2026_data/8.json exists=True
+[2025-09-18T23:37:32.920170+08:00] [T0] 子表有效数据 sub_id=8 rows=117 来源=submit
+[2025-09-18T23:37:32.924620+08:00] [T0] 读取子表 sub_key=jinzhou sub_id=11 文件=/app/data/heating_plan_2025-2026_data/11.json exists=True
+[2025-09-18T23:37:32.937858+08:00] [T0] 子表有效数据 sub_id=11 rows=117 来源=submit
+[2025-09-18T23:37:32.942323+08:00] [T0] 读取子表 sub_key=beifang sub_id=12 文件=/app/data/heating_plan_2025-2026_data/12.json exists=True
+[2025-09-18T23:37:32.955602+08:00] [T0] 子表有效数据 sub_id=12 rows=117 来源=submit
+[2025-09-18T23:37:32.960110+08:00] [T0] 读取子表 sub_key=jinpu sub_id=13 文件=/app/data/heating_plan_2025-2026_data/13.json exists=True
+[2025-09-18T23:37:32.973646+08:00] [T0] 子表有效数据 sub_id=13 rows=117 来源=submit
+[2025-09-18T23:37:32.977757+08:00] [T0] 读取子表 sub_key=zhuanghe sub_id=14 文件=/app/data/heating_plan_2025-2026_data/14.json exists=True
+[2025-09-18T23:37:32.992251+08:00] [T0] 子表有效数据 sub_id=14 rows=117 来源=submit
+[2025-09-18T23:37:32.996344+08:00] [T0] 读取子表 sub_key=research sub_id=15 文件=/app/data/heating_plan_2025-2026_data/15.json exists=True
+[2025-09-18T23:37:33.009798+08:00] [T0] 子表有效数据 sub_id=15 rows=117 来源=submit
+[2025-09-18T23:37:33.013187+08:00] [T0] 聚合完成 rows=117 issues=0
+[2025-09-18T23:37:33.016636+08:00] [API] 返回结果 has_submit=True has_temp=False

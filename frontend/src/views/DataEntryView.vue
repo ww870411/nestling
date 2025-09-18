@@ -1051,7 +1051,19 @@ const _applyPayloadToTable = (payload) => {
       }
 
 
-      if (localRow.type === 'basic') {
+      const isTable0 = currentTableConfig.value?.id === '0';
+
+      if (isTable0) {
+        // 表0（集团分单位汇总表）：无论行类型如何，均应应用后端聚合给出的值，
+        // 以便显示各单位的 totals.plan/samePeriod 等列（保留 1000 序号列）。
+        fieldConfig.value.forEach(fc => {
+          const fid = fc.id;
+          if (fid === 1000) return;
+          if (loadedValuesMap.has(fid)) {
+            localRow.values[fid] = loadedValuesMap.get(fid);
+          }
+        });
+      } else if (localRow.type === 'basic') {
         Object.keys(localRow.values).forEach(fieldId => {
           const numericFieldId = parseInt(fieldId);
           if (Number.isNaN(numericFieldId)) return;

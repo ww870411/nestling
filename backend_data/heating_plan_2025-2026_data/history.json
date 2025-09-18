@@ -219,5 +219,18 @@
             "globalRole": "god"
         },
         "tableTemplate": "subsidiaryTemplate"
+    },
+    {
+        "projectId": "heating_plan_2025-2026",
+        "tableId": "1",
+        "tableName": "集团汇总表",
+        "action": "submit",
+        "timestamp": "2025-09-18T21:30:22.683+08:00",
+        "submittedBy": {
+            "username": "ww870411",
+            "unit": "系统管理员",
+            "globalRole": "god"
+        },
+        "tableTemplate": "subsidiaryTemplate"
     }
 ]

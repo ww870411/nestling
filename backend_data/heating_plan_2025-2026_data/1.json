@@ -1,6 +1,6 @@
 {
     "submit": {
-        "submittedAt": "2025-09-14T04:06:21.835Z",
+        "submittedAt": "2025-09-18T21:30:22.683+08:00",
         "table": {
             "id": "1",
             "name": "集团汇总表",
@@ -39,7 +39,7 @@
                         "fieldId": 1003,
                         "fieldName": "totals.plan",
                         "fieldLabel": "本期计划",
-                        "value": 14.2857142857
+                        "value": 0
                     },
                     {
                         "fieldId": 1004,
@@ -57,7 +57,7 @@
                         "fieldId": 2001,
                         "fieldName": "monthlyData.october.plan",
                         "fieldLabel": "10月-计划",
-                        "value": 100
+                        "value": 0
                     },
                     {
                         "fieldId": 2002,
@@ -813,7 +813,7 @@
                         "fieldId": 1005,
                         "fieldName": "totals.diffRate",
                         "fieldLabel": "差异率",
-                        "value": -6.951694
+                        "value": -1
                     },
                     {
                         "fieldId": 2001,
@@ -2210,7 +2210,7 @@
                         "fieldId": 1005,
                         "fieldName": "totals.diffRate",
                         "fieldLabel": "差异率",
-                        "value": -3
+                        "value": -1
                     },
                     {
                         "fieldId": 2001,
@@ -3099,7 +3099,7 @@
                         "fieldId": 1005,
                         "fieldName": "totals.diffRate",
                         "fieldLabel": "差异率",
-                        "value": -2
+                        "value": -1
                     },
                     {
                         "fieldId": 2001,
@@ -3480,7 +3480,7 @@
                         "fieldId": 1005,
                         "fieldName": "totals.diffRate",
                         "fieldLabel": "差异率",
-                        "value": -4
+                        "value": -1
                     },
                     {
                         "fieldId": 2001,
@@ -3607,7 +3607,7 @@
                         "fieldId": 1005,
                         "fieldName": "totals.diffRate",
                         "fieldLabel": "差异率",
-                        "value": -2
+                        "value": -1
                     },
                     {
                         "fieldId": 2001,
@@ -3988,7 +3988,7 @@
                         "fieldId": 1005,
                         "fieldName": "totals.diffRate",
                         "fieldLabel": "差异率",
-                        "value": -2
+                        "value": -1
                     },
                     {
                         "fieldId": 2001,
@@ -4369,7 +4369,7 @@
                         "fieldId": 1005,
                         "fieldName": "totals.diffRate",
                         "fieldLabel": "差异率",
-                        "value": -2
+                        "value": -1
                     },
                     {
                         "fieldId": 2001,
@@ -4496,7 +4496,7 @@
                         "fieldId": 1005,
                         "fieldName": "totals.diffRate",
                         "fieldLabel": "差异率",
-                        "value": -2
+                        "value": -1
                     },
                     {
                         "fieldId": 2001,
@@ -5004,7 +5004,7 @@
                         "fieldId": 1005,
                         "fieldName": "totals.diffRate",
                         "fieldLabel": "差异率",
-                        "value": -7
+                        "value": -1
                     },
                     {
                         "fieldId": 2001,
@@ -5259,7 +5259,7 @@
                         "fieldId": 1005,
                         "fieldName": "totals.diffRate",
                         "fieldLabel": "差异率",
-                        "value": -3
+                        "value": -1
                     },
                     {
                         "fieldId": 2001,
@@ -7927,7 +7927,7 @@
                         "fieldId": 1005,
                         "fieldName": "totals.diffRate",
                         "fieldLabel": "差异率",
-                        "value": -4
+                        "value": -1
                     },
                     {
                         "fieldId": 2001,
@@ -8054,7 +8054,7 @@
                         "fieldId": 1005,
                         "fieldName": "totals.diffRate",
                         "fieldLabel": "差异率",
-                        "value": 0
+                        "value": -1
                     },
                     {
                         "fieldId": 2001,
@@ -8308,7 +8308,7 @@
                         "fieldId": 1005,
                         "fieldName": "totals.diffRate",
                         "fieldLabel": "差异率",
-                        "value": -2
+                        "value": -1
                     },
                     {
                         "fieldId": 2001,
@@ -8689,7 +8689,7 @@
                         "fieldId": 1005,
                         "fieldName": "totals.diffRate",
                         "fieldLabel": "差异率",
-                        "value": -4
+                        "value": -1
                     },
                     {
                         "fieldId": 2001,
@@ -9578,7 +9578,7 @@
                         "fieldId": 1005,
                         "fieldName": "totals.diffRate",
                         "fieldLabel": "差异率",
-                        "value": 0.2803049885
+                        "value": -1
                     },
                     {
                         "fieldId": 2001,
@@ -9705,7 +9705,7 @@
                         "fieldId": 1005,
                         "fieldName": "totals.diffRate",
                         "fieldLabel": "差异率",
-                        "value": 0.2672528845
+                        "value": -1
                     },
                     {
                         "fieldId": 2001,
@@ -9832,7 +9832,7 @@
                         "fieldId": 1005,
                         "fieldName": "totals.diffRate",
                         "fieldLabel": "差异率",
-                        "value": 0.2803049885
+                        "value": -1
                     },
                     {
                         "fieldId": 2001,
@@ -9959,7 +9959,7 @@
                         "fieldId": 1005,
                         "fieldName": "totals.diffRate",
                         "fieldLabel": "差异率",
-                        "value": 0.1931026111
+                        "value": -1
                     },
                     {
                         "fieldId": 2001,
@@ -10086,7 +10086,7 @@
                         "fieldId": 1005,
                         "fieldName": "totals.diffRate",
                         "fieldLabel": "差异率",
-                        "value": 0.5
+                        "value": -1
                     },
                     {
                         "fieldId": 2001,
@@ -10207,13 +10207,13 @@
                         "fieldId": 1004,
                         "fieldName": "totals.samePeriod",
                         "fieldLabel": "同期完成",
-                        "value": 0.0663232902
+                        "value": 0.5969096121
                     },
                     {
                         "fieldId": 1005,
                         "fieldName": "totals.diffRate",
                         "fieldLabel": "差异率",
-                        "value": null
+                        "value": -1
                     },
                     {
                         "fieldId": 2001,
@@ -10237,7 +10237,7 @@
                         "fieldId": 2004,
                         "fieldName": "monthlyData.november.samePeriod",
                         "fieldLabel": "11月-同期",
-                        "value": 0.0541958542
+                        "value": 0.4877626882
                     },
                     {
                         "fieldId": 2005,
@@ -10249,7 +10249,7 @@
                         "fieldId": 2006,
                         "fieldName": "monthlyData.december.samePeriod",
                         "fieldLabel": "12月-同期",
-                        "value": 0.0753767902
+                        "value": 0.678391112
                     },
                     {
                         "fieldId": 2007,
@@ -10261,7 +10261,7 @@
                         "fieldId": 2008,
                         "fieldName": "monthlyData.january.samePeriod",
                         "fieldLabel": "1月-同期",
-                        "value": 0.0835855161
+                        "value": 0.7522696453
                     },
                     {
                         "fieldId": 2009,
@@ -10273,7 +10273,7 @@
                         "fieldId": 2010,
                         "fieldName": "monthlyData.february.samePeriod",
                         "fieldLabel": "2月-同期",
-                        "value": 0.0746764598
+                        "value": 0.6720881386
                     },
                     {
                         "fieldId": 2011,
@@ -10285,7 +10285,7 @@
                         "fieldId": 2012,
                         "fieldName": "monthlyData.march.samePeriod",
                         "fieldLabel": "3月-同期",
-                        "value": 0.0501087403
+                        "value": 0.4509786626
                     },
                     {
                         "fieldId": 2013,
@@ -10297,7 +10297,7 @@
                         "fieldId": 2014,
                         "fieldName": "monthlyData.april.samePeriod",
                         "fieldLabel": "4月-同期",
-                        "value": 0.0182282711
+                        "value": 0.1640544395
                     }
                 ]
             },
@@ -10334,13 +10334,13 @@
                         "fieldId": 1004,
                         "fieldName": "totals.samePeriod",
                         "fieldLabel": "同期完成",
-                        "value": 0.0418117053
+                        "value": 0.3763053478
                     },
                     {
                         "fieldId": 1005,
                         "fieldName": "totals.diffRate",
                         "fieldLabel": "差异率",
-                        "value": null
+                        "value": -1
                     },
                     {
                         "fieldId": 2001,
@@ -10364,7 +10364,7 @@
                         "fieldId": 2004,
                         "fieldName": "monthlyData.november.samePeriod",
                         "fieldLabel": "11月-同期",
-                        "value": 0.0333359253
+                        "value": 0.3000233281
                     },
                     {
                         "fieldId": 2005,
@@ -10376,7 +10376,7 @@
                         "fieldId": 2006,
                         "fieldName": "monthlyData.december.samePeriod",
                         "fieldLabel": "12月-同期",
-                        "value": 0.0488414184
+                        "value": 0.4395727655
                     },
                     {
                         "fieldId": 2007,
@@ -10388,7 +10388,7 @@
                         "fieldId": 2008,
                         "fieldName": "monthlyData.january.samePeriod",
                         "fieldLabel": "1月-同期",
-                        "value": 0.0526036995
+                        "value": 0.4734332951
                     },
                     {
                         "fieldId": 2009,
@@ -10400,7 +10400,7 @@
                         "fieldId": 2010,
                         "fieldName": "monthlyData.february.samePeriod",
                         "fieldLabel": "2月-同期",
-                        "value": 0.0505881901
+                        "value": 0.4552937112
                     },
                     {
                         "fieldId": 2011,
@@ -10412,7 +10412,7 @@
                         "fieldId": 2012,
                         "fieldName": "monthlyData.march.samePeriod",
                         "fieldLabel": "3月-同期",
-                        "value": 0.0279147026
+                        "value": 0.2512323232
                     },
                     {
                         "fieldId": 2013,
@@ -10424,7 +10424,7 @@
                         "fieldId": 2014,
                         "fieldName": "monthlyData.april.samePeriod",
                         "fieldLabel": "4月-同期",
-                        "value": 0.008625876
+                        "value": 0.0776328836
                     }
                 ]
             },
@@ -10467,7 +10467,7 @@
                         "fieldId": 1005,
                         "fieldName": "totals.diffRate",
                         "fieldLabel": "差异率",
-                        "value": 0
+                        "value": -1
                     },
                     {
                         "fieldId": 2001,
@@ -10594,7 +10594,7 @@
                         "fieldId": 1005,
                         "fieldName": "totals.diffRate",
                         "fieldLabel": "差异率",
-                        "value": 1
+                        "value": -1
                     },
                     {
                         "fieldId": 2001,
@@ -10721,7 +10721,7 @@
                         "fieldId": 1005,
                         "fieldName": "totals.diffRate",
                         "fieldLabel": "差异率",
-                        "value": 1438.4982998389
+                        "value": -1
                     },
                     {
                         "fieldId": 2001,
@@ -10848,7 +10848,7 @@
                         "fieldId": 1005,
                         "fieldName": "totals.diffRate",
                         "fieldLabel": "差异率",
-                        "value": 200
+                        "value": -1
                     },
                     {
                         "fieldId": 2001,
@@ -10975,7 +10975,7 @@
                         "fieldId": 1005,
                         "fieldName": "totals.diffRate",
                         "fieldLabel": "差异率",
-                        "value": null
+                        "value": -1
                     },
                     {
                         "fieldId": 2001,
@@ -11102,7 +11102,7 @@
                         "fieldId": 1005,
                         "fieldName": "totals.diffRate",
                         "fieldLabel": "差异率",
-                        "value": 287.6996599678
+                        "value": -1
                     },
                     {
                         "fieldId": 2001,
@@ -11229,7 +11229,7 @@
                         "fieldId": 1005,
                         "fieldName": "totals.diffRate",
                         "fieldLabel": "差异率",
-                        "value": 0
+                        "value": -1
                     },
                     {
                         "fieldId": 2001,
@@ -11356,7 +11356,7 @@
                         "fieldId": 1005,
                         "fieldName": "totals.diffRate",
                         "fieldLabel": "差异率",
-                        "value": 0.14384983
+                        "value": -1
                     },
                     {
                         "fieldId": 2001,
@@ -11483,7 +11483,7 @@
                         "fieldId": 1005,
                         "fieldName": "totals.diffRate",
                         "fieldLabel": "差异率",
-                        "value": 0.3333333333
+                        "value": -1
                     },
                     {
                         "fieldId": 2001,
@@ -11610,7 +11610,7 @@
                         "fieldId": 1005,
                         "fieldName": "totals.diffRate",
                         "fieldLabel": "差异率",
-                        "value": 2000
+                        "value": -1
                     },
                     {
                         "fieldId": 2001,
@@ -11737,7 +11737,7 @@
                         "fieldId": 1005,
                         "fieldName": "totals.diffRate",
                         "fieldLabel": "差异率",
-                        "value": 10000
+                        "value": -1
                     },
                     {
                         "fieldId": 2001,
@@ -11864,7 +11864,7 @@
                         "fieldId": 1005,
                         "fieldName": "totals.diffRate",
                         "fieldLabel": "差异率",
-                        "value": 29308
+                        "value": -1
                     },
                     {
                         "fieldId": 2001,
@@ -11991,7 +11991,7 @@
                         "fieldId": 1005,
                         "fieldName": "totals.diffRate",
                         "fieldLabel": "差异率",
-                        "value": 0
+                        "value": null
                     },
                     {
                         "fieldId": 2001,
@@ -12245,7 +12245,7 @@
                         "fieldId": 1005,
                         "fieldName": "totals.diffRate",
                         "fieldLabel": "差异率",
-                        "value": 0
+                        "value": null
                     },
                     {
                         "fieldId": 2001,
@@ -12499,7 +12499,7 @@
                         "fieldId": 1005,
                         "fieldName": "totals.diffRate",
                         "fieldLabel": "差异率",
-                        "value": 0
+                        "value": null
                     },
                     {
                         "fieldId": 2001,
@@ -12753,7 +12753,7 @@
                         "fieldId": 1005,
                         "fieldName": "totals.diffRate",
                         "fieldLabel": "差异率",
-                        "value": 0
+                        "value": null
                     },
                     {
                         "fieldId": 2001,
@@ -13007,7 +13007,7 @@
                         "fieldId": 1005,
                         "fieldName": "totals.diffRate",
                         "fieldLabel": "差异率",
-                        "value": 0
+                        "value": null
                     },
                     {
                         "fieldId": 2001,
@@ -13515,7 +13515,7 @@
                         "fieldId": 1005,
                         "fieldName": "totals.diffRate",
                         "fieldLabel": "差异率",
-                        "value": 0
+                        "value": null
                     },
                     {
                         "fieldId": 2001,
@@ -13769,7 +13769,7 @@
                         "fieldId": 1005,
                         "fieldName": "totals.diffRate",
                         "fieldLabel": "差异率",
-                        "value": 0
+                        "value": null
                     },
                     {
                         "fieldId": 2001,
@@ -14023,7 +14023,7 @@
                         "fieldId": 1005,
                         "fieldName": "totals.diffRate",
                         "fieldLabel": "差异率",
-                        "value": 0
+                        "value": null
                     },
                     {
                         "fieldId": 2001,
@@ -14658,7 +14658,7 @@
                         "fieldId": 1005,
                         "fieldName": "totals.diffRate",
                         "fieldLabel": "差异率",
-                        "value": 0
+                        "value": null
                     },
                     {
                         "fieldId": 2001,
@@ -14773,13 +14773,13 @@
                         "fieldId": 1003,
                         "fieldName": "totals.plan",
                         "fieldLabel": "本期计划",
-                        "value": 1368
+                        "value": 152
                     },
                     {
                         "fieldId": 1004,
                         "fieldName": "totals.samePeriod",
                         "fieldLabel": "同期完成",
-                        "value": 1368
+                        "value": 152
                     },
                     {
                         "fieldId": 1005,
@@ -14803,73 +14803,73 @@
                         "fieldId": 2003,
                         "fieldName": "monthlyData.november.plan",
                         "fieldLabel": "11月-计划",
-                        "value": 234
+                        "value": 26
                     },
                     {
                         "fieldId": 2004,
                         "fieldName": "monthlyData.november.samePeriod",
                         "fieldLabel": "11月-同期",
-                        "value": 234
+                        "value": 26
                     },
                     {
                         "fieldId": 2005,
                         "fieldName": "monthlyData.december.plan",
                         "fieldLabel": "12月-计划",
-                        "value": 279
+                        "value": 31
                     },
                     {
                         "fieldId": 2006,
                         "fieldName": "monthlyData.december.samePeriod",
                         "fieldLabel": "12月-同期",
-                        "value": 279
+                        "value": 31
                     },
                     {
                         "fieldId": 2007,
                         "fieldName": "monthlyData.january.plan",
                         "fieldLabel": "1月-计划",
-                        "value": 279
+                        "value": 31
                     },
                     {
                         "fieldId": 2008,
                         "fieldName": "monthlyData.january.samePeriod",
                         "fieldLabel": "1月-同期",
-                        "value": 279
+                        "value": 31
                     },
                     {
                         "fieldId": 2009,
                         "fieldName": "monthlyData.february.plan",
                         "fieldLabel": "2月-计划",
-                        "value": 252
+                        "value": 28
                     },
                     {
                         "fieldId": 2010,
                         "fieldName": "monthlyData.february.samePeriod",
                         "fieldLabel": "2月-同期",
-                        "value": 252
+                        "value": 28
                     },
                     {
                         "fieldId": 2011,
                         "fieldName": "monthlyData.march.plan",
                         "fieldLabel": "3月-计划",
-                        "value": 279
+                        "value": 31
                     },
                     {
                         "fieldId": 2012,
                         "fieldName": "monthlyData.march.samePeriod",
                         "fieldLabel": "3月-同期",
-                        "value": 279
+                        "value": 31
                     },
                     {
                         "fieldId": 2013,
                         "fieldName": "monthlyData.april.plan",
                         "fieldLabel": "4月-计划",
-                        "value": 45
+                        "value": 5
                     },
                     {
                         "fieldId": 2014,
                         "fieldName": "monthlyData.april.samePeriod",
                         "fieldLabel": "4月-同期",
-                        "value": 45
+                        "value": 5
                     }
                 ]
             }
