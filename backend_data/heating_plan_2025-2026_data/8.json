@@ -1,6 +1,6 @@
 {
     "submit": {
-        "submittedAt": "2025-09-14T04:04:49.088Z",
+        "submittedAt": "2025-09-18T09:51:35.941+08:00",
         "table": {
             "id": "8",
             "name": "香海热电厂表",
@@ -39,7 +39,7 @@
                         "fieldId": 1003,
                         "fieldName": "totals.plan",
                         "fieldLabel": "本期计划",
-                        "value": 3.2857142857
+                        "value": 0
                     },
                     {
                         "fieldId": 1004,
@@ -57,7 +57,7 @@
                         "fieldId": 2001,
                         "fieldName": "monthlyData.october.plan",
                         "fieldLabel": "10月-计划",
-                        "value": 11
+                        "value": 0
                     },
                     {
                         "fieldId": 2002,
@@ -69,7 +69,7 @@
                         "fieldId": 2003,
                         "fieldName": "monthlyData.november.plan",
                         "fieldLabel": "11月-计划",
-                        "value": 12
+                        "value": 0
                     },
                     {
                         "fieldId": 2004,

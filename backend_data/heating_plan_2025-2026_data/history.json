@@ -154,5 +154,57 @@
             "globalRole": "god"
         },
         "tableTemplate": "subsidiaryTemplate"
+    },
+    {
+        "projectId": "heating_plan_2025-2026",
+        "tableId": "8",
+        "tableName": "香海热电厂表",
+        "action": "save_draft",
+        "timestamp": "2025-09-18T09:24:10.021+08:00",
+        "submittedBy": {
+            "username": "ww870411",
+            "unit": "系统管理员",
+            "globalRole": "god"
+        },
+        "tableTemplate": "subsidiaryTemplate"
+    },
+    {
+        "projectId": "heating_plan_2025-2026",
+        "tableId": "8",
+        "tableName": "香海热电厂表",
+        "action": "save_draft",
+        "timestamp": "2025-09-18T09:31:00.064+08:00",
+        "submittedBy": {
+            "username": "ww870411",
+            "unit": "系统管理员",
+            "globalRole": "god"
+        },
+        "tableTemplate": "subsidiaryTemplate"
+    },
+    {
+        "projectId": "heating_plan_2025-2026",
+        "tableId": "8",
+        "tableName": "香海热电厂表",
+        "action": "save_draft",
+        "timestamp": "2025-09-18T09:36:29.915+08:00",
+        "submittedBy": {
+            "username": "ww870411",
+            "unit": "系统管理员",
+            "globalRole": "god"
+        },
+        "tableTemplate": "subsidiaryTemplate"
+    },
+    {
+        "projectId": "heating_plan_2025-2026",
+        "tableId": "8",
+        "tableName": "香海热电厂表",
+        "action": "submit",
+        "timestamp": "2025-09-18T09:51:35.941+08:00",
+        "submittedBy": {
+            "username": "ww870411",
+            "unit": "系统管理员",
+            "globalRole": "god"
+        },
+        "tableTemplate": "subsidiaryTemplate"
     }
 ]

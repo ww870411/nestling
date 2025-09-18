@@ -104,7 +104,7 @@
       </div>
       <div>
         <el-button v-if="currentTableActions.save" @click="handleSave">{{ hasLocalDraft ? '更新暂存' : '暂存' }}</el-button>
-        <el-button v-if="currentTableActions.save" @click="handleLoadDraft" :disabled="!hasLocalDraft">{{ hasLocalDraft ? '取回暂存数据' : '尚无暂存数据' }}</el-button>
+        <el-button v-if="currentTableActions.save" @click="handleLoadDraft">取回暂存数据</el-button>
         <el-button @click="handleLoadFromServer" :icon="Download">加载已提交数据</el-button>
         <el-button v-if="currentTableActions.submit" type="primary" :disabled="hasHardErrors" @click="handleSubmit">提交</el-button>
       </div>
@@ -151,6 +151,8 @@ const route = useRoute();
 const projectStore = useProjectStore();
 const authStore = useAuthStore(); // Get auth store
 const { menuData } = storeToRefs(projectStore);
+
+const isGodUser = computed(() => authStore.user?.globalRole === 'god');
 
 // --- Component State ---
 const tableData = ref([]);
@@ -1135,53 +1137,109 @@ const handleSave = async () => {
   }
 };
 
-const handleLoadDraft = () => {
+const handleLoadDraft = async () => {
   const savedData = localStorage.getItem(localDraftKey.value);
-  if (!savedData) {
-    ElMessage.warning('没有找到可用的本地暂存数据');
+  if (savedData) {
+    const draftData = JSON.parse(savedData);
+    tableData.value.forEach(row => {
+      if (draftData[row.metricId]) {
+        Object.keys(draftData[row.metricId]).forEach(fieldId => {
+          row.values[fieldId] = draftData[row.metricId][fieldId];
+        });
+      }
+    });
+    calculateAll();
+    ElMessage.success('本地暂存数据已成功取回');
     return;
   }
-  const draftData = JSON.parse(savedData);
-  tableData.value.forEach(row => {
-    if (draftData[row.metricId]) {
-      Object.keys(draftData[row.metricId]).forEach(fieldId => {
-        row.values[fieldId] = draftData[row.metricId][fieldId];
-      });
+
+  const projectId = route.params.projectId;
+  const tableId = route.params.tableId;
+  if (!projectId || !tableId) {
+    ElMessage.warning('未找到本地暂存数据');
+    return;
+  }
+
+  try {
+    isLoading.value = true;
+    const response = await fetch(`/api/project/${projectId}/data/table/${tableId}`);
+    if (response.status === 404) {
+      ElMessage.warning('未找到本地暂存数据');
+      return;
     }
-  });
-  calculateAll();
-  ElMessage.success('本地暂存数据已成功拉取！');
+    if (!response.ok) {
+      throw new Error(`Unexpected status ${response.status}`);
+    }
+
+    const data = await response.json();
+    const tempPayload = data?.temp;
+    if (!tempPayload || !Array.isArray(tempPayload.tableData)) {
+      ElMessage.warning('未找到本地暂存数据');
+      return;
+    }
+
+    try {
+      await ElMessageBox.confirm(
+        '缓存中未找到暂存数据，但服务器上存在备份，是否确定取回？',
+        '提示',
+        {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'info',
+        }
+      );
+    } catch (err) {
+      ElMessage.warning('取回暂存数据失败');
+      return;
+    }
+
+    _applyPayloadToTable(tempPayload);
+    checkLocalDraft();
+  } catch (error) {
+    console.error('Load draft from server failed:', error);
+    ElMessage.error('尝试从服务器加载暂存备份失败，请稍后重试。');
+  } finally {
+    isLoading.value = false;
+  }
 };
 
 const handleSubmit = async () => {
-  // Step 1: Run validation to find all errors.
-  runValidation({ level: 'all' });
+  const skipValidation = isGodUser.value;
 
-  // Step 2: Check for hard errors.
-  if (hasHardErrors.value) {
-    ElMessage.error('提交失败，请修正所有红色错误后再试。');
-    return;
-  }
+  if (!skipValidation) {
+    // Step 1: Run validation to find all errors.
+    runValidation({ level: 'all' });
 
-  // Step 3: Handle soft errors.
-  if (softErrorsForDisplay.value.length > 0) {
-    // Check if all found soft errors have explanations.
-    const allExplained = softErrorsForDisplay.value.every(([key]) => 
-      explanations.value[key] && explanations.value[key].trim().length >= 10
-    );
-
-    // If not all are explained, open the panel and stop.
-    if (!allExplained) {
-      isErrorPanelVisible.value = true; // Open panel only when needed.
-      ElMessage.warning('检测到软性错误/警告，请为所有项目填写不少于10个字的说明后再提交。');
+    // Step 2: Check for hard errors.
+    if (hasHardErrors.value) {
+      ElMessage.error('提交失败：请先修复所有红色错误项。');
       return;
     }
+
+    // Step 3: Handle soft errors.
+    if (softErrorsForDisplay.value.length > 0) {
+      // Check if all found soft errors have explanations.
+      const allExplained = softErrorsForDisplay.value.every(([key]) =>
+        explanations.value[key] && explanations.value[key].trim().length >= 10
+      );
+
+      // If not all are explained, open the panel and stop.
+      if (!allExplained) {
+        isErrorPanelVisible.value = true; // Open panel only when needed.
+        ElMessage.warning('检测到软性问题/警告，请为相关项填写至少10字说明后再提交。');
+        return;
+      }
+    }
+  } else {
+    // God users submit without validation barriers.
+    errors.value = {};
+    isErrorPanelVisible.value = false;
   }
 
   // Step 4: Proceed to create payload and submit.
   const payload = _createPayload();
 
-  // --- 发送数据到后端 ---
+  // --- 提交数据到后端 ---
   try {
     const projectId = route.params.projectId;
     const tableId = route.params.tableId;
@@ -1196,20 +1254,19 @@ const handleSubmit = async () => {
       const errorData = await response.json();
       throw new Error(errorData.detail || 'Backend submission failed');
     }
-    
+
     // For immediate UI feedback
     localStorage.setItem(`status-${route.params.tableId}`, 'submitted');
     localStorage.setItem(`submittedAt-${route.params.tableId}`, payload.submittedAt);
 
-    ElMessage.success('数据已成功提交至服务器！');
+    ElMessage.success('数据已成功提交至服务器');
     isErrorPanelVisible.value = false;
 
   } catch (error) {
     console.error('Submission error:', error);
-    ElMessage.error(`数据提交至后端失败: ${error.message}`);
+    ElMessage.error(`数据提交到服务器失败: ${error.message}`);
   }
 };
-
 const handleUpdateExplanations = async () => {
   if (isExplanationsReadOnly.value) {
     isExplanationsDialogVisible.value = false;
