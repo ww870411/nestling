@@ -103,9 +103,11 @@
 
               <!-- 操作列 -->
               <div v-else-if="column.type === 'actions'">
-                <el-button type="primary" link @click="goToReport(row.id)">
-                  进入
-                </el-button>
+                <el-button type="primary" link @click="goToReport(row.id)">进入</el-button>
+                <template v-if="authStore.user && (authStore.user.globalRole === 'unit_admin' || authStore.user.globalRole === 'regional_admin' || authStore.user.globalRole === 'super_admin' || authStore.user.globalRole === 'god')">
+                  <el-button v-if="row.status === 'submitted'" type="success" link @click="approveRow(row)">批准</el-button>
+                  <el-button v-if="row.status === 'approved'" type="warning" link @click="unapproveRow(row)">撤销批准</el-button>
+                </template>
               </div>
 
               <!-- 默认列 -->
@@ -168,6 +170,10 @@ const buildUserHeaders = () => {
 };
 
 const config = ref(dashboardConfig);
+// 扩展状态映射：增加已批准(approved)
+if (!config.value.statusMap.approved) {
+  config.value.statusMap.approved = { text: '已批准', className: 'status-approved' };
+}
 const reportInfo = ref({});
 const isLoading = ref(false);
 
@@ -220,49 +226,7 @@ const parentMap = computed(() => {
 // 条件：
 // 1) 子未提交 且 任一祖先汇总已提交；或
 // 2) 子已提交 且 任一祖先未提交 或 祖先时间早于子时间。
-const needsAttention = computed(() => {
-  const result = new Set();
-  const statuses = reportInfo.value || {};
-
-  const parseTime = (ts) => {
-    if (!ts || typeof ts !== 'string') return null;
-    let s = ts.trim();
-    s = s.replace(/\.(\d{3})\d+$/, '.$1');
-    if (!/(Z|[z]|[+\-]\d{2}:?\d{2})$/.test(s)) s += 'Z';
-    const t = Date.parse(s);
-    return Number.isFinite(t) ? t : null;
-  };
-
-  const getTime = (id) => parseTime(statuses[id]?.submittedAt);
-
-  const hasOutdatedAncestor = (childId) => {
-    const childTime = getTime(childId);
-    const visited = new Set();
-    const stack = [childId];
-    while (stack.length) {
-      const cur = stack.pop();
-      if (visited.has(cur)) continue;
-      visited.add(cur);
-      const parents = parentMap.value.get(cur) || [];
-      for (const pid of parents) {
-        const pTime = getTime(pid);
-        if (childTime == null && pTime != null) return true;
-        if (childTime != null && (pTime == null || pTime < childTime)) return true;
-        stack.push(pid);
-      }
-    }
-    return false;
-  };
-
-  for (const group of menuData.value || []) {
-    for (const table of group.tables || []) {
-      if (table?.type !== 'summary' && hasOutdatedAncestor(table.id)) {
-        result.add(table.id);
-      }
-    }
-  }
-  return result;
-});
+const needsAttention = computed(() => new Set());
 
 // 从后端获取状态
 const fetchReportStatuses = async () => {
@@ -395,6 +359,30 @@ const goToReport = (reportId) => {
   const projectId = route.params.projectId;
   router.push({ name: 'data-entry', params: { projectId, tableId: reportId } });
 };
+
+const approveRow = async (row) => {
+  try {
+    const projectId = route.params.projectId;
+    const resp = await fetch(`/api/project/${projectId}/table/${row.id}/approve`, { method: 'POST', headers: buildUserHeaders() });
+    if (!resp.ok) throw new Error('approve failed');
+    ElMessage.success('已批准。');
+    fetchReportStatuses();
+  } catch (e) {
+    ElMessage.error('批准失败');
+  }
+};
+
+const unapproveRow = async (row) => {
+  try {
+    const projectId = route.params.projectId;
+    const resp = await fetch(`/api/project/${projectId}/table/${row.id}/unapprove`, { method: 'POST', headers: buildUserHeaders() });
+    if (!resp.ok) throw new Error('unapprove failed');
+    ElMessage.success('已撤销批准。');
+    fetchReportStatuses();
+  } catch (e) {
+    ElMessage.error('撤销批准失败');
+  }
+};
 </script>
 
 <style scoped>
@@ -415,21 +403,11 @@ const goToReport = (reportId) => {
   overflow: hidden;
 }
 
-.status-text {
-  font-weight: bold;
-}
-
-.status-new {
-  color: #f56c6c;
-}
-
-.status-saved {
-  color: #e6a23c;
-}
-
-.status-submitted {
-  color: #67c23a;
-}
+.status-text { font-weight: bold; }
+.status-new { color: inherit; }
+.status-saved { color: #e6a23c; }
+.status-submitted { color: #409eff; }
+.status-approved { color: #67c23a; }
 
 /* 需要汇总更新的提示标记（名称列旁） */
 .attention-mark {

@@ -232,5 +232,57 @@
             "globalRole": "god"
         },
         "tableTemplate": "subsidiaryTemplate"
+    },
+    {
+        "projectId": "heating_plan_2025-2026",
+        "tableId": "11",
+        "tableName": "金州热电表",
+        "action": "submit",
+        "timestamp": "2025-09-19T11:27:55.227+08:00",
+        "submittedBy": {
+            "username": "jinzhou_filler",
+            "unit": "金州热电",
+            "globalRole": "unit_filler"
+        },
+        "tableTemplate": "subsidiaryTemplate"
+    },
+    {
+        "projectId": "heating_plan_2025-2026",
+        "tableId": "11",
+        "tableName": "金州热电表",
+        "action": "approve",
+        "timestamp": "2025-09-19T11:27:55.227+08:00",
+        "submittedBy": {
+            "username": "jinzhou_filler",
+            "unit": "金州热电",
+            "globalRole": "unit_filler"
+        },
+        "tableTemplate": "subsidiaryTemplate"
+    },
+    {
+        "projectId": "heating_plan_2025-2026",
+        "tableId": "11",
+        "tableName": "金州热电表",
+        "action": "unapprove",
+        "timestamp": "2025-09-19T11:27:55.227+08:00",
+        "submittedBy": {
+            "username": "jinzhou_filler",
+            "unit": "金州热电",
+            "globalRole": "unit_filler"
+        },
+        "tableTemplate": "subsidiaryTemplate"
+    },
+    {
+        "projectId": "heating_plan_2025-2026",
+        "tableId": "11",
+        "tableName": "金州热电表",
+        "action": "approve",
+        "timestamp": "2025-09-19T11:27:55.227+08:00",
+        "submittedBy": {
+            "username": "jinzhou_filler",
+            "unit": "金州热电",
+            "globalRole": "unit_filler"
+        },
+        "tableTemplate": "subsidiaryTemplate"
     }
 ]

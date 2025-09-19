@@ -24,6 +24,7 @@ export const useAuthStore = defineStore('auth', {
           // Super admin can access all units.
           return ALL_UNITS;
         case 'regional_admin':
+        case 'regional_filler':
           // Downtown admin can access a specific set of units.
           return ['主城区', '北海热电厂', '香海热电厂', '供热公司'];
         default:

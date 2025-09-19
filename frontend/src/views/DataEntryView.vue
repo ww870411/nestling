@@ -35,7 +35,7 @@
                   :width="childField.width * zoomLevel / 100"
                   :fixed="childField.fixed">
                   <template #default="{ row }">
-                    <div v-if="getCellState(row, childField, currentTableConfig, childToParentsMap.value, forcedParentMap.value) === 'WRITABLE'" class="cell-content">
+                    <div v-if="getCellState(row, childField, currentTableConfig, childToParentsMap.value, forcedParentMap.value) === 'WRITABLE' && !isReadOnlyAdmin && !isApproved" class="cell-content">
                       <FormattedInput 
                         v-model="row.values[childField.id]"
                         :format-options="getFormatOptions(row, childField)"
@@ -56,7 +56,7 @@
                 :width="field.width * zoomLevel / 100" 
                 :fixed="field.fixed">
                 <template #default="{ row }">
-                  <div v-if="getCellState(row, field, currentTableConfig, childToParentsMap.value, forcedParentMap.value) === 'WRITABLE'" class="cell-content">
+                  <div v-if="getCellState(row, field, currentTableConfig, childToParentsMap.value, forcedParentMap.value) === 'WRITABLE' && !isReadOnlyAdmin && !isApproved" class="cell-content">
                     <FormattedInput 
                       v-model="row.values[field.id]"
                       :format-options="getFormatOptions(row, field)"
@@ -82,7 +82,7 @@
             <div v-for="([key, error]) in softErrorsForDisplay" :key="key" class="error-item error-item-soft">
               <label>{{ getErrorLabel(key) }}</label>
               <p class="error-message">原因: {{ error.message }}</p>
-              <el-input v-model="explanations[key]" type="textarea" :rows="2" placeholder="请输入说明..." />
+              <el-input v-model="explanations[key]" type="textarea" :rows="2" placeholder="请输入说明..." :disabled="isReadOnlyAdmin" />
             </div>
           </el-scrollbar>
         </div>
@@ -118,21 +118,21 @@
       <el-table-column prop="message" label="错误原因" width="200"></el-table-column>
       <el-table-column label="说明内容">
         <template #default="{ row }">
-          <el-input v-model="row.content" type="textarea" :rows="2" :disabled="isExplanationsReadOnly" />
+          <el-input v-model="row.content" type="textarea" :rows="2" :disabled="isExplanationsReadOnly || isReadOnlyAdmin" />
         </template>
       </el-table-column>
     </el-table>
     <template #footer>
       <span class="dialog-footer">
         <el-button @click="isExplanationsDialogVisible = false">取消</el-button>
-        <el-button v-if="!isExplanationsReadOnly" type="primary" @click="handleUpdateExplanations">修改并提交</el-button>
+        <el-button v-if="!isExplanationsReadOnly && !isReadOnlyAdmin" type="primary" @click="handleUpdateExplanations">修改并提交</el-button>
       </span>
     </template>
   </el-dialog>
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { storeToRefs } from 'pinia';
@@ -159,6 +159,15 @@ const buildUserHeaders = () => {
 const { menuData } = storeToRefs(projectStore);
 
 const isGodUser = computed(() => authStore.user?.globalRole === 'god');
+// 只读管理员（除集团 super_admin 外的 admin）：区域管理员、单位管理员
+const isReadOnlyAdmin = computed(() => {
+  const role = authStore.user?.globalRole;
+  return role === 'regional_admin' || role === 'unit_admin';
+});
+
+// 当前表状态（new/saved/submitted/approved）
+const tableStatus = ref(null);
+const isApproved = computed(() => (tableStatus.value && tableStatus.value.status === 'approved'));
 
 // --- Component State ---
 const tableData = ref([]);
@@ -204,8 +213,62 @@ const currentTableProperties = computed(() => {
 const currentTableActions = computed(() => {
   const defaults = { submit: true, save: true };
   const configActions = currentTableConfig.value?.actions;
-  return { ...defaults, ...configActions };
+  const base = { ...defaults, ...configActions };
+  // 管理员只读：禁用提交与暂存/取回
+  if (isReadOnlyAdmin.value) {
+    return { ...base, submit: false, save: false };
+  }
+  return base;
 });
+
+const fetchCurrentStatus = async () => {
+  const projectId = route.params.projectId;
+  const tableId = route.params.tableId;
+  if (!projectId || !tableId) return;
+  try {
+    const resp = await fetch(`/api/project/${projectId}/table_statuses`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...buildUserHeaders() },
+      body: JSON.stringify([tableId])
+    });
+    if (resp.ok) {
+      const data = await resp.json();
+      tableStatus.value = data?.[tableId] || null;
+    }
+  } catch (e) { /* ignore */ }
+};
+
+onMounted(() => {
+  fetchCurrentStatus();
+});
+
+const handleApprove = async () => {
+  const projectId = route.params.projectId;
+  const tableId = route.params.tableId;
+  if (!projectId || !tableId) return;
+  try {
+    const resp = await fetch(`/api/project/${projectId}/table/${tableId}/approve`, { method: 'POST', headers: buildUserHeaders() });
+    if (!resp.ok) throw new Error('approve failed');
+    ElMessage.success('已批准。');
+    await fetchCurrentStatus();
+  } catch (e) {
+    ElMessage.error('批准失败');
+  }
+};
+
+const handleUnapprove = async () => {
+  const projectId = route.params.projectId;
+  const tableId = route.params.tableId;
+  if (!projectId || !tableId) return;
+  try {
+    const resp = await fetch(`/api/project/${projectId}/table/${tableId}/unapprove`, { method: 'POST', headers: buildUserHeaders() });
+    if (!resp.ok) throw new Error('unapprove failed');
+    ElMessage.success('已撤销批准。');
+    await fetchCurrentStatus();
+  } catch (e) {
+    ElMessage.error('撤销批准失败');
+  }
+};
 
 const processedFieldConfig = computed(() => {
   if (!fieldConfig.value) return [];

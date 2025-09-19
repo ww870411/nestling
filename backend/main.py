@@ -6,6 +6,7 @@ from datetime import datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
 from fastapi import FastAPI, HTTPException, status, Body, Request
+from typing import List
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
@@ -50,6 +51,64 @@ with open(TEMPLATE_FILE, "r", encoding="utf-8") as f:
     REPORT_TEMPLATE = json.load(f)
 
 ALL_TABLES = {table["id"]: table for group in MENU_DATA for table in group["tables"]}
+TABLE_TO_GROUP = {table["id"]: group["name"] for group in MENU_DATA for table in group["tables"]}
+
+def _load_users():
+    try:
+        with open(AUTH_FILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return []
+
+def _get_user_from_request(request: Request):
+    username = request.headers.get('X-User-Name') if hasattr(request, 'headers') else None
+    if not username:
+        return None
+    for u in _load_users():
+        if u.get('username') == username:
+            return u
+    return None
+
+def _region_scope_ids(region_name: str):
+    # 所属区域的汇总表ID集合及其子表ID集合（如主城区: 表2/3 以及它们的subsidiaries）
+    ids = set()
+    child_ids = set()
+    for group in MENU_DATA:
+        if group.get('name') == region_name:
+            for t in group.get('tables', []):
+                ids.add(str(t.get('id')))
+                subs = t.get('subsidiaries')
+                if isinstance(subs, list):
+                    for sid in subs:
+                        child_ids.add(str(sid))
+    return ids, child_ids
+
+def _can_approve(table_id: str, user: dict, action: str):
+    # action: 'approve' or 'unapprove'
+    if not user:
+        return False
+    role = user.get('globalRole')
+    unit = user.get('unit')
+    if role in ('god', 'super_admin'):
+        return True
+
+    group_name = TABLE_TO_GROUP.get(str(table_id))
+    if role == 'unit_admin':
+        # 单位管理员仅能操作本单位下表
+        return group_name == unit
+
+    if role == 'regional_admin':
+        # 区域管理员：
+        region_tables, region_children = _region_scope_ids(unit or '')
+        tid = str(table_id)
+        if action == 'approve':
+            # 只能批准本区域自身负责的汇总表（例如主城区的表2/3）
+            return tid in region_tables
+        else:
+            # 撤销批准：可对本区域汇总表及其下属单位表执行
+            return tid in region_tables or tid in region_children
+
+    return False
 
 # --- Pydantic model for login request body ---
 class UserLogin(BaseModel):
@@ -223,6 +282,73 @@ async def submit_data(project_id: str, table_id: str, request: Request, payload:
     _log_action("submit", request, username=_extract_username(payload, request), details={"projectId": project_id, "tableId": table_id})
     return {"message": f"Data for table ID '{table_id}' submitted successfully."}
 
+@app.post("/project/{project_id}/table/{table_id}/approve")
+async def approve_table(project_id: str, table_id: str, request: Request):
+    user = _get_user_from_request(request)
+    if not _can_approve(str(table_id), user, 'approve'):
+        raise HTTPException(status_code=403, detail="Not allowed to approve this table.")
+
+    submissions_dir = DATA_DIR / f"{project_id}_data"
+    submissions_dir.mkdir(parents=True, exist_ok=True)
+    file_path = submissions_dir / f"{table_id}.json"
+    if not file_path.exists():
+        raise HTTPException(status_code=404, detail="Table data not found.")
+
+    try:
+        with open(file_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+    except Exception:
+        raise HTTPException(status_code=500, detail="Failed to read table file.")
+
+    submit_payload = data.get('submit')
+    if not submit_payload:
+        raise HTTPException(status_code=400, detail="No submission to approve.")
+
+    approved = copy.deepcopy(submit_payload)
+    approved['approvedAt'] = datetime.now(BEIJING_TZ).isoformat()
+    approved['approvedBy'] = user
+    data['approved'] = approved
+
+    try:
+        with open(file_path, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=4)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to write approval: {e}")
+
+    _append_history_record(submissions_dir, project_id, table_id, approved, "approve")
+    _log_action("approve", request, username=_extract_username(approved, request), details={"projectId": project_id, "tableId": table_id})
+    return {"message": "Approved."}
+
+@app.post("/project/{project_id}/table/{table_id}/unapprove")
+async def unapprove_table(project_id: str, table_id: str, request: Request):
+    user = _get_user_from_request(request)
+    if not _can_approve(str(table_id), user, 'unapprove'):
+        raise HTTPException(status_code=403, detail="Not allowed to unapprove this table.")
+
+    submissions_dir = DATA_DIR / f"{project_id}_data"
+    submissions_dir.mkdir(parents=True, exist_ok=True)
+    file_path = submissions_dir / f"{table_id}.json"
+    if not file_path.exists():
+        raise HTTPException(status_code=404, detail="Table data not found.")
+
+    try:
+        with open(file_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+    except Exception:
+        raise HTTPException(status_code=500, detail="Failed to read table file.")
+
+    if 'approved' in data:
+        approved_snapshot = data['approved']
+        del data['approved']
+        try:
+            with open(file_path, "w", encoding="utf-8") as f:
+                json.dump(data, f, ensure_ascii=False, indent=4)
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Failed to remove approval: {e}")
+        _append_history_record(submissions_dir, project_id, table_id, approved_snapshot, "unapprove")
+        _log_action("unapprove", request, username=_extract_username(approved_snapshot, request), details={"projectId": project_id, "tableId": table_id})
+    return {"message": "Unapproved."}
+
 @app.post("/project/{project_id}/table/{table_id}/save_draft")
 async def save_draft(project_id: str, table_id: str, request: Request, payload: dict = Body(...)):
     submissions_dir = DATA_DIR / f"{project_id}_data"
@@ -294,7 +420,8 @@ async def get_table_0_data(project_id: str):
             except (json.JSONDecodeError, IOError):
                 sub_content = {}  # Continue with empty content on error
 
-        sub_data = sub_content.get("submit") or sub_content.get("temp")
+        # 表0仅汇总已批准的数据；未批准则跳过
+        sub_data = sub_content.get("approved")
         if not sub_data or not isinstance(sub_data.get("tableData"), list):
             continue
 
@@ -436,7 +563,13 @@ async def get_table_data_recursive(project_id: str, table_id: str):
                     sub_content = {}
             # --- END MODIFICATION ---
 
-            sub_data = sub_content.get("submit") or sub_content.get("temp")
+            # 规则：表1汇总其子表的已批准版本；表2/3使用其子表的已提交版本；其它默认沿用已提交/草稿。
+            if table_id == '1':
+                sub_data = sub_content.get("approved")
+            elif table_id in ('2', '3'):
+                sub_data = sub_content.get("submit")
+            else:
+                sub_data = sub_content.get("submit") or sub_content.get("temp")
             if not sub_data or not isinstance(sub_data.get("tableData"), list): continue
 
             if aggregated_payload is None:
@@ -588,12 +721,12 @@ async def get_table_data(project_id: str, table_id: str, request: Request):
     return result
 
 @app.post("/project/{project_id}/table_statuses")
-async def get_table_statuses(project_id: str, table_ids: list[str] = Body(...)):
+async def get_table_statuses(project_id: str, table_ids: List[str] = Body(...)):
     statuses = {}
     submissions_dir = DATA_DIR / f"{project_id}_data"
     for table_id in table_ids:
         file_path = submissions_dir / f"{table_id}.json"
-        status_info = {"status": "new", "submittedAt": None, "submittedBy": None}
+        status_info = {"status": "new", "submittedAt": None, "submittedBy": None, "approvedAt": None, "approvedBy": None}
 
         if file_path.exists():
             try:
@@ -608,8 +741,18 @@ async def get_table_statuses(project_id: str, table_ids: list[str] = Body(...)):
                 if data.get("temp"):
                     status_info["status"] = "saved"
 
-                # Check for a valid submission that can override the status
-                if data.get("submit"):
+                # Approved has highest priority
+                if data.get("approved"):
+                    status_info["status"] = "approved"
+                    status_info["approvedAt"] = data["approved"].get("approvedAt")
+                    status_info["approvedBy"] = data["approved"].get("approvedBy")
+                    # also surface submitted info if present
+                    if data.get("submit"):
+                        status_info["submittedAt"] = data["submit"].get("submittedAt")
+                        status_info["submittedBy"] = data["submit"].get("submittedBy")
+
+                # Check for a valid submission if not approved
+                elif data.get("submit"):
                     submitted_by = data["submit"].get("submittedBy")
                     # If NOT submitted by the admin, then it's officially "submitted"
                     if not (submitted_by and submitted_by.get("username") == 'ww870411'):
