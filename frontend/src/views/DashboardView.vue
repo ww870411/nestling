@@ -44,10 +44,14 @@
           </li>
           <li class="guide-dialog__item">
             <span class="guide-dialog__index">6</span>
-            <p>当数据填好并经您所在单位领导审核后，便可以点击 <span style="color:red;">【提交】</span>按钮，将数据提交至服务器上，您所在区域的管理员便可看到相应的数据（如集团、主城区管理员）。在提交时，会进行数据有效性校验，请确保填写的数字合法，且与同期值之间的关系符合本工作的通知要求，若有特殊情况，必须撰写情况<span style="color:red;">【解释说明】</span>并提交审核。</p>
+            <p>当数据填好并经检查后，请您点击<span style="color:red;">【提交】</span>按钮，将数据提交至服务器上。在提交时，会进行数据有效性校验，请确保填写的数字合法，且与同期值之间的关系符合本工作的通知要求，若有特殊情况，必须撰写情况<span style="color:red;">【解释说明】</span>并提交审核。</p>
           </li>
           <li class="guide-dialog__item">
             <span class="guide-dialog__index">7</span>
+            <p>在提交后，请您联系所在单位领导登录本单位的管理员账号，对数据进行审核，审核通过后，点击 <span style="color:red;">【批准】</span>按钮，此时数据就作为最终数据上传，且不可更改。您所在区域的管理员可看到相应的数据情况（如集团、主城区管理员）。</p>
+          </li>
+          <li class="guide-dialog__item">
+            <span class="guide-dialog__index">8</span>
             <p>本系统仍处于试用阶段，可能存在不足和bug，目前正在积极完善中，欢迎您在使用中随时提出宝贵的意见和建议！</p>
           </li>
         </ol>
