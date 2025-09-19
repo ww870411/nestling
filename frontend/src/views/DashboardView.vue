@@ -84,6 +84,18 @@
                 <span v-else></span>
               </div>
 
+              <!-- 名称列：增加需要汇总更新标记 -->
+              <div v-else-if="column.prop === 'name'">
+                <span>{{ row.name }}</span>
+                <span
+                  v-if="needsAttention.has(row.id)"
+                  class="attention-mark"
+                  title="该表的提交时间晚于上级汇总表"
+                >
+                  !
+                </span>
+              </div>
+
               <!-- 提交历史 -->
               <div v-else-if="column.type === 'history'">
                 <el-button type="primary" link @click="openHistoryDialog(row)">查看</el-button>
@@ -185,6 +197,71 @@ const allReports = computed(() => {
         submittedBy: reportInfo.value[table.id]?.submittedBy || null
       }))
     );
+});
+
+// 基于菜单构建 子->父(汇总表) 映射
+const parentMap = computed(() => {
+  const map = new Map();
+  if (!menuData.value) return map;
+  for (const group of menuData.value) {
+    for (const table of group.tables || []) {
+      if (table && table.type === 'summary' && Array.isArray(table.subsidiaries)) {
+        for (const childId of table.subsidiaries) {
+          if (!map.has(childId)) map.set(childId, []);
+          map.get(childId).push(table.id);
+        }
+      }
+    }
+  }
+  return map;
+});
+
+// 需要提示的表集合（仅对子表显示标记）
+// 条件：
+// 1) 子未提交 且 任一祖先汇总已提交；或
+// 2) 子已提交 且 任一祖先未提交 或 祖先时间早于子时间。
+const needsAttention = computed(() => {
+  const result = new Set();
+  const statuses = reportInfo.value || {};
+
+  const parseTime = (ts) => {
+    if (!ts || typeof ts !== 'string') return null;
+    let s = ts.trim();
+    s = s.replace(/\.(\d{3})\d+$/, '.$1');
+    if (!/(Z|[z]|[+\-]\d{2}:?\d{2})$/.test(s)) s += 'Z';
+    const t = Date.parse(s);
+    return Number.isFinite(t) ? t : null;
+  };
+
+  const getTime = (id) => parseTime(statuses[id]?.submittedAt);
+
+  const hasOutdatedAncestor = (childId) => {
+    const childTime = getTime(childId);
+    const visited = new Set();
+    const stack = [childId];
+    while (stack.length) {
+      const cur = stack.pop();
+      if (visited.has(cur)) continue;
+      visited.add(cur);
+      const parents = parentMap.value.get(cur) || [];
+      for (const pid of parents) {
+        const pTime = getTime(pid);
+        if (childTime == null && pTime != null) return true;
+        if (childTime != null && (pTime == null || pTime < childTime)) return true;
+        stack.push(pid);
+      }
+    }
+    return false;
+  };
+
+  for (const group of menuData.value || []) {
+    for (const table of group.tables || []) {
+      if (table?.type !== 'summary' && hasOutdatedAncestor(table.id)) {
+        result.add(table.id);
+      }
+    }
+  }
+  return result;
 });
 
 // 从后端获取状态
@@ -352,6 +429,13 @@ const goToReport = (reportId) => {
 
 .status-submitted {
   color: #67c23a;
+}
+
+/* 需要汇总更新的提示标记（名称列旁） */
+.attention-mark {
+  color: #f56c6c;
+  margin-left: 6px;
+  font-weight: bold;
 }
 
 .history-dialog__loading,

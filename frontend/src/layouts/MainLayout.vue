@@ -87,6 +87,7 @@ const dashboardPath = computed(() => `/project/${currentProjectId.value}/dashboa
 const reportStatuses = ref({});
 const isSidebarCollapsed = ref(false);
 
+
 // 根据当前用户的权限过滤菜单
 const filteredMenuData = computed(() => {
   if (!menuData.value) return [];
@@ -176,6 +177,7 @@ const handleLogout = () => {
 
 .status-saved { color: #e6a23c !important; }
 .status-submitted { color: #67c23a !important; }
+
 .status-new { color: #f56c6c !important; }
 
 .main-header {
