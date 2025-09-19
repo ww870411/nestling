@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="dashboard-container">
     <el-dialog
       v-model="instructionDialogVisible"
@@ -60,9 +60,20 @@
     </el-dialog>
     <h2 class="dashboard-title">{{ config.title }}</h2>
     <div class="table-container">
-      <el-table :data="allReports" stripe style="width: 100%" v-loading="isLoading">
+      <el-table :data="allReports" stripe style="width: 100%" v-loading="isLoading" :fit="true">
         <template v-for="column in config.columns" :key="column.prop">
-          <el-table-column :prop="column.prop" :label="column.label" :width="column.width">
+          <el-table-column
+            :prop="column.prop"
+            :label="column.label"
+            :width="column.width"
+            :min-width="getMinWidth(column)"
+            :show-overflow-tooltip="column.prop === 'name'"
+          >
+            <template #header>
+              <span v-if="column.type === 'datetime'">操作时间</span>
+              <span v-else-if="column.type === 'submitter'">操作人</span>
+              <span v-else>{{ column.label }}</span>
+            </template>
             
             <template #default="{ row }">
               <!-- 状态列 -->
@@ -74,13 +85,17 @@
 
               <!-- 时间列 -->
               <div v-else-if="column.type === 'datetime'">
-                <span v-if="row.status === 'submitted'">{{ formatDateTime(row.submittedAt) }}</span>
+                <span v-if="row.status === 'approved' && row.approvedAt">{{ formatDateTime(row.approvedAt) }}</span>
+                <span v-else-if="row.unapprovedAt">{{ formatDateTime(row.unapprovedAt) }}</span>
+                <span v-else-if="row.status === 'submitted' && row.submittedAt">{{ formatDateTime(row.submittedAt) }}</span>
                 <span v-else></span>
               </div>
 
               <!-- 提交人列 -->
               <div v-else-if="column.type === 'submitter'">
-                <span v-if="row.status === 'submitted'">{{ row.submittedBy?.username }}</span>
+                <span v-if="row.status === 'approved' && row.approvedBy && row.approvedBy.username">{{ row.approvedBy.username }}</span>
+                <span v-else-if="row.unapprovedBy && row.unapprovedBy.username">{{ row.unapprovedBy.username }}</span>
+                <span v-else-if="row.status === 'submitted' && row.submittedBy && row.submittedBy.username">{{ row.submittedBy.username }}</span>
                 <span v-else></span>
               </div>
 
@@ -105,8 +120,8 @@
               <div v-else-if="column.type === 'actions'">
                 <el-button type="primary" link @click="goToReport(row.id)">进入</el-button>
                 <template v-if="authStore.user && (authStore.user.globalRole === 'unit_admin' || authStore.user.globalRole === 'regional_admin' || authStore.user.globalRole === 'super_admin' || authStore.user.globalRole === 'god')">
-                  <el-button v-if="row.status === 'submitted'" type="success" link @click="approveRow(row)">批准</el-button>
-                  <el-button v-if="row.status === 'approved'" type="warning" link @click="unapproveRow(row)">撤销批准</el-button>
+                  <el-button v-if="row.status === 'submitted' && canApproveRow(row)" type="success" link @click="approveRow(row)">批准</el-button>
+                  <el-button v-if="row.status === 'approved' && canUnapproveRow(row)" type="warning" link @click="unapproveRow(row)">撤销批准</el-button>
                 </template>
               </div>
 
@@ -174,6 +189,9 @@ const config = ref(dashboardConfig);
 if (!config.value.statusMap.approved) {
   config.value.statusMap.approved = { text: '已批准', className: 'status-approved' };
 }
+if (config.value.statusMap && config.value.statusMap.new && config.value.statusMap.new.text) {
+  config.value.statusMap.new.text = '未操作';
+}
 const reportInfo = ref({});
 const isLoading = ref(false);
 
@@ -185,7 +203,7 @@ const historyRecords = ref([]);
 const historyLoading = ref(false);
 const historyError = ref('');
 const historyTableName = ref('');
-const historyDialogTitle = computed(() => historyTableName.value ? `${historyTableName.value} 提交历史` : '提交历史');
+const historyDialogTitle = computed(() => historyTableName.value ? `${historyTableName.value} 操作历史` : '操作历史');
 
 // 将菜单数据和状态数据结合，并根据权限过滤
 const allReports = computed(() => {
@@ -198,12 +216,29 @@ const allReports = computed(() => {
         name: `${table.id} ${table.name.replace(/^\d+\s*/, '')}`,
         groupName: group.name,
         // The key in reportInfo is the table's id
-        status: reportInfo.value[table.id]?.status || 'new',
+        status: (reportInfo.value[table.id]?.approvedAt ? 'approved' : (reportInfo.value[table.id]?.status || 'new')),
         submittedAt: reportInfo.value[table.id]?.submittedAt || null,
-        submittedBy: reportInfo.value[table.id]?.submittedBy || null
+        submittedBy: reportInfo.value[table.id]?.submittedBy || null,
+        approvedAt: reportInfo.value[table.id]?.approvedAt || null,
+        approvedBy: reportInfo.value[table.id]?.approvedBy || null,
+        unapprovedAt: reportInfo.value[table.id]?.unapprovedAt || null,
+        unapprovedBy: reportInfo.value[table.id]?.unapprovedBy || null
       }))
     );
 });
+
+// 统一控制各列的最小宽度，避免换行
+const getMinWidth = (column) => {
+  if (!column) return undefined;
+  if (column.prop === 'name') return 360;
+  if (column.prop === 'groupName') return 180;
+  if (column.type === 'status') return 110;
+  if (column.type === 'datetime') return 180;
+  if (column.type === 'submitter') return 140;
+  if (column.type === 'history') return 100;
+  if (column.type === 'actions') return 220;
+  return column.minWidth || undefined;
+};
 
 // 基于菜单构建 子->父(汇总表) 映射
 const parentMap = computed(() => {
@@ -280,6 +315,8 @@ const markInstructionRead = () => {
 const historyActionLabel = (action) => {
   if (action === 'submit') return '提交';
   if (action === 'save_draft') return '暂存';
+  if (action === 'approve') return '批准';
+  if (action === 'unapprove') return '撤销批准';
   return action || '';
 };
 
@@ -360,11 +397,58 @@ const goToReport = (reportId) => {
   router.push({ name: 'data-entry', params: { projectId, tableId: reportId } });
 };
 
+const canApproveRow = (row) => {
+  const user = authStore.user || {};
+  const role = user.globalRole;
+  if (role === 'god' || role === 'super_admin') return true;
+  if (role === 'unit_admin') return row.groupName === user.unit;
+  if (role === 'regional_admin') {
+    if (user.unit === '主城区') return ['2','3'].includes(String(row.id));
+    return false;
+  }
+  return false;
+};
+
+const canUnapproveRow = (row) => {
+  const user = authStore.user || {};
+  const role = user.globalRole;
+  if (role === 'god' || role === 'super_admin') return true;
+  if (role === 'regional_admin' && user.unit === '主城区') {
+    return ['4','5','6','7','8','9','10'].includes(String(row.id));
+  }
+  return false;
+};
+
 const approveRow = async (row) => {
   try {
     const projectId = route.params.projectId;
     const resp = await fetch(`/api/project/${projectId}/table/${row.id}/approve`, { method: 'POST', headers: buildUserHeaders() });
-    if (!resp.ok) throw new Error('approve failed');
+    if (!resp.ok) {
+      let msg = '批准失败';
+      try {
+        const data = await resp.json();
+        if (data && typeof data === 'object') {
+          const detail = data.detail || data;
+          if (detail?.message) msg = detail.message;
+          const ids = detail?.unapprovedChildren;
+          if (Array.isArray(ids) && ids.length) {
+            const names = ids.map(String).map(id => {
+              for (const g of menuData.value || []) {
+                const t = (g.tables || []).find(x => String(x.id) === id);
+                if (t) return `${id} ${t.name}`;
+              }
+              return id;
+            });
+            msg += `：${names.join('，')}`;
+          }
+        } else {
+          const text = await resp.text();
+          if (text) msg = text;
+        }
+      } catch (_) {}
+      ElMessage.error(msg);
+      return;
+    }
     ElMessage.success('已批准。');
     fetchReportStatuses();
   } catch (e) {
@@ -376,7 +460,32 @@ const unapproveRow = async (row) => {
   try {
     const projectId = route.params.projectId;
     const resp = await fetch(`/api/project/${projectId}/table/${row.id}/unapprove`, { method: 'POST', headers: buildUserHeaders() });
-    if (!resp.ok) throw new Error('unapprove failed');
+    if (!resp.ok) {
+      let msg = '撤销批准失败';
+      try {
+        const data = await resp.json();
+        if (data && typeof data === 'object') {
+          const detail = data.detail || data;
+          if (detail?.message) msg = detail.message;
+          const ids = detail?.approvedParents;
+          if (Array.isArray(ids) && ids.length) {
+            const names = ids.map(String).map(id => {
+              for (const g of menuData.value || []) {
+                const t = (g.tables || []).find(x => String(x.id) === id);
+                if (t) return `${id} ${t.name}`;
+              }
+              return id;
+            });
+            msg += `：${names.join('，')}`;
+          }
+        } else {
+          const text = await resp.text();
+          if (text) msg = text;
+        }
+      } catch (_) {}
+      ElMessage.error(msg);
+      return;
+    }
     ElMessage.success('已撤销批准。');
     fetchReportStatuses();
   } catch (e) {
@@ -404,10 +513,15 @@ const unapproveRow = async (row) => {
 }
 
 .status-text { font-weight: bold; }
-.status-new { color: inherit; }
+.status-new { color: #f56c6c; }
 .status-saved { color: #e6a23c; }
 .status-submitted { color: #409eff; }
 .status-approved { color: #67c23a; }
+
+/* 保持单行显示，配合各列最小宽度与溢出提示 */
+:deep(.el-table .cell) {
+  white-space: nowrap;
+}
 
 /* 需要汇总更新的提示标记（名称列旁） */
 .attention-mark {
@@ -541,3 +655,4 @@ const unapproveRow = async (row) => {
 }
 
 </style>
+

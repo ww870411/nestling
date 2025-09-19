@@ -107,6 +107,8 @@
         <el-button v-if="currentTableActions.save" @click="handleLoadDraft">取回暂存数据</el-button>
         <el-button @click="handleLoadFromServer" :icon="Download">加载已提交数据</el-button>
         <el-button v-if="currentTableActions.submit" type="primary" :disabled="hasHardErrors" @click="handleSubmit">提交</el-button>
+        <el-button v-if="isReadOnlyAdmin && canApproveHere && tableStatus && tableStatus.status === 'submitted'" type="success" @click="handleApprove">批准</el-button>
+        <el-button v-if="isReadOnlyAdmin && canUnapproveHere && tableStatus && tableStatus.status === 'approved'" type="warning" @click="handleUnapprove">撤销批准</el-button>
       </div>
     </div>
   </div>
@@ -164,10 +166,45 @@ const isReadOnlyAdmin = computed(() => {
   const role = authStore.user?.globalRole;
   return role === 'regional_admin' || role === 'unit_admin';
 });
+// 鉴权就绪，避免初始闪现提交/暂存按钮
+const isAuthReady = computed(() => !!authStore.user);
 
 // 当前表状态（new/saved/submitted/approved）
 const tableStatus = ref(null);
 const isApproved = computed(() => (tableStatus.value && tableStatus.value.status === 'approved'));
+const canUnapproveHere = computed(() => {
+  const role = authStore.user?.globalRole;
+  const unitName = authStore.user?.unit;
+  const tid = String(route.params.tableId || '');
+  if (role === 'god' || role === 'super_admin') return true;
+  if (role === 'regional_admin' && unitName === '主城区') {
+    return ['4','5','6','7','8','9','10'].includes(tid);
+  }
+  return false;
+});
+
+// 仅在允许批准的表上显示“批准”按钮
+const canApproveHere = computed(() => {
+  const role = authStore.user?.globalRole;
+  const unitName = authStore.user?.unit;
+  const tid = String(route.params.tableId || '');
+  if (role === 'god' || role === 'super_admin') return true;
+  if (role === 'regional_admin' && unitName === '主城区') {
+    return ['2','3'].includes(tid);
+  }
+  if (role === 'unit_admin') {
+    // 单位管理员：仅可批准本单位分组下的表
+    const groups = (menuData?.value || []);
+    for (const group of groups) {
+      const found = (group.tables || []).some(t => String(t.id) === tid);
+      if (found) {
+        return group.name === unitName;
+      }
+    }
+    return false;
+  }
+  return false;
+});
 
 // --- Component State ---
 const tableData = ref([]);
@@ -214,10 +251,12 @@ const currentTableActions = computed(() => {
   const defaults = { submit: true, save: true };
   const configActions = currentTableConfig.value?.actions;
   const base = { ...defaults, ...configActions };
+  // 鉴权未就绪：隐藏提交/暂存，避免闪现
+  if (!authStore.user) return { submit: false, save: false };
   // 管理员只读：禁用提交与暂存/取回
-  if (isReadOnlyAdmin.value) {
-    return { ...base, submit: false, save: false };
-  }
+  if (isReadOnlyAdmin.value) return { ...base, submit: false, save: false };
+  // 已批准：任何人都不可再次提交
+  if (isApproved.value) return { ...base, submit: false };
   return base;
 });
 
@@ -242,13 +281,44 @@ onMounted(() => {
   fetchCurrentStatus();
 });
 
+watch(() => route.params.tableId, () => {
+  // 切换表时先清空状态，避免上一张表的状态短暂“遗留”导致按钮误显
+  tableStatus.value = null;
+  fetchCurrentStatus();
+});
+
 const handleApprove = async () => {
   const projectId = route.params.projectId;
   const tableId = route.params.tableId;
   if (!projectId || !tableId) return;
   try {
     const resp = await fetch(`/api/project/${projectId}/table/${tableId}/approve`, { method: 'POST', headers: buildUserHeaders() });
-    if (!resp.ok) throw new Error('approve failed');
+    if (!resp.ok) {
+      let msg = '批准失败';
+      try {
+        const data = await resp.json();
+        if (data && typeof data === 'object') {
+          const detail = data.detail || data;
+          if (detail?.message) msg = detail.message;
+          const ids = detail?.unapprovedChildren;
+          if (Array.isArray(ids) && ids.length) {
+            const names = ids.map(String).map(id => {
+              for (const g of menuData.value || []) {
+                const t = (g.tables || []).find(x => String(x.id) === id);
+                if (t) return `${id} ${t.name}`;
+              }
+              return id;
+            });
+            msg += `：${names.join('，')}`;
+          }
+        } else {
+          const text = await resp.text();
+          if (text) msg = text;
+        }
+      } catch (_) {}
+      ElMessage.error(msg);
+      return;
+    }
     ElMessage.success('已批准。');
     await fetchCurrentStatus();
   } catch (e) {
@@ -262,7 +332,32 @@ const handleUnapprove = async () => {
   if (!projectId || !tableId) return;
   try {
     const resp = await fetch(`/api/project/${projectId}/table/${tableId}/unapprove`, { method: 'POST', headers: buildUserHeaders() });
-    if (!resp.ok) throw new Error('unapprove failed');
+    if (!resp.ok) {
+      let msg = '撤销批准失败';
+      try {
+        const data = await resp.json();
+        if (data && typeof data === 'object') {
+          const detail = data.detail || data;
+          if (detail?.message) msg = detail.message;
+          const ids = detail?.approvedParents;
+          if (Array.isArray(ids) && ids.length) {
+            const names = ids.map(String).map(id => {
+              for (const g of menuData.value || []) {
+                const t = (g.tables || []).find(x => String(x.id) === id);
+                if (t) return `${id} ${t.name}`;
+              }
+              return id;
+            });
+            msg += `：${names.join('，')}`;
+          }
+        } else {
+          const text = await resp.text();
+          if (text) msg = text;
+        }
+      } catch (_) {}
+      ElMessage.error(msg);
+      return;
+    }
     ElMessage.success('已撤销批准。');
     await fetchCurrentStatus();
   } catch (e) {

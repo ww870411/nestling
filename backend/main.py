@@ -53,6 +53,26 @@ with open(TEMPLATE_FILE, "r", encoding="utf-8") as f:
 ALL_TABLES = {table["id"]: table for group in MENU_DATA for table in group["tables"]}
 TABLE_TO_GROUP = {table["id"]: group["name"] for group in MENU_DATA for table in group["tables"]}
 
+# Build child-parent relationships (direct only)
+CHILDREN_MAP: dict[str, list[str]] = {}
+PARENT_MAP: dict[str, list[str]] = {}
+for group in MENU_DATA:
+    for t in group.get("tables", []):
+        tid = str(t.get("id"))
+        children: list[str] = []
+        subs = t.get("subsidiaries")
+        if isinstance(subs, list):
+            children = [str(x) for x in subs]
+        elif isinstance(subs, dict):
+            try:
+                children = [str(v) for v in subs.values()]
+            except Exception:
+                children = []
+        if children:
+            CHILDREN_MAP[tid] = children
+            for cid in children:
+                PARENT_MAP.setdefault(cid, []).append(tid)
+
 def _load_users():
     try:
         with open(AUTH_FILE, "r", encoding="utf-8") as f:
@@ -69,19 +89,41 @@ def _get_user_from_request(request: Request):
             return u
     return None
 
+def _is_table_approved(project_id: str, table_id: str) -> bool:
+    submissions_dir = DATA_DIR / f"{project_id}_data"
+    file_path = submissions_dir / f"{table_id}.json"
+    if not file_path.exists():
+        return False
+    try:
+        with open(file_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        return bool(data.get("approved"))
+    except Exception:
+        return False
+
 def _region_scope_ids(region_name: str):
-    # 所属区域的汇总表ID集合及其子表ID集合（如主城区: 表2/3 以及它们的subsidiaries）
-    ids = set()
+    # 所属区域的汇总表ID集合及其（递归）子表ID集合
+    region_table_ids = set()
     child_ids = set()
+    id_to_table = {str(t["id"]): t for g in MENU_DATA for t in g.get("tables", [])}
+
     for group in MENU_DATA:
         if group.get('name') == region_name:
             for t in group.get('tables', []):
-                ids.add(str(t.get('id')))
+                tid = str(t.get('id'))
+                region_table_ids.add(tid)
                 subs = t.get('subsidiaries')
                 if isinstance(subs, list):
-                    for sid in subs:
-                        child_ids.add(str(sid))
-    return ids, child_ids
+                    stack = [str(s) for s in subs]
+                    while stack:
+                        cid = stack.pop()
+                        if cid in child_ids:
+                            continue
+                        child_ids.add(cid)
+                        ct = id_to_table.get(cid)
+                        if ct and isinstance(ct.get('subsidiaries'), list):
+                            stack.extend([str(s) for s in ct.get('subsidiaries')])
+    return region_table_ids, child_ids
 
 def _can_approve(table_id: str, user: dict, action: str):
     # action: 'approve' or 'unapprove'
@@ -94,19 +136,19 @@ def _can_approve(table_id: str, user: dict, action: str):
 
     group_name = TABLE_TO_GROUP.get(str(table_id))
     if role == 'unit_admin':
-        # 单位管理员仅能操作本单位下表
-        return group_name == unit
+        # 单位管理员：仅能批准本单位表；不可撤销批准
+        if action == 'approve':
+            return group_name == unit
+        return False
 
     if role == 'regional_admin':
-        # 区域管理员：
+        # 区域管理员：批准仅限本区域汇总表；撤销仅限其下属单位表
         region_tables, region_children = _region_scope_ids(unit or '')
         tid = str(table_id)
         if action == 'approve':
-            # 只能批准本区域自身负责的汇总表（例如主城区的表2/3）
             return tid in region_tables
         else:
-            # 撤销批准：可对本区域汇总表及其下属单位表执行
-            return tid in region_tables or tid in region_children
+            return tid in region_children
 
     return False
 
@@ -224,7 +266,21 @@ def _log_action(action, request=None, username=None, details=None):
 def _append_history_record(submissions_dir: Path, project_id: str, table_id: str, payload: dict, action: str):
     payload = payload if isinstance(payload, dict) else {}
     table_info = payload.get("table") if isinstance(payload.get("table"), dict) else {}
-    timestamp = payload.get("submittedAt") if isinstance(payload.get("submittedAt"), str) else None
+    # Derive timestamp by action type first, then fallback to generic fields, then now()
+    ts_candidates = []
+    if action == "submit":
+        ts_candidates.append(payload.get("submittedAt"))
+    elif action == "approve":
+        ts_candidates.append(payload.get("approvedAt"))
+    elif action == "unapprove":
+        # may be provided by caller; otherwise will fallback to now
+        ts_candidates.append(payload.get("unapprovedAt"))
+    elif action == "save_draft":
+        ts_candidates.append(payload.get("savedAt"))
+    # generic fallbacks
+    ts_candidates.append(payload.get("timestamp"))
+    ts_candidates.append(payload.get("submittedAt"))
+    timestamp = next((t for t in ts_candidates if isinstance(t, str) and t), None)
     if not timestamp:
         timestamp = datetime.now(BEIJING_TZ).isoformat()
 
@@ -277,6 +333,18 @@ async def submit_data(project_id: str, table_id: str, request: Request, payload:
     submissions_dir = DATA_DIR / f"{project_id}_data"
     submissions_dir.mkdir(parents=True, exist_ok=True)
     file_path = submissions_dir / f"{table_id}.json"
+    # Normalize submit metadata server-side to ensure accurate history
+    try:
+        if not isinstance(payload, dict):
+            payload = {}
+        if not payload.get('submittedAt'):
+            payload['submittedAt'] = datetime.now(BEIJING_TZ).isoformat()
+        if not payload.get('submittedBy'):
+            user = _get_user_from_request(request)
+            if user:
+                payload['submittedBy'] = user
+    except Exception:
+        pass
     _update_data_file(file_path, "submit", payload)
     _append_history_record(submissions_dir, project_id, table_id, payload, "submit")
     _log_action("submit", request, username=_extract_username(payload, request), details={"projectId": project_id, "tableId": table_id})
@@ -287,6 +355,20 @@ async def approve_table(project_id: str, table_id: str, request: Request):
     user = _get_user_from_request(request)
     if not _can_approve(str(table_id), user, 'approve'):
         raise HTTPException(status_code=403, detail="Not allowed to approve this table.")
+
+    # 规则：若为汇总表，只有当其直接子表均已处于“已批准”状态时，方可批准
+    t_id = str(table_id)
+    direct_children = CHILDREN_MAP.get(t_id, [])
+    if direct_children:
+        not_ready = [cid for cid in direct_children if not _is_table_approved(project_id, cid)]
+        if not_ready:
+            raise HTTPException(
+                status_code=400,
+                detail={
+                    "message": "无法批准：存在未被批准的直接子表。",
+                    "unapprovedChildren": not_ready,
+                }
+            )
 
     submissions_dir = DATA_DIR / f"{project_id}_data"
     submissions_dir.mkdir(parents=True, exist_ok=True)
@@ -315,7 +397,8 @@ async def approve_table(project_id: str, table_id: str, request: Request):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to write approval: {e}")
 
-    _append_history_record(submissions_dir, project_id, table_id, approved, "approve")
+    # history uses operator and action time
+    _append_history_record(submissions_dir, project_id, table_id, {"approvedAt": approved.get("approvedAt"), "submittedBy": user}, "approve")
     _log_action("approve", request, username=_extract_username(approved, request), details={"projectId": project_id, "tableId": table_id})
     return {"message": "Approved."}
 
@@ -324,6 +407,20 @@ async def unapprove_table(project_id: str, table_id: str, request: Request):
     user = _get_user_from_request(request)
     if not _can_approve(str(table_id), user, 'unapprove'):
         raise HTTPException(status_code=403, detail="Not allowed to unapprove this table.")
+
+    # 规则：撤销某张子表的批准，必须确保其直接汇总表未处于“已批准”状态
+    t_id = str(table_id)
+    direct_parents = PARENT_MAP.get(t_id, [])
+    if direct_parents:
+        blocking = [pid for pid in direct_parents if _is_table_approved(project_id, pid)]
+        if blocking:
+            raise HTTPException(
+                status_code=400,
+                detail={
+                    "message": "无法撤销：其直接汇总表处于已批准状态，请先撤销汇总表的批准。",
+                    "approvedParents": blocking,
+                }
+            )
 
     submissions_dir = DATA_DIR / f"{project_id}_data"
     submissions_dir.mkdir(parents=True, exist_ok=True)
@@ -340,14 +437,30 @@ async def unapprove_table(project_id: str, table_id: str, request: Request):
     if 'approved' in data:
         approved_snapshot = data['approved']
         del data['approved']
+        # 记录撤销批准的操作信息，供仪表盘显示
+        data['unapproved'] = {
+            'unapprovedAt': datetime.now(BEIJING_TZ).isoformat(),
+            'unapprovedBy': user,
+        }
+        # 若不存在提交快照，则用原批准快照回填 submit，确保状态可回退为“已提交”
+        try:
+            if 'submit' not in data and isinstance(approved_snapshot, dict):
+                restored = copy.deepcopy(approved_snapshot)
+                # 清理与批准相关的字段，保留原提交元数据
+                restored.pop('approvedAt', None)
+                restored.pop('approvedBy', None)
+                data['submit'] = restored
+        except Exception:
+            pass
         try:
             with open(file_path, "w", encoding="utf-8") as f:
                 json.dump(data, f, ensure_ascii=False, indent=4)
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"Failed to remove approval: {e}")
-        _append_history_record(submissions_dir, project_id, table_id, approved_snapshot, "unapprove")
+        _append_history_record(submissions_dir, project_id, table_id, {"unapprovedAt": data['unapproved']['unapprovedAt'], "submittedBy": user}, "unapprove")
         _log_action("unapprove", request, username=_extract_username(approved_snapshot, request), details={"projectId": project_id, "tableId": table_id})
     return {"message": "Unapproved."}
+
 
 @app.post("/project/{project_id}/table/{table_id}/save_draft")
 async def save_draft(project_id: str, table_id: str, request: Request, payload: dict = Body(...)):
@@ -355,7 +468,7 @@ async def save_draft(project_id: str, table_id: str, request: Request, payload: 
     submissions_dir.mkdir(parents=True, exist_ok=True)
     file_path = submissions_dir / f"{table_id}.json"
     _update_data_file(file_path, "temp", payload)
-    _append_history_record(submissions_dir, project_id, table_id, payload, "save_draft")
+    _append_history_record(submissions_dir, project_id, table_id, {"savedAt": datetime.now(BEIJING_TZ).isoformat(), "submittedBy": _get_user_from_request(request) or _extract_username(payload, request)}, "save_draft")
     _log_action("save_draft", request, username=_extract_username(payload, request), details={"projectId": project_id, "tableId": table_id})
     return {"message": f"Draft for table ID '{table_id}' saved successfully."}
 
@@ -726,7 +839,7 @@ async def get_table_statuses(project_id: str, table_ids: List[str] = Body(...)):
     submissions_dir = DATA_DIR / f"{project_id}_data"
     for table_id in table_ids:
         file_path = submissions_dir / f"{table_id}.json"
-        status_info = {"status": "new", "submittedAt": None, "submittedBy": None, "approvedAt": None, "approvedBy": None}
+        status_info = {"status": "new", "submittedAt": None, "submittedBy": None, "approvedAt": None, "approvedBy": None, "unapprovedAt": None, "unapprovedBy": None}
 
         if file_path.exists():
             try:
@@ -751,14 +864,23 @@ async def get_table_statuses(project_id: str, table_ids: List[str] = Body(...)):
                         status_info["submittedAt"] = data["submit"].get("submittedAt")
                         status_info["submittedBy"] = data["submit"].get("submittedBy")
 
+                # Capture unapprove (withdraw) meta for display, without changing status
+                if data.get("unapproved"):
+                    status_info["unapprovedAt"] = data["unapproved"].get("unapprovedAt")
+                    status_info["unapprovedBy"] = data["unapproved"].get("unapprovedBy")
+
                 # Check for a valid submission if not approved
-                elif data.get("submit"):
-                    submitted_by = data["submit"].get("submittedBy")
-                    # If NOT submitted by the admin, then it's officially "submitted"
-                    if not (submitted_by and submitted_by.get("username") == 'ww870411'):
+                if status_info["status"] != "approved" and data.get("submit"):
+                    submitted_by = data["submit"].get("submittedBy") or {}
+                    # god 提交必须隐身：当提交者为 god 时，不记为“已提交”
+                    is_god_submit = (
+                        submitted_by.get("username") == "ww870411" or
+                        submitted_by.get("globalRole") == "god"
+                    )
+                    if not is_god_submit:
                         status_info["status"] = "submitted"
                         status_info["submittedAt"] = data["submit"].get("submittedAt")
-                        status_info["submittedBy"] = data["submit"].get("submittedBy")
+                        status_info["submittedBy"] = submitted_by
 
             except Exception:
                 pass
