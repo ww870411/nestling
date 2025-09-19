@@ -499,6 +499,10 @@ const unapproveRow = async (row) => {
   padding: 20px;
   background-color: #fff;
   height: 100%;
+  width: 100%; /* 使容器占满可用宽度 */
+  box-sizing: border-box; /* 防止内边距影响总宽度 */
+  display: flex;
+  flex-direction: column;
 }
 
 .dashboard-title {
@@ -509,7 +513,9 @@ const unapproveRow = async (row) => {
 .table-container {
   border: 1px solid #ebeef5;
   border-radius: 4px;
-  overflow: hidden;
+  width: 100%;
+  overflow: auto; /* 允许横向/纵向滚动以适配不同分辨率 */
+  flex: 1 1 auto; /* 占据剩余空间，随窗口自适应 */
 }
 
 .status-text { font-weight: bold; }

@@ -292,3 +292,5 @@
 {"timestamp": "2025-09-19T14:10:15.967922+08:00", "action": "load_table", "username": "downtown_admin", "ip": "172.18.0.1", "details": {"projectId": "heating_plan_2025-2026", "tableId": "4", "hasTemp": false, "hasSubmit": true}}
 {"timestamp": "2025-09-19T14:10:22.187438+08:00", "action": "unapprove", "username": "beihai_filler", "ip": "172.18.0.1", "details": {"projectId": "heating_plan_2025-2026", "tableId": "6"}}
 {"timestamp": "2025-09-19T14:10:29.683978+08:00", "action": "load_table", "username": "downtown_admin", "ip": "172.18.0.1", "details": {"projectId": "heating_plan_2025-2026", "tableId": "3", "hasTemp": false, "hasSubmit": true}}
+{"timestamp": "2025-09-19T14:43:27.272532+08:00", "action": "login", "username": "ww870411", "ip": "172.18.0.1", "details": {"result": "success"}}
+{"timestamp": "2025-09-19T14:43:59.921021+08:00", "action": "load_table", "username": "ww870411", "ip": "172.18.0.1", "details": {"projectId": "heating_plan_2025-2026", "tableId": "4", "hasTemp": false, "hasSubmit": true}}
