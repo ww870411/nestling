@@ -23,8 +23,8 @@
         </div>
         <div v-else class="table-wrapper" :style="zoomStyle">
           <el-table :data="tableData" :cell-class-name="getCellClass" border row-key="id" style="width: 100%"
-                    :header-cell-style="{ textAlign: 'center' }"
-                    :cell-style="{ textAlign: 'center' }" height="100%">
+                    :header-cell-style="headerCellStyle"
+                    :cell-style="cellStyle" height="100%">
             <template v-for="field in processedFieldConfig" :key="field.id">
               <!-- If it's a group with children -->
               <el-table-column v-if="field.children && field.children.length > 0"
@@ -161,6 +161,10 @@ const buildUserHeaders = () => {
 };
 
 const { menuData } = storeToRefs(projectStore);
+
+// --- Static table style objects (避免每次渲染创建新对象) ---
+const headerCellStyle = { textAlign: 'center' };
+const cellStyle = { textAlign: 'center' };
 
 const isGodUser = computed(() => authStore.user?.globalRole === 'god');
 // 只读管理员（除集团 super_admin 外的 admin）：区域管理员、单位管理员
@@ -485,13 +489,11 @@ const childToParentsMap = computed(() => {
   return map;
 });
 
-const forcedParentMap = computed(() => {
-  const set = new Set();
-  tableData.value.filter(r => r.isForced && r.type === 'calculated').forEach(r => set.add(r.metricId));
-  return set;
-});
+// 强制逻辑移除：不再有强制父项
+const forcedParentMap = computed(() => new Set());
 
-const hasHardErrors = computed(() => Object.values(errors.value).some(e => e && (e.type === 'A' || e.type === 'C')));
+// 仅 A 类作为硬错误，C 类校验已移除
+const hasHardErrors = computed(() => Object.values(errors.value).some(e => e && (e.type === 'A')));
 const softErrorsForDisplay = computed(() => Object.entries(errors.value).filter(([, error]) => error.type === 'B'));
 
 // --- Core Logic: Initialization & Formula Engine ---
@@ -654,7 +656,7 @@ const calculateAll = () => {
           result = lastId ? valResolver(lastId) : 0;
         } else {
           const funcBody = formulaToUse.replace(/VAL\((\d+)\)/g, (match, id) => `(valResolver(${id}))`);
-          result = new Function('valResolver', `return ${funcBody}`)(valResolver);
+          result = _compileFormula(funcBody)(valResolver);
         }
         row.values[field.id] = parseFloat(result.toFixed(10));
       } catch (e) {
@@ -683,7 +685,7 @@ const calculateAll = () => {
       valueColumns.forEach(col => {
         if (getCellState(targetRow, col, currentTableConfig.value, childToParentsMap.value, forcedParentMap.value) !== 'READONLY_CALCULATED') return;
         // 若该行被标记为强制，仅屏蔽“同期值”列的自动计算，允许“计划值”等继续计算
-        if (targetRow.isForced && typeof col.name === 'string' && col.name.endsWith('.samePeriod')) return;
+        // isForced 逻辑已移除，始终参与自动计算
 
         const valResolver = (sourceMetricId) => {
           const sourceRow = getRowByMetricId(sourceMetricId);
@@ -692,7 +694,7 @@ const calculateAll = () => {
 
         try {
           const funcBody = metricToCalculate.formula.replace(/VAL\((\d+)\)/g, (match, id) => `(valResolver(${id}))`);
-          const result = new Function('valResolver', `return ${funcBody}`)(valResolver);
+          const result = _compileFormula(funcBody)(valResolver);
           const newValue = parseFloat(result.toFixed(10));
           
           // Check if the value has changed, also handling NaN cases to prevent infinite loops
@@ -718,7 +720,7 @@ const calculateAll = () => {
       const valResolver = (columnId) => parseFloat(row.values[columnId]) || 0;
       try {
         const funcBody = field.formula.replace(/VAL\((\d+)\)/g, (match, id) => `(valResolver(${id}))`);
-        const result = new Function('valResolver', `return ${funcBody}`)(valResolver);
+        const result = _compileFormula(funcBody)(valResolver);
         row.values[field.id] = parseFloat(result.toFixed(10));
       } catch (e) {
         console.error(`Error calculating diff formula for field ${field.id} in row ${row.metricId}:`, e);
@@ -737,6 +739,17 @@ const calculateAll = () => {
 };
 
 // --- NEW Validation Logic ---
+// 公式编译缓存，避免重复 new Function 分配
+const __formulaCache = new Map();
+const _compileFormula = (expr) => {
+  let fn = __formulaCache.get(expr);
+  if (!fn) {
+    fn = new Function('valResolver', `return ${expr}`);
+    __formulaCache.set(expr, fn);
+  }
+  return fn;
+};
+
 const evaluateValidationRule = (rule, rowData, findFieldByIdentifier) => {
     const valResolver = (identifier) => {
         const field = findFieldByIdentifier(identifier);
@@ -763,7 +776,7 @@ const evaluateValidationRule = (rule, rowData, findFieldByIdentifier) => {
 
     try {
         // The expression is now expected to use standard JS operators like && and || directly.
-        return Boolean(new Function('valResolver', `return ${evaluatableString}`)(valResolver));
+        return Boolean(_compileFormula(evaluatableString)(valResolver));
     } catch (e) {
         console.error(`Error evaluating validation rule "${rule}":`, e);
         return false;
@@ -860,7 +873,7 @@ const runValidation = ({ level = 'hard' } = {}) => {
           let childrenSum = 0;
           try {
             const funcBody = row.formula.replace(/VAL\((\d+)\)/g, (match, id) => `(valResolver(${id}))`);
-            const result = new Function('valResolver', `return ${funcBody}`)(valResolver);
+            const result = _compileFormula(funcBody)(valResolver);
             childrenSum = sanitize(result);
           } catch (e) {
             console.error(`Error evaluating reverse-calc formula for metric ${metricId} in column ${col.id}:`, e);
@@ -883,7 +896,7 @@ const runValidation = ({ level = 'hard' } = {}) => {
           let expectedValue = 0;
           try {
             const funcBody = row.formula.replace(/VAL\((\d+)\)/g, (match, id) => `(valResolver(${id}))`);
-            const result = new Function('valResolver', `return ${funcBody}`)(valResolver);
+            const result = _compileFormula(funcBody)(valResolver);
             expectedValue = sanitize(result);
           } catch (e) {
             console.error(`Error evaluating calc formula for metric ${metricId} in column ${col.id}:`, e);
@@ -903,7 +916,7 @@ const runValidation = ({ level = 'hard' } = {}) => {
 
     if (finalValidation.hard) processRules(finalValidation.hard, 'A');
     if (level === 'all' && finalValidation.soft) processRules(finalValidation.soft, 'B');
-    if (finalValidation.calc) processCalcRules(finalValidation.calc);
+    // C类校验移除：不再执行 finalValidation.calc
   });
 
   errors.value = newErrors;
@@ -951,18 +964,36 @@ const getCellStyle = (row, field) => {
   return row.style;
 };
 
+// 建立字段名->字段定义的映射，避免每格 .find
+const fieldByName = computed(() => {
+  const map = new Map();
+  (fieldConfig.value || []).forEach(f => { if (f && f.name) map.set(f.name, f); });
+  return map;
+});
+
+// 建立单元格硬错误索引，O(1) 判断
+const cellHardErrorSet = computed(() => {
+  const set = new Set();
+  const all = errors.value || {};
+  for (const err of Object.values(all)) {
+    if (!err) continue;
+    if (err.type === 'A') {
+      const mid = err.metricId;
+      const fid = err.fieldId;
+      if (mid !== undefined && fid !== undefined) set.add(`${mid}:${fid}`);
+    }
+  }
+  return set;
+});
+
 const getCellClass = ({ row, column }) => {
-  const field = fieldConfig.value.find(f => f.name === column.property);
+  const field = fieldByName.value.get(column.property);
   if (!field) return '';
 
   const classes = [];
 
-  // Find if there is any hard error ('A' or 'C') associated with this specific cell
-  const hasCellError = Object.values(errors.value).some(error =>
-    error.metricId === row.metricId &&
-    error.fieldId === field.id &&
-    (error.type === 'A' || error.type === 'C')
-  );
+  // O(1) 判断该格是否存在硬错误（A/C）
+  const hasCellError = cellHardErrorSet.value.has(`${row.metricId}:${field.id}`);
 
   if (hasCellError) {
     classes.push('is-error');
@@ -1152,7 +1183,6 @@ const _createPayload = () => {
       metricId: row.metricId,
       metricName: metricInfo ? metricInfo.name : 'unknown',
       type: row.type,
-      ...(row.isForced && { force: true }), // Conditionally add force flag
       values: processedValues,
     };
 
@@ -1185,15 +1215,10 @@ const _applyPayloadToTable = (payload) => {
   tableData.value.forEach(localRow => {
     const loadedMetric = loadedDataMap.get(localRow.metricId);
 
-    // Reset force flag before applying new data
-    localRow.isForced = false;
     localRow.cellIssues = {};
 
     if (loadedMetric) {
-      // Apply the force flag from the payload
-      if (loadedMetric.force) {
-        localRow.isForced = true;
-      }
+      // 强制标记已废弃，不再从 payload 应用 force
 
       // 仅对 basic 行直接应用所有加载数据；
       // 若是被强制的 calculated 行，仅应用“各月的同期值”（monthlyData.*.samePeriod），不覆盖计划值和其他计算列。
@@ -1231,17 +1256,6 @@ const _applyPayloadToTable = (payload) => {
           if (numericFieldId === 1000) return;
 
           if (loadedValuesMap.has(numericFieldId)) {
-            localRow.values[numericFieldId] = loadedValuesMap.get(numericFieldId);
-          }
-        });
-      } else if (localRow.isForced) {
-        Object.keys(localRow.values).forEach(fieldId => {
-          const numericFieldId = parseInt(fieldId);
-          if (Number.isNaN(numericFieldId)) return;
-          const fieldDef = fieldConfig.value.find(f => f.id === numericFieldId);
-          if (!fieldDef || typeof fieldDef.name !== 'string') return;
-          const isMonthlySamePeriod = fieldDef.name.startsWith('monthlyData.') && fieldDef.name.endsWith('.samePeriod');
-          if (isMonthlySamePeriod && loadedValuesMap.has(numericFieldId)) {
             localRow.values[numericFieldId] = loadedValuesMap.get(numericFieldId);
           }
         });
@@ -1532,9 +1546,8 @@ const handleExport = () => {
       fieldConfig.value.forEach((field, colIndex) => {
         const cellState = getCellState(row, field, currentTableConfig.value, childToParentsMap.value, forcedParentMap.value);
 
-        // Only add formulas to cells that are meant to be calculated,
-        // and respect the 'isForced' flag for samePeriod columns.
-        if (cellState === 'READONLY_CALCULATED' && !(row.isForced && typeof field.name === 'string' && field.name.endsWith('.samePeriod'))) {
+        // Only add formulas to cells that are meant to be calculated
+        if (cellState === 'READONLY_CALCULATED') {
           const c = colIndex;
           const excelFormula = metricDef.formula.replace(/VAL\((\d+)\)/g, (match, id) => {
             const sourceRowIndex = metricIdToRowIndex.get(parseInt(id));
