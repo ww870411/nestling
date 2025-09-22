@@ -91,6 +91,8 @@
 
     <div class="footer-actions">
       <div>
+        <input ref="fileInputRef" type="file" accept=".xlsx,.xls" @change="onFileSelected" style="display:none" />
+        <el-button @click="triggerImport">导入Excel</el-button>
         <el-button @click="handleExport">导出至本地</el-button>
         <el-button @click="handleShowExplanations">解释说明</el-button>
       </div>
@@ -1567,6 +1569,95 @@ const handleExport = () => {
 };
 
 
+
+// --- Import from Excel ---
+const fileInputRef = ref(null);
+const triggerImport = () => {
+  if (isReadOnlyAdmin.value || isApproved.value) {
+    ElMessage.warning('当前状态不可导入（已只读或已审批）。');
+    return;
+  }
+  fileInputRef.value?.click();
+};
+
+const onFileSelected = async (e) => {
+  const file = e?.target?.files?.[0];
+  if (!file) return;
+  try {
+    await handleImport(file);
+    ElMessage.success('导入成功，已更新可写单元格。');
+  } catch (err) {
+    console.error(err);
+    ElMessage.error(err?.message || '导入失败，请检查文件。');
+  } finally {
+    if (e?.target) e.target.value = '';
+  }
+};
+
+const handleImport = async (file) => {
+  if (!fieldConfig.value || fieldConfig.value.length === 0 || tableData.value.length === 0) {
+    throw new Error('当前无可导入的数据表。');
+  }
+
+  const buf = await file.arrayBuffer();
+  const wb = XLSX.read(buf, { type: 'array' });
+
+  const sheetName = wb.SheetNames.includes(pageTitle.value) ? pageTitle.value : wb.SheetNames[0];
+  const ws = wb.Sheets[sheetName];
+  if (!ws) throw new Error('未找到有效工作表。');
+
+  const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+  if (!rows || rows.length < 2) throw new Error('表格内容为空或缺少表头。');
+
+  const header = rows[0].map(h => String(h || '').trim());
+
+  const colIndexByFieldId = new Map();
+  const missingHeaders = [];
+  fieldConfig.value.forEach((field) => {
+    const idx = header.findIndex(h => h === String(field.label));
+    if (idx >= 0) {
+      colIndexByFieldId.set(field.id, idx);
+    } else {
+      missingHeaders.push(field.label);
+    }
+  });
+  if (colIndexByFieldId.size === 0) {
+    throw new Error('文件表头与当前表不匹配，请使用同一页面导出的Excel导入。');
+  }
+
+  const rowCount = Math.min(tableData.value.length, rows.length - 1);
+  const parseCellToValue = (raw) => {
+    if (raw === null || raw === undefined) return null;
+    if (typeof raw === 'number') return raw;
+    if (typeof raw === 'string') {
+      const s = raw.trim();
+      if (!s) return null;
+      if (/^[-+]?\d+(?:\.\d+)?%$/.test(s)) {
+        const num = parseFloat(s.replace('%', ''));
+        return isNaN(num) ? s : num / 100;
+      }
+      const n = parseFloat(s.replace(/,/g, ''));
+      return isNaN(n) ? s : n;
+    }
+    return raw;
+  };
+
+  for (let i = 0; i < rowCount; i++) {
+    const targetRow = tableData.value[i];
+    const source = rows[i + 1] || [];
+
+    fieldConfig.value.forEach((field) => {
+      const colIdx = colIndexByFieldId.get(field.id);
+      if (colIdx === undefined) return;
+      const cellState = getCellState(targetRow, field, currentTableConfig.value, childToParentsMap.value, forcedParentMap.value);
+      if (cellState !== 'WRITABLE') return;
+      const raw = source[colIdx];
+      const val = parseCellToValue(raw);
+      targetRow.values[field.id] = (val === '' ? null : val);
+    });
+  }
+  calculateAll();
+};
 
 </script>
 
