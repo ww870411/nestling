@@ -1,0 +1,288 @@
+[
+    {
+        "projectId": "heating_plan_2025-2026",
+        "tableId": "9",
+        "tableName": "供热公司表",
+        "action": "submit",
+        "timestamp": "2025-09-16T11:28:05.686+08:00",
+        "submittedBy": {
+            "username": "group_admin",
+            "unit": "集团公司",
+            "globalRole": "super_admin"
+        },
+        "tableTemplate": "subsidiaryTemplate"
+    },
+    {
+        "projectId": "heating_plan_2025-2026",
+        "tableId": "9",
+        "tableName": "供热公司表",
+        "action": "submit",
+        "timestamp": "2025-09-16T11:28:53.978+08:00",
+        "submittedBy": {
+            "username": "group_admin",
+            "unit": "集团公司",
+            "globalRole": "super_admin"
+        },
+        "tableTemplate": "subsidiaryTemplate"
+    },
+    {
+        "projectId": "heating_plan_2025-2026",
+        "tableId": "9",
+        "tableName": "供热公司表",
+        "action": "save_draft",
+        "timestamp": "2025-09-16T12:09:18.555+08:00",
+        "submittedBy": {
+            "username": "group_admin",
+            "unit": "集团公司",
+            "globalRole": "super_admin"
+        },
+        "tableTemplate": "subsidiaryTemplate"
+    },
+    {
+        "projectId": "heating_plan_2025-2026",
+        "tableId": "8",
+        "tableName": "香海热电厂表",
+        "action": "save_draft",
+        "timestamp": "2025-09-16T12:12:56.834+08:00",
+        "submittedBy": {
+            "username": "xianghai_filler",
+            "unit": "香海热电厂",
+            "globalRole": "filler"
+        },
+        "tableTemplate": "subsidiaryTemplate"
+    },
+    {
+        "projectId": "heating_plan_2025-2026",
+        "tableId": "9",
+        "tableName": "供热公司表",
+        "action": "submit",
+        "timestamp": "2025-09-16T12:13:20.645+08:00",
+        "submittedBy": {
+            "username": "ww870411",
+            "unit": "系统管理员",
+            "globalRole": "god"
+        },
+        "tableTemplate": "subsidiaryTemplate"
+    },
+    {
+        "projectId": "heating_plan_2025-2026",
+        "tableId": "8",
+        "tableName": "香海热电厂表",
+        "action": "save_draft",
+        "timestamp": "2025-09-16T12:13:31.291+08:00",
+        "submittedBy": {
+            "username": "ww870411",
+            "unit": "系统管理员",
+            "globalRole": "god"
+        },
+        "tableTemplate": "subsidiaryTemplate"
+    },
+    {
+        "projectId": "heating_plan_2025-2026",
+        "tableId": "9",
+        "tableName": "供热公司表",
+        "action": "submit",
+        "timestamp": "2025-09-16T12:13:38.548+08:00",
+        "submittedBy": {
+            "username": "ww870411",
+            "unit": "系统管理员",
+            "globalRole": "god"
+        },
+        "tableTemplate": "subsidiaryTemplate"
+    },
+    {
+        "projectId": "heating_plan_2025-2026",
+        "tableId": "11",
+        "tableName": "金州热电表",
+        "action": "submit",
+        "timestamp": "2025-09-17T10:52:02.888+08:00",
+        "submittedBy": {
+            "username": "ww870411",
+            "unit": "系统管理员",
+            "globalRole": "god"
+        },
+        "tableTemplate": "subsidiaryTemplate"
+    },
+    {
+        "projectId": "heating_plan_2025-2026",
+        "tableId": "11",
+        "tableName": "金州热电表",
+        "action": "submit",
+        "timestamp": "2025-09-17T10:53:05.454+08:00",
+        "submittedBy": {
+            "username": "group_admin",
+            "unit": "集团公司",
+            "globalRole": "super_admin"
+        },
+        "tableTemplate": "subsidiaryTemplate"
+    },
+    {
+        "projectId": "heating_plan_2025-2026",
+        "tableId": "11",
+        "tableName": "金州热电表",
+        "action": "submit",
+        "timestamp": "2025-09-17T11:06:43.003+08:00",
+        "submittedBy": {
+            "username": "group_admin",
+            "unit": "集团公司",
+            "globalRole": "super_admin"
+        },
+        "tableTemplate": "subsidiaryTemplate"
+    },
+    {
+        "projectId": "heating_plan_2025-2026",
+        "tableId": "11",
+        "tableName": "金州热电表",
+        "action": "submit",
+        "timestamp": "2025-09-17T11:23:03.201+08:00",
+        "submittedBy": {
+            "username": "ww870411",
+            "unit": "系统管理员",
+            "globalRole": "god"
+        },
+        "tableTemplate": "subsidiaryTemplate"
+    },
+    {
+        "projectId": "heating_plan_2025-2026",
+        "tableId": "11",
+        "tableName": "金州热电表",
+        "action": "submit",
+        "timestamp": "2025-09-17T11:25:53.537+08:00",
+        "submittedBy": {
+            "username": "ww870411",
+            "unit": "系统管理员",
+            "globalRole": "god"
+        },
+        "tableTemplate": "subsidiaryTemplate"
+    },
+    {
+        "projectId": "heating_plan_2025-2026",
+        "tableId": "8",
+        "tableName": "香海热电厂表",
+        "action": "save_draft",
+        "timestamp": "2025-09-18T09:24:10.021+08:00",
+        "submittedBy": {
+            "username": "ww870411",
+            "unit": "系统管理员",
+            "globalRole": "god"
+        },
+        "tableTemplate": "subsidiaryTemplate"
+    },
+    {
+        "projectId": "heating_plan_2025-2026",
+        "tableId": "8",
+        "tableName": "香海热电厂表",
+        "action": "save_draft",
+        "timestamp": "2025-09-18T09:31:00.064+08:00",
+        "submittedBy": {
+            "username": "ww870411",
+            "unit": "系统管理员",
+            "globalRole": "god"
+        },
+        "tableTemplate": "subsidiaryTemplate"
+    },
+    {
+        "projectId": "heating_plan_2025-2026",
+        "tableId": "8",
+        "tableName": "香海热电厂表",
+        "action": "save_draft",
+        "timestamp": "2025-09-18T09:36:29.915+08:00",
+        "submittedBy": {
+            "username": "ww870411",
+            "unit": "系统管理员",
+            "globalRole": "god"
+        },
+        "tableTemplate": "subsidiaryTemplate"
+    },
+    {
+        "projectId": "heating_plan_2025-2026",
+        "tableId": "8",
+        "tableName": "香海热电厂表",
+        "action": "submit",
+        "timestamp": "2025-09-18T09:51:35.941+08:00",
+        "submittedBy": {
+            "username": "ww870411",
+            "unit": "系统管理员",
+            "globalRole": "god"
+        },
+        "tableTemplate": "subsidiaryTemplate"
+    },
+    {
+        "projectId": "heating_plan_2025-2026",
+        "tableId": "7",
+        "tableName": "北海热电厂(天然气炉)表",
+        "action": "submit",
+        "timestamp": "2025-09-18T11:16:27.023+08:00",
+        "submittedBy": {
+            "username": "ww870411",
+            "unit": "系统管理员",
+            "globalRole": "god"
+        },
+        "tableTemplate": "subsidiaryTemplate"
+    },
+    {
+        "projectId": "heating_plan_2025-2026",
+        "tableId": "1",
+        "tableName": "集团汇总表",
+        "action": "submit",
+        "timestamp": "2025-09-18T21:30:22.683+08:00",
+        "submittedBy": {
+            "username": "ww870411",
+            "unit": "系统管理员",
+            "globalRole": "god"
+        },
+        "tableTemplate": "subsidiaryTemplate"
+    },
+    {
+        "projectId": "heating_plan_2025-2026",
+        "tableId": "11",
+        "tableName": "金州热电表",
+        "action": "submit",
+        "timestamp": "2025-09-19T11:27:55.227+08:00",
+        "submittedBy": {
+            "username": "jinzhou_filler",
+            "unit": "金州热电",
+            "globalRole": "unit_filler"
+        },
+        "tableTemplate": "subsidiaryTemplate"
+    },
+    {
+        "projectId": "heating_plan_2025-2026",
+        "tableId": "11",
+        "tableName": "金州热电表",
+        "action": "approve",
+        "timestamp": "2025-09-19T11:27:55.227+08:00",
+        "submittedBy": {
+            "username": "jinzhou_filler",
+            "unit": "金州热电",
+            "globalRole": "unit_filler"
+        },
+        "tableTemplate": "subsidiaryTemplate"
+    },
+    {
+        "projectId": "heating_plan_2025-2026",
+        "tableId": "11",
+        "tableName": "金州热电表",
+        "action": "unapprove",
+        "timestamp": "2025-09-19T11:27:55.227+08:00",
+        "submittedBy": {
+            "username": "jinzhou_filler",
+            "unit": "金州热电",
+            "globalRole": "unit_filler"
+        },
+        "tableTemplate": "subsidiaryTemplate"
+    },
+    {
+        "projectId": "heating_plan_2025-2026",
+        "tableId": "11",
+        "tableName": "金州热电表",
+        "action": "approve",
+        "timestamp": "2025-09-19T11:27:55.227+08:00",
+        "submittedBy": {
+            "username": "jinzhou_filler",
+            "unit": "金州热电",
+            "globalRole": "unit_filler"
+        },
+        "tableTemplate": "subsidiaryTemplate"
+    }
+]

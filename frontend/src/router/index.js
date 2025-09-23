@@ -7,6 +7,7 @@ import MainLayout from '../layouts/MainLayout.vue';
 import DashboardView from '../views/DashboardView.vue';
 import DataEntryView from '../views/DataEntryView.vue';
 import ProjectSelectionView from '../views/ProjectSelectionView.vue';
+import GroupOverviewView from '../views/GroupOverviewView.vue';
 
 const routes = [
   {
@@ -30,6 +31,11 @@ const routes = [
         path: 'dashboard',
         name: 'dashboard',
         component: DashboardView
+      },
+      {
+        path: 'group-overview',
+        name: 'group-overview',
+        component: GroupOverviewView
       },
       {
         path: 'data-entry/:tableId',

@@ -24,6 +24,13 @@
               <el-icon><Grid /></el-icon>
               <span>{{ group.name }}</span>
             </template>
+            <!-- 数据概览入口：仅在“集团公司”分组展示，位于表0之前 -->
+            <el-menu-item
+              v-if="group.name === '集团公司'"
+              :index="groupOverviewPath"
+            >
+              数据概览
+            </el-menu-item>
             <el-menu-item 
               v-for="table in group.tables" 
               :key="table.id" 
@@ -83,6 +90,7 @@ const currentProjectId = computed(() => route.params.projectId);
 
 // 为模板动态生成首页链接
 const dashboardPath = computed(() => `/project/${currentProjectId.value}/dashboard`);
+const groupOverviewPath = computed(() => `/project/${currentProjectId.value}/group-overview`);
 
 const reportStatuses = ref({});
 const isSidebarCollapsed = ref(false);

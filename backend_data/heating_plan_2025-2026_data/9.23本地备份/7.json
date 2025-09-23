@@ -438,7 +438,7 @@
                         "fieldId": 2001,
                         "fieldName": "monthlyData.october.plan",
                         "fieldLabel": "10月-计划",
-                        "value": 217
+                        "value": 0
                     },
                     {
                         "fieldId": 2002,
@@ -450,7 +450,7 @@
                         "fieldId": 2003,
                         "fieldName": "monthlyData.november.plan",
                         "fieldLabel": "11月-计划",
-                        "value": 217
+                        "value": 0
                     },
                     {
                         "fieldId": 2004,
@@ -462,7 +462,7 @@
                         "fieldId": 2005,
                         "fieldName": "monthlyData.december.plan",
                         "fieldLabel": "12月-计划",
-                        "value": 217
+                        "value": 0
                     },
                     {
                         "fieldId": 2006,
@@ -474,7 +474,7 @@
                         "fieldId": 2007,
                         "fieldName": "monthlyData.january.plan",
                         "fieldLabel": "1月-计划",
-                        "value": 217
+                        "value": 0
                     },
                     {
                         "fieldId": 2008,
@@ -486,7 +486,7 @@
                         "fieldId": 2009,
                         "fieldName": "monthlyData.february.plan",
                         "fieldLabel": "2月-计划",
-                        "value": 217
+                        "value": 0
                     },
                     {
                         "fieldId": 2010,
@@ -498,7 +498,7 @@
                         "fieldId": 2011,
                         "fieldName": "monthlyData.march.plan",
                         "fieldLabel": "3月-计划",
-                        "value": 217
+                        "value": 0
                     },
                     {
                         "fieldId": 2012,
@@ -510,7 +510,7 @@
                         "fieldId": 2013,
                         "fieldName": "monthlyData.april.plan",
                         "fieldLabel": "4月-计划",
-                        "value": 217
+                        "value": 0
                     },
                     {
                         "fieldId": 2014,
