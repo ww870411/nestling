@@ -22,8 +22,11 @@ app.add_middleware(
 )
 
 # --- App Configuration ---
-# Path for USER-GENERATED data (submissions, auth file). From env var or default.
-data_dir_path = os.getenv('DATA_DIR_PATH', str(Path(__file__).resolve().parent / "app" / "data"))
+# Path for USER-GENERATED data (submissions, auth file).
+# 优先使用环境变量 DATA_DIR_PATH；未设置时，回退到仓库根目录下的 backend_data。
+data_dir_path = os.getenv('DATA_DIR_PATH')
+if not data_dir_path:
+    data_dir_path = str((Path(__file__).resolve().parent.parent / "backend_data").resolve())
 DATA_DIR = Path(data_dir_path)
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 BEIJING_TZ = ZoneInfo("Asia/Shanghai")
@@ -533,10 +536,34 @@ async def get_table_0_data(project_id: str):
             except (json.JSONDecodeError, IOError):
                 sub_content = {}  # Continue with empty content on error
 
-        # 表0仅汇总已批准的数据；未批准则跳过
-        sub_data = sub_content.get("approved") or sub_content.get("submit")
-        if not sub_data or not isinstance(sub_data.get("tableData"), list):
+        # 表0汇总逻辑：优先采用“已批准”，若批准无效(无 tableData)则回退到“已提交”
+        approved_payload = sub_content.get("approved")
+        submit_payload = sub_content.get("submit")
+
+        # 新规则：已提交/已批准同时检查，取时间较新的那份（不再设定优先级）
+        candidates: list[tuple[dict, str]] = []
+        if isinstance(approved_payload, dict) and isinstance(approved_payload.get("tableData"), list):
+            ts_a = approved_payload.get("approvedAt") or approved_payload.get("timestamp") or ""
+            candidates.append((approved_payload, ts_a))
+        if isinstance(submit_payload, dict) and isinstance(submit_payload.get("tableData"), list):
+            ts_s = submit_payload.get("submittedAt") or submit_payload.get("timestamp") or ""
+            candidates.append((submit_payload, ts_s))
+
+        if not candidates:
             continue
+
+        def _parse_ts(ts: str):
+            try:
+                # 兼容末尾 'Z' 的 UTC 表示
+                ts_norm = ts.replace('Z', '+00:00') if isinstance(ts, str) else ""
+                return datetime.fromisoformat(ts_norm)
+            except Exception:
+                return None
+
+        sub_data = max(
+            candidates,
+            key=lambda item: _parse_ts(item[1]) or datetime.min.replace(tzinfo=BEIJING_TZ)
+        )[0]
 
         target_plan_id = key_to_plan_field_id.get(sub_key)
         target_same_period_id = key_to_same_period_field_id.get(sub_key)

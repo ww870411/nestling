@@ -65,7 +65,7 @@
 </template>
 
 <script setup>
-// 数据概览（集团分单位对比）：基于表0（集团分单位汇总表）已批准数据
+// 数据概览（集团分单位对比）：基于表0（集团分单位汇总表）“已提交/已批准”数据
 // 仅前端渲染，不修改任何既有接口。
 
 import { ref, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue';
@@ -105,7 +105,7 @@ const activeTab = ref('charts');
 
 const isLoading = ref(false);
 const error = ref('');
-const tableData = ref([]); // 已批准的表0数据（tableData 数组）
+const tableData = ref([]); // 表0数据（采纳“已提交/已批准”的汇总 tableData）
 const unitStatus = ref({}); // 每个单位的表状态（submitted/approved）
 const tablePropsMap = computed(() => {
   const map = {};
@@ -151,7 +151,7 @@ const getMetricName = (metricId) => {
 };
 
 // 拉取表0数据（采纳“已提交/已批准”的汇总数据）
-const fetchTable0Approved = async () => {
+const fetchTable0Overview = async () => {
   isLoading.value = true;
   error.value = '';
   try {
@@ -327,7 +327,7 @@ const handleResize = () => {
 
 onMounted(async () => {
   // 权限层面：菜单入口仅对“集团公司”可见，这里不再重复校验
-  await fetchTable0Approved();
+  await fetchTable0Overview();
   await fetchUnitStatuses();
   await renderAll();
   window.addEventListener('resize', handleResize);
@@ -418,50 +418,7 @@ const unitReports = computed(() => {
     const items = [];
     const val = (row, kind) => kind === 'plan' ? getVal(row, u, planFieldIdByUnit.value) : getVal(row, u, samePeriodFieldIdByUnit.value);
 
-    // F0 可写指标“本期计划为0”（不论同期）
-    // 按业务挑选“可写（basic）”指标ID清单
-    const writableCheckIds = [
-      // 产量-分项
-      6, 9, 10, 11, 12,
-      // 油
-      37, 38,
-      // 水
-      41, 45, 46, 47,
-      // 外购电
-      69, 70, 71, 72,
-      // 材料
-      53, 54,
-    ];
-    const metricDefsById = Object.fromEntries((subTemplate.reportTemplate || []).map(d => [d.id, d]));
-    const unitTableIds = unitToTables[u] || [];
-    const isApplicableToUnit = (metricDef) => {
-      if (!metricDef) return false;
-      const req = metricDef.requiredProperties || {};
-      // No requirements means universally applicable
-      if (!req || Object.keys(req).length === 0) return true;
-      // If any of the unit's tables matches all requiredProperties, treat as applicable
-      return unitTableIds.some(tid => {
-        const props = tablePropsMap.value[String(tid)] || {};
-        return Object.entries(req).every(([k, reqVals]) => {
-          const unitVals = props[k] || [];
-          if (!Array.isArray(reqVals) || reqVals.length === 0) return true;
-          if (!Array.isArray(unitVals) || unitVals.length === 0) return false;
-          // require intersection
-          return reqVals.some(v => unitVals.includes(v));
-        });
-      });
-    };
-
-    writableCheckIds.forEach((id) => {
-      const rw = getRowById(id);
-      if (!rw) return;
-      const metricDef = metricDefsById[id];
-      if (!isApplicableToUnit(metricDef)) return; // 不适用该单位时跳过
-      const pl = val(rw, 'plan');
-      if (Math.abs(pl) < EPS) {
-        items.push({ level: 'p3', title: '本期计划为0', desc: `${rw.name} 为可写指标，本期计划为0`, evidence: `${rw.name}：本期=${fmtNum(pl)}` });
-      }
-    });
+    // 软校验降噪：取消“本期计划为0（可写指标）”的逻辑检查
 
     // 产量与能耗/消耗：方向一致 + 5%紧窗
     const pairs = [

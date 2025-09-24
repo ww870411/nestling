@@ -820,21 +820,7 @@ const runValidation = ({ level = 'hard' } = {}) => {
 
     const baseRules = baseScheme[row.type] || {};
     const finalValidation = { ...baseRules, ...menuOverride, ...templateOverride };
-    // 追加：可写指标“本期计划为0”的软校验（不论同期）
-    try {
-      const planField = (fieldConfig.value || []).find(f => f && f.name === 'totals.plan');
-      const monthlyPlanInputs = (fieldConfig.value || []).filter(fc => typeof fc?.name === 'string' && fc.name.endsWith('.plan') && fc.component === 'input');
-      if (planField && row.type === 'basic') {
-        const hasWritableMonth = monthlyPlanInputs.some(f => getCellState(row, f, currentTableConfig.value, childToParentsMap.value, forcedParentMap.value) === 'WRITABLE');
-        if (hasWritableMonth) {
-          const planVal = parseFloat(row.values[planField.id]);
-          if (!isNaN(planVal) && planVal === 0) {
-            const key = `${row.metricId}-B-zero-plan`;
-            newErrors[key] = { type: 'B', message: '本期计划为0（可写指标）', metricId: row.metricId, fieldId: planField.id };
-          }
-        }
-      }
-    } catch (_) {}
+    // 软校验降噪：移除“本期计划为0（可写指标）”规则
 
     const processRules = (rules, errorType) => {
       if (!rules) return;
@@ -932,22 +918,7 @@ const runValidation = ({ level = 'hard' } = {}) => {
 
     if (finalValidation.hard) processRules(finalValidation.hard, 'A');
     if (level === 'all' && finalValidation.soft) processRules(finalValidation.soft, 'B');
-    // Extra soft check: writable (basic) metric with totals.plan == 0
-    try {
-      const planField = (fieldConfig.value || []).find(f => f.name === 'totals.plan');
-      if (planField && row.type === 'basic') {
-        const planVal = parseFloat(row.values[planField.id]);
-        if (!isNaN(planVal) && planVal === 0) {
-          const key = `${row.metricId}-B-zero-plan`;
-          newErrors[key] = {
-            type: 'B',
-            message: '本期计划为0（可写指标）',
-            metricId: row.metricId,
-            fieldId: planField.id,
-          };
-        }
-      }
-    } catch (_) {}
+    // 软校验降噪：移除“本期计划为0（可写指标）”附加规则
     // C类校验：此处仅执行 finalValidation.calc
   });
 
@@ -967,6 +938,28 @@ watch(currentTableConfig, async () => {
 
 
 const handleInputBlur = (row, fieldId) => {
+  try {
+    let v = row?.values?.[fieldId];
+    // 将空值/非法值统一归一为 0，保证失焦后不留空
+    if (v === '' || v === null || v === undefined) {
+      row.values[fieldId] = 0;
+    } else if (typeof v === 'string') {
+      const s = v.replace(/,/g, '').trim();
+      if (s === '') {
+        row.values[fieldId] = 0;
+      } else {
+        const n = parseFloat(s);
+        row.values[fieldId] = Number.isFinite(n) ? n : 0;
+      }
+    } else if (typeof v === 'number') {
+      row.values[fieldId] = Number.isFinite(v) ? v : 0;
+    } else {
+      // 其他非常见类型，兜底为 0
+      row.values[fieldId] = 0;
+    }
+  } catch (_) {
+    try { row.values[fieldId] = 0; } catch (_) {}
+  }
   calculateAll();
 };
 
@@ -1300,6 +1293,27 @@ const _applyPayloadToTable = (payload) => {
       }
     }
   });
+
+  // 全量归一：对当前表内所有“可写单元格”的空值进行 0 归一，确保已有空输入框也显示为 0
+  try {
+    const cfg = currentTableConfig.value;
+    (tableData.value || []).forEach(row => {
+      (fieldConfig.value || []).forEach(field => {
+        const cellState = getCellState(row, field, cfg, childToParentsMap.value, forcedParentMap.value);
+        if (cellState === 'WRITABLE') {
+          const v = row.values[field.id];
+          if (v === '' || v === null || v === undefined) {
+            row.values[field.id] = 0;
+          } else if (typeof v === 'string') {
+            const s = v.replace(/,/g, '').trim();
+            if (s === '') row.values[field.id] = 0;
+          } else if (typeof v === 'number' && !Number.isFinite(v)) {
+            row.values[field.id] = 0;
+          }
+        }
+      });
+    });
+  } catch (_) {}
 
   calculateAll(); // Recalculate formulas and validations
   ElMessage.success('数据已成功加载！');
@@ -1931,11 +1945,26 @@ const handleImport = async (file) => {
       if (cellState !== 'WRITABLE') return;
       const raw = source[colIdx];
       const val = parseCellToValue(raw);
-      targetRow.values[field.id] = (val === '' ? null : val);
-    });
-  }
-  calculateAll();
-};
+      // 导入归一：将空值/非法值统一归一为 0，避免UI留空且确保计算稳定
+      let normalized = 0;
+      if (val === null || val === undefined || val === '') {
+        normalized = 0;
+      } else if (typeof val === 'number') {
+        normalized = Number.isFinite(val) ? val : 0;
+      } else if (typeof val === 'string') {
+        const s = val.replace(/,/g, '').trim();
+        if (s === '') normalized = 0; else {
+          const n = parseFloat(s);
+          normalized = Number.isFinite(n) ? n : 0;
+        }
+      } else {
+        normalized = 0;
+      }
+      targetRow.values[field.id] = normalized;
+      });
+    }
+    calculateAll();
+  };
 
 </script>
 
