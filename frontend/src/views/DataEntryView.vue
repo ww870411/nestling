@@ -1536,6 +1536,33 @@ const handleExport = () => {
 
   const worksheet = XLSX.utils.aoa_to_sheet(data);
 
+  // Helper: map displayFormat -> Excel number format string
+  const getExcelFormatString = (formatOptions) => {
+    if (!formatOptions || !formatOptions.type) return null;
+    if (formatOptions.type === 'percentage') {
+      const places = formatOptions.places !== undefined ? formatOptions.places : 2;
+      return places > 0 ? `0.${'0'.repeat(places)}%` : '0%';
+    }
+    if (formatOptions.type === 'integer') {
+      return '#,##0';
+    }
+    if (formatOptions.type === 'decimal') {
+      const places = formatOptions.places !== undefined ? formatOptions.places : 2;
+      return places > 0 ? `#,##0.${'0'.repeat(places)}` : '#,##0';
+    }
+    return null;
+  };
+
+  const applyCellFormat = (addr, row, field) => {
+    const fmt = getFormatOptions(row, field);
+    const excelFmt = getExcelFormatString(fmt);
+    if (excelFmt) {
+      // Ensure cell exists before applying z
+      worksheet[addr] = worksheet[addr] || {};
+      worksheet[addr].z = excelFmt;
+    }
+  };
+
   // Re-add formulas
   tableData.value.forEach((row, rowIndex) => {
     const r = rowIndex + 1; // 1-based for cell address
@@ -1546,31 +1573,69 @@ const handleExport = () => {
       fieldConfig.value.forEach((field, colIndex) => {
         const cellState = getCellState(row, field, currentTableConfig.value, childToParentsMap.value, forcedParentMap.value);
 
+        // 仅对“值类列”（输入/展示，且非 diffs）写入行级公式，保持与在线一致
+        const isValueColumn = (field.component === 'input' || field.component === 'display') && field.type !== 'diffs';
+
         // Only add formulas to cells that are meant to be calculated
-        if (cellState === 'READONLY_CALCULATED') {
+        if (isValueColumn && cellState === 'READONLY_CALCULATED') {
           const c = colIndex;
           const excelFormula = metricDef.formula.replace(/VAL\((\d+)\)/g, (match, id) => {
             const sourceRowIndex = metricIdToRowIndex.get(parseInt(id));
             return XLSX.utils.encode_cell({ r: sourceRowIndex, c });
           });
-          worksheet[XLSX.utils.encode_cell({ r, c })] = { t: 'n', f: excelFormula };
+          const addr = XLSX.utils.encode_cell({ r, c });
+          worksheet[addr] = { t: 'n', f: excelFormula };
+          applyCellFormat(addr, row, field);
         }
       });
     }
 
-    // Handle column-level formulas (e.g., totals)
+    // Handle column-level formulas (e.g., totals/diffs/calculated)
     fieldConfig.value.forEach((field, colIndex) => {
-      if (field.type === 'calculated' && field.formula) {
+      if (['calculated', 'totals', 'diffs'].includes(field.type) && field.formula) {
         const c = colIndex;
-        const excelFormula = field.formula.replace(/VAL\((\d+)\)/g, (match, id) => {
-          const sourceColIndex = fieldIdToColIndex.get(parseInt(id));
-          return XLSX.utils.encode_cell({ r, c: sourceColIndex });
-        });
-        worksheet[XLSX.utils.encode_cell({ r, c })] = { t: 'n', f: excelFormula };
-        // Add number formatting for percentage
-        if (field.name === 'totals.diffRate') {
-          worksheet[XLSX.utils.encode_cell({ r, c })].z = '0.00%';
+        const cellState = getCellState(row, field, currentTableConfig.value, childToParentsMap.value, forcedParentMap.value);
+
+        // 对于计算指标(calculated)的行，当该格属于行级计算产物时，不再用列级公式覆盖；
+        // diffs 例外始终使用列级公式。basic 指标的 totals 仍应写入列级聚合公式。
+        if (metricDef?.type === 'calculated' && cellState === 'READONLY_CALCULATED' && field.type !== 'diffs') {
+          return;
         }
+        // Use per-metric overrides when provided (e.g., AVG/LAST_VAL cases)
+        let formulaToUse = field.formula;
+        if (metricDef?.columnFormulaOverrides?.[field.name]) {
+          formulaToUse = metricDef.columnFormulaOverrides[field.name];
+        }
+
+        // Build Excel-friendly formula by mapping custom helpers and VAL() to cell refs
+        let excelFormula = formulaToUse
+          // LAST_VAL(id1, id2, ...) -> last id's cell reference on the same row
+          .replace(/LAST_VAL\(([^)]*)\)/g, (match, inner) => {
+            const ids = (inner.match(/\d+/g) || []).map(Number);
+            const lastId = ids.length > 0 ? ids[ids.length - 1] : null;
+            if (!lastId) return '0';
+            const sourceColIndex = fieldIdToColIndex.get(lastId);
+            return XLSX.utils.encode_cell({ r, c: sourceColIndex });
+          })
+          // AVG(id1, id2, ...) -> AVERAGE(cellRef1, cellRef2, ...)
+          .replace(/AVG\(([^)]*)\)/g, (match, inner) => {
+            const ids = (inner.match(/\d+/g) || []).map(Number);
+            if (ids.length === 0) return '0';
+            const refs = ids.map(id => {
+              const sourceColIndex = fieldIdToColIndex.get(id);
+              return XLSX.utils.encode_cell({ r, c: sourceColIndex });
+            });
+            return `AVERAGE(${refs.join(',')})`;
+          })
+          // VAL(id) -> cell reference on the same row
+          .replace(/VAL\((\d+)\)/g, (match, id) => {
+            const sourceColIndex = fieldIdToColIndex.get(parseInt(id));
+            return XLSX.utils.encode_cell({ r, c: sourceColIndex });
+          });
+
+        const targetAddr = XLSX.utils.encode_cell({ r, c });
+        worksheet[targetAddr] = { t: 'n', f: excelFormula };
+        applyCellFormat(targetAddr, row, field);
       }
     });
   });
