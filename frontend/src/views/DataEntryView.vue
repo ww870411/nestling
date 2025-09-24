@@ -143,6 +143,7 @@ import { storeToRefs } from 'pinia';
 import { useProjectStore } from '@/stores/projectStore';
 import { Close, Loading, Download } from '@element-plus/icons-vue'; // Import Download icon
 import * as XLSX from 'xlsx';
+import ExcelJS from 'exceljs/dist/exceljs.min.js';
 import { validationSchemes, getCellState } from '@/projects/heating_plan_2025-2026/tableRules.js';
 import { validationRules } from '@/utils/validator.js'; // Import the whole rules object
 import { formatValue, formatDateTime, getBeijingISODateString } from '@/utils/formatter.js';
@@ -1516,6 +1517,152 @@ const handleUpdateExplanations = async () => {
 };
 
 const handleExport = () => {
+  // --- exceljs 导出（带样式/公式） ---
+  try {
+    const headers = fieldConfig.value.map(f => f.label);
+    const wb = new ExcelJS.Workbook();
+    const ws = wb.addWorksheet(pageTitle.value || 'Sheet1', { properties: { defaultRowHeight: 18 } });
+
+    // 列配置：宽度与居中
+    const cols = (fieldConfig.value || []).map(fc => {
+      const px = typeof fc.width === 'number' ? fc.width : 100;
+      const wch = Math.min(60, Math.max(8, Math.round(px / 8), String(fc.label || '').length + 2));
+      return { header: fc.label || '', key: String(fc.id), width: wch, style: { alignment: { horizontal: 'center', vertical: 'middle' } } };
+    });
+    ws.columns = cols;
+
+    // 表头（使用 columns.header 自动生成首行表头）
+    const headerRow = ws.getRow(1);
+    headerRow.font = { bold: true };
+    headerRow.alignment = { horizontal: 'center', vertical: 'middle' };
+
+    // 映射
+    const metricIdToRowNumber = new Map();
+    const fieldIdToColNumber = new Map();
+    fieldConfig.value.forEach((field, idx) => fieldIdToColNumber.set(field.id, idx + 1));
+
+    // 数据行
+    tableData.value.forEach((row, index) => {
+      const rowValues = fieldConfig.value.map(field => row.values[field.id] ?? '');
+      ws.addRow(rowValues);
+      metricIdToRowNumber.set(row.metricId, index + 2);
+    });
+
+    // 数字格式映射
+    const getExcelNumFmt = (formatOptions) => {
+      if (!formatOptions || !formatOptions.type) return null;
+      if (formatOptions.type === 'percentage') {
+        const places = formatOptions.places !== undefined ? formatOptions.places : 2;
+        return places > 0 ? `0.${'0'.repeat(places)}%` : '0%';
+      }
+      if (formatOptions.type === 'integer') return '#,##0';
+      if (formatOptions.type === 'decimal') {
+        const places = formatOptions.places !== undefined ? formatOptions.places : 2;
+        return places > 0 ? `#,##0.${'0'.repeat(places)}` : '#,##0';
+      }
+      return null;
+    };
+    const applyCellNumFmt = (cell, row, field) => {
+      const fmt = getFormatOptions(row, field);
+      const numFmt = getExcelNumFmt(fmt);
+      if (numFmt) cell.numFmt = numFmt;
+    };
+
+    // 行级与列级公式
+    tableData.value.forEach((row, rowIndex) => {
+      const excelRow = rowIndex + 2;
+      const metricDef = reportTemplate.value.find(m => m.id === row.metricId);
+
+      // 行级（仅计算指标）
+      if (metricDef && metricDef.type === 'calculated' && metricDef.formula) {
+        fieldConfig.value.forEach((field, colIndex) => {
+          const cellState = getCellState(row, field, currentTableConfig.value, childToParentsMap.value, forcedParentMap.value);
+          const isValueColumn = (field.component === 'input' || field.component === 'display') && field.type !== 'diffs';
+          if (isValueColumn && cellState === 'READONLY_CALCULATED') {
+            const excelCol = colIndex + 1;
+            const formula = metricDef.formula.replace(/VAL\((\d+)\)/g, (match, id) => {
+              const sourceRow = metricIdToRowNumber.get(parseInt(id));
+              return ws.getCell(sourceRow, excelCol).address;
+            });
+            const cell = ws.getCell(excelRow, excelCol);
+            cell.value = { formula };
+            cell.alignment = { horizontal: 'center', vertical: 'middle' };
+            applyCellNumFmt(cell, row, field);
+          }
+        });
+      }
+
+      // 列级（totals/diffs/calculated）
+      fieldConfig.value.forEach((field, colIndex) => {
+        if (['calculated', 'totals', 'diffs'].includes(field.type) && field.formula) {
+          const cellState = getCellState(row, field, currentTableConfig.value, childToParentsMap.value, forcedParentMap.value);
+          if (metricDef?.type === 'calculated' && cellState === 'READONLY_CALCULATED' && field.type !== 'diffs') {
+            return; // 不覆盖行级产物
+          }
+          const excelCol = colIndex + 1;
+          let formulaToUse = field.formula;
+          if (metricDef?.columnFormulaOverrides?.[field.name]) {
+            formulaToUse = metricDef.columnFormulaOverrides[field.name];
+          }
+          const formula = formulaToUse
+            .replace(/LAST_VAL\(([^)]*)\)/g, (match, inner) => {
+              const ids = (inner.match(/\d+/g) || []).map(Number);
+              const lastId = ids.length > 0 ? ids[ids.length - 1] : null;
+              if (!lastId) return '0';
+              const sourceCol = fieldIdToColNumber.get(lastId);
+              return ws.getCell(excelRow, sourceCol).address;
+            })
+            .replace(/AVG\(([^)]*)\)/g, (match, inner) => {
+              const ids = (inner.match(/\d+/g) || []).map(Number);
+              if (ids.length === 0) return '0';
+              const refs = ids.map(id => ws.getCell(excelRow, fieldIdToColNumber.get(id)).address);
+              return `AVERAGE(${refs.join(',')})`;
+            })
+            .replace(/VAL\((\d+)\)/g, (match, id) => ws.getCell(excelRow, fieldIdToColNumber.get(parseInt(id))).address);
+
+          const cell = ws.getCell(excelRow, excelCol);
+          cell.value = { formula };
+          cell.alignment = { horizontal: 'center', vertical: 'middle' };
+          applyCellNumFmt(cell, row, field);
+        }
+      });
+    });
+
+    // 边框
+    const lastRow = ws.rowCount;
+    const lastCol = ws.columnCount;
+    for (let r = 1; r <= lastRow; r++) {
+      for (let c = 1; c <= lastCol; c++) {
+        const cell = ws.getCell(r, c);
+        cell.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
+      }
+    }
+
+    // 自动筛选（表头）
+    const colLetters = (n) => { let s = ''; while (n > 0) { const m = (n - 1) % 26; s = String.fromCharCode(65 + m) + s; n = Math.floor((n - 1) / 26); } return s; };
+    if (lastCol > 0) ws.autoFilter = `A1:${colLetters(lastCol)}1`;
+
+    // 触发下载
+    wb.xlsx.writeBuffer().then(buffer => {
+      const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${pageTitle.value}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      ElMessage.success('导出成功');
+    }).catch(err => {
+      console.error(err);
+      ElMessage.error('导出失败');
+    });
+  } catch (e) {
+    console.error(e);
+    ElMessage.error('导出失败');
+  }
+  return;
   const header = fieldConfig.value.map(f => f.label);
   const data = [header];
 
