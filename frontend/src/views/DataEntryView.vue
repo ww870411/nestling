@@ -1536,6 +1536,28 @@ const handleExport = () => {
 
   const worksheet = XLSX.utils.aoa_to_sheet(data);
 
+  // --- 美化导出：列宽、筛选、行高（开源版 xlsx 不支持字体加粗/边框） ---
+  // 列宽：优先用前端字段宽度的近似值作为 Excel 字符宽度；不足时以标题长度兜底
+  const cols = (fieldConfig.value || []).map(fc => {
+    const px = typeof fc.width === 'number' ? fc.width : 100; // 前端列宽（像素）
+    const fromPx = Math.max(8, Math.round(px / 8)); // 粗略换算为字符宽度
+    const fromLabel = Math.max(10, String(fc.label || '').length + 2);
+    return { wch: Math.min(60, Math.max(fromPx, fromLabel)) };
+  });
+  if (cols.length > 0) worksheet['!cols'] = cols;
+
+  // 头部自动筛选区域：基于当前表数据范围
+  const lastRow = data.length - 1; // 0-based（含表头）
+  const lastCol = (fieldConfig.value || []).length - 1;
+  if (lastRow >= 0 && lastCol >= 0) {
+    const rangeRef = XLSX.utils.encode_range({ s: { r: 0, c: 0 }, e: { r: lastRow, c: lastCol } });
+    worksheet['!autofilter'] = { ref: rangeRef };
+  }
+
+  // 行高：适度提高表头行高，便于阅读（单位 points）
+  worksheet['!rows'] = worksheet['!rows'] || [];
+  worksheet['!rows'][0] = { hpt: 18 };
+
   // Helper: map displayFormat -> Excel number format string
   const getExcelFormatString = (formatOptions) => {
     if (!formatOptions || !formatOptions.type) return null;
