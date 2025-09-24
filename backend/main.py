@@ -534,7 +534,7 @@ async def get_table_0_data(project_id: str):
                 sub_content = {}  # Continue with empty content on error
 
         # 表0仅汇总已批准的数据；未批准则跳过
-        sub_data = sub_content.get("approved")
+        sub_data = sub_content.get("approved") or sub_content.get("submit")
         if not sub_data or not isinstance(sub_data.get("tableData"), list):
             continue
 
@@ -678,7 +678,7 @@ async def get_table_data_recursive(project_id: str, table_id: str):
 
             # 规则：表1汇总其子表的已批准版本；表2/3使用其子表的已提交版本；其它默认沿用已提交/草稿。
             if table_id == '1':
-                sub_data = sub_content.get("approved")
+                sub_data = sub_content.get("approved") or sub_content.get("submit")
             elif table_id in ('2', '3'):
                 sub_data = sub_content.get("submit")
             else:
@@ -892,3 +892,4 @@ async def get_table_statuses(project_id: str, table_ids: List[str] = Body(...)):
 @app.get("/")
 def read_root():
     return {"Hello": "World"}
+

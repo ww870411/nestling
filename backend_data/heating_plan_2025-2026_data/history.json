@@ -1391,5 +1391,33 @@
             "globalRole": "unit_admin"
         },
         "tableTemplate": "subsidiaryTemplate"
+    },
+    {
+        "projectId": "heating_plan_2025-2026",
+        "tableId": "11",
+        "tableName": "金州热电表",
+        "action": "unapprove",
+        "timestamp": "2025-09-24T13:58:18.293535+08:00",
+        "submittedBy": {
+            "username": "group_admin",
+            "password": "password",
+            "unit": "集团公司",
+            "globalRole": "super_admin"
+        },
+        "tableTemplate": "subsidiaryTemplate"
+    },
+    {
+        "projectId": "heating_plan_2025-2026",
+        "tableId": "11",
+        "tableName": "金州热电表",
+        "action": "approve",
+        "timestamp": "2025-09-24T14:05:27.463716+08:00",
+        "submittedBy": {
+            "username": "group_admin",
+            "password": "password",
+            "unit": "集团公司",
+            "globalRole": "super_admin"
+        },
+        "tableTemplate": "subsidiaryTemplate"
     }
 ]

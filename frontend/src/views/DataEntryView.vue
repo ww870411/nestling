@@ -820,6 +820,21 @@ const runValidation = ({ level = 'hard' } = {}) => {
 
     const baseRules = baseScheme[row.type] || {};
     const finalValidation = { ...baseRules, ...menuOverride, ...templateOverride };
+    // 追加：可写指标“本期计划为0”的软校验（不论同期）
+    try {
+      const planField = (fieldConfig.value || []).find(f => f && f.name === 'totals.plan');
+      const monthlyPlanInputs = (fieldConfig.value || []).filter(fc => typeof fc?.name === 'string' && fc.name.endsWith('.plan') && fc.component === 'input');
+      if (planField && row.type === 'basic') {
+        const hasWritableMonth = monthlyPlanInputs.some(f => getCellState(row, f, currentTableConfig.value, childToParentsMap.value, forcedParentMap.value) === 'WRITABLE');
+        if (hasWritableMonth) {
+          const planVal = parseFloat(row.values[planField.id]);
+          if (!isNaN(planVal) && planVal === 0) {
+            const key = `${row.metricId}-B-zero-plan`;
+            newErrors[key] = { type: 'B', message: '本期计划为0（可写指标）', metricId: row.metricId, fieldId: planField.id };
+          }
+        }
+      }
+    } catch (_) {}
 
     const processRules = (rules, errorType) => {
       if (!rules) return;
@@ -917,7 +932,23 @@ const runValidation = ({ level = 'hard' } = {}) => {
 
     if (finalValidation.hard) processRules(finalValidation.hard, 'A');
     if (level === 'all' && finalValidation.soft) processRules(finalValidation.soft, 'B');
-    // C类校验移除：不再执行 finalValidation.calc
+    // Extra soft check: writable (basic) metric with totals.plan == 0
+    try {
+      const planField = (fieldConfig.value || []).find(f => f.name === 'totals.plan');
+      if (planField && row.type === 'basic') {
+        const planVal = parseFloat(row.values[planField.id]);
+        if (!isNaN(planVal) && planVal === 0) {
+          const key = `${row.metricId}-B-zero-plan`;
+          newErrors[key] = {
+            type: 'B',
+            message: '本期计划为0（可写指标）',
+            metricId: row.metricId,
+            fieldId: planField.id,
+          };
+        }
+      }
+    } catch (_) {}
+    // C类校验：此处仅执行 finalValidation.calc
   });
 
   errors.value = newErrors;
@@ -2004,3 +2035,4 @@ const handleImport = async (file) => {
 .text-danger { color: #f56c6c; }
 .text-success { color: #67c23a; }
 </style>
+
