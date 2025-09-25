@@ -1,0 +1,40 @@
+# 根目录 .dockerignore（用于缩小 Web 构建上下文）
+
+# 版本控制
+.git
+.gitignore
+
+# Node 前端产物/缓存
+**/node_modules/
+**/dist/
+**/.cache/
+**/coverage/
+
+# Python 缓存
+**/__pycache__/
+**/*.py[cod]
+**/.pytest_cache/
+
+# 本地环境文件
+*.env
+*.env.*
+**/.env
+**/.env.*
+
+# 数据与日志（避免打包进镜像）
+backend_data/
+backend/data/
+*.log
+log*.txt
+
+# 操作系统与编辑器配置
+**/.DS_Store
+**/Thumbs.db
+**/.idea/
+**/.vscode/
+
+# 压缩归档
+*.tar
+*.gz
+*.zip
+

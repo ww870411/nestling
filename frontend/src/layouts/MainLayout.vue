@@ -148,6 +148,7 @@ const getStatusClass = (reportId) => {
   const status = statusInfo.status;
   if (status === 'saved') return 'status-saved';
   if (status === 'submitted') return 'status-submitted';
+  if (status === 'approved') return 'status-approved';
   return 'status-new';
 };
 
@@ -184,8 +185,8 @@ const handleLogout = () => {
 }
 
 .status-saved { color: #e6a23c !important; }
-.status-submitted { color: #67c23a !important; }
-
+.status-submitted { color: #409eff !important; }
+.status-approved { color: #67c23a !important; }
 .status-new { color: #f56c6c !important; }
 
 .main-header {

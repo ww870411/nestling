@@ -19,6 +19,9 @@ export const useAuthStore = defineStore('auth', {
       if (!state.user) return [];
 
       switch (state.user.globalRole) {
+        case 'super_viewer':
+          // 只读集团观察者：可查看全部单位，但无写权限（前端禁用写，后端兜底拦截）。
+          return ALL_UNITS;
         case 'super_admin':
         case 'god':
           // Super admin can access all units.

@@ -92,6 +92,15 @@ def _get_user_from_request(request: Request):
             return u
     return None
 
+def _is_read_only_user(user: dict | None) -> bool:
+    """只读用户判定：super_viewer 等角色不可执行任何写操作。
+    允许扩展其它只读别名，保持后端兜底安全。
+    """
+    if not user or not isinstance(user, dict):
+        return False
+    role = user.get('globalRole') or user.get('role')
+    return role in { 'super_viewer', 'viewer', 'read_only' }
+
 def _is_table_approved(project_id: str, table_id: str) -> bool:
     submissions_dir = DATA_DIR / f"{project_id}_data"
     file_path = submissions_dir / f"{table_id}.json"
@@ -333,6 +342,10 @@ def _append_history_record(submissions_dir: Path, project_id: str, table_id: str
 
 @app.post("/project/{project_id}/table/{table_id}/submit")
 async def submit_data(project_id: str, table_id: str, request: Request, payload: dict = Body(...)):
+    # 只读用户不可提交
+    user = _get_user_from_request(request)
+    if _is_read_only_user(user):
+        raise HTTPException(status_code=403, detail="Read-only role is not allowed to submit.")
     submissions_dir = DATA_DIR / f"{project_id}_data"
     submissions_dir.mkdir(parents=True, exist_ok=True)
     file_path = submissions_dir / f"{table_id}.json"
@@ -356,6 +369,8 @@ async def submit_data(project_id: str, table_id: str, request: Request, payload:
 @app.post("/project/{project_id}/table/{table_id}/approve")
 async def approve_table(project_id: str, table_id: str, request: Request):
     user = _get_user_from_request(request)
+    if _is_read_only_user(user):
+        raise HTTPException(status_code=403, detail="Read-only role is not allowed to approve.")
     if not _can_approve(str(table_id), user, 'approve'):
         raise HTTPException(status_code=403, detail="Not allowed to approve this table.")
 
@@ -408,6 +423,8 @@ async def approve_table(project_id: str, table_id: str, request: Request):
 @app.post("/project/{project_id}/table/{table_id}/unapprove")
 async def unapprove_table(project_id: str, table_id: str, request: Request):
     user = _get_user_from_request(request)
+    if _is_read_only_user(user):
+        raise HTTPException(status_code=403, detail="Read-only role is not allowed to unapprove.")
     if not _can_approve(str(table_id), user, 'unapprove'):
         raise HTTPException(status_code=403, detail="Not allowed to unapprove this table.")
 
@@ -467,6 +484,10 @@ async def unapprove_table(project_id: str, table_id: str, request: Request):
 
 @app.post("/project/{project_id}/table/{table_id}/save_draft")
 async def save_draft(project_id: str, table_id: str, request: Request, payload: dict = Body(...)):
+    # 只读用户不可暂存到服务器
+    user = _get_user_from_request(request)
+    if _is_read_only_user(user):
+        raise HTTPException(status_code=403, detail="Read-only role is not allowed to save draft.")
     submissions_dir = DATA_DIR / f"{project_id}_data"
     submissions_dir.mkdir(parents=True, exist_ok=True)
     file_path = submissions_dir / f"{table_id}.json"

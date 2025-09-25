@@ -171,7 +171,8 @@ const isGodUser = computed(() => authStore.user?.globalRole === 'god');
 // 只读管理员（除集团 super_admin 外的 admin）：区域管理员、单位管理员
 const isReadOnlyAdmin = computed(() => {
   const role = authStore.user?.globalRole;
-  return role === 'regional_admin' || role === 'unit_admin';
+  // 只读角色：区域/单位管理员（原有只读）以及 super_viewer（集团观察者）
+  return role === 'regional_admin' || role === 'unit_admin' || role === 'super_viewer';
 });
 // 鉴权就绪，避免初始闪现提交/暂存按钮
 const isAuthReady = computed(() => !!authStore.user);

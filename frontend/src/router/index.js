@@ -95,6 +95,14 @@ router.beforeEach(async (to, from, next) => {
   }
   
   // 5. 报表权限校验
+  // super_viewer（集团观察者）不可访问“group-overview”页面
+  if (to.name === 'group-overview') {
+    const role = (useAuthStore().user || {}).globalRole;
+    if (role === 'super_viewer') {
+      return next({ name: 'dashboard', params: { projectId: to.params.projectId } });
+    }
+  }
+
   if (to.name === 'data-entry') {
     const tableId = to.params.tableId;
     const menuData = projectStore.menuData;

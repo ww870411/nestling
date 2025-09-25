@@ -1,0 +1,17 @@
+*** Begin Patch
+*** Update File: backend/main.py
+@@
+ async def submit_data(project_id: str, table_id: str, request: Request, payload: dict = Body(...)):
++    # super_viewer is read-only: deny submit
++    user_guard = _get_user_from_request(request)
++    if user_guard and user_guard.get('globalRole') == 'super_viewer':
++        raise HTTPException(status_code=403, detail="Read-only user (super_viewer) is not allowed to submit.")
+     submissions_dir = DATA_DIR / f"{project_id}_data"
+@@
+ async def save_draft(project_id: str, table_id: str, request: Request, payload: dict = Body(...)):
++    # super_viewer is read-only: deny save draft
++    user_guard = _get_user_from_request(request)
++    if user_guard and user_guard.get('globalRole') == 'super_viewer':
++        raise HTTPException(status_code=403, detail="Read-only user (super_viewer) is not allowed to save draft.")
+     submissions_dir = DATA_DIR / f"{project_id}_data"
+*** End Patch
