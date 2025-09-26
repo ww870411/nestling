@@ -49,6 +49,10 @@ export const getCellState = (row, field, currentTableConfig, childToParentsMap, 
   }
   // --- END: ADDED LOGIC FOR SUMMARY TABLES ---
 
+  if (row.type === 'calculated' && field.component !== 'label') {
+    return 'READONLY_CALCULATED';
+  }
+
   // 新增：检查指标的 requiredProperties 是否被当前表格的 properties 满足
   const required = row.requiredProperties;
   const provided = currentTableConfig?.properties || {};
