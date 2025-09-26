@@ -55,6 +55,11 @@ export const fieldConfig = [
   { id: 1016, name: 'xianghai.samePeriod', label: '香海-同期完成', type: 'totals', component: 'display', width: 120 },
   { id: 1017, name: 'xianghai.diffRate', label: '香海-差异率', type: 'diffs', formula: '(VAL(1015)-VAL(1016))/VAL(1016)', component: 'display', width: 120, displayFormat: { type: 'percentage', places: 2 } },
 
+  // --- 供热公司 (ID: 1033-1035) ---
+  { id: 1033, name: 'heating_company.plan', label: '供热公司-本期计划', type: 'totals', component: 'display', width: 120 },
+  { id: 1034, name: 'heating_company.samePeriod', label: '供热公司-同期完成', type: 'totals', component: 'display', width: 120 },
+  { id: 1035, name: 'heating_company.diffRate', label: '供热公司-差异率', type: 'diffs', formula: '(VAL(1033)-VAL(1034))/VAL(1034)', component: 'display', width: 120, displayFormat: { type: 'percentage', places: 2 } },
+
   // --- 金州 (ID: 1018-1020) ---
   { id: 1018, name: 'jinzhou.plan', label: '金州-本期计划', type: 'totals', component: 'display', width: 120 },
   { id: 1019, name: 'jinzhou.samePeriod', label: '金州-同期完成', type: 'totals', component: 'display', width: 120 },
@@ -182,9 +187,9 @@ export const reportTemplate = [
   { id: 97, category: '经济指标', name: '电收入', unit: '万元', type: 'basic', formula: null, style: { fontWeight: 'normal' }, samePeriodEditable: false, requiredProperties: { productionMethod: ['thermoelectric'], businessModel: ['independent'] } , validation: { soft: [] }},
   { id: 98, category: '经济指标', name: '电单价', unit: '元/kWh', type: 'calculated', formula: 'VAL(97)/VAL(13)', style: { fontWeight: 'bold' }, samePeriodEditable: false, requiredProperties: { productionMethod: ['thermoelectric'], businessModel: ['independent'] } , validation: { soft: [] }},
   { id: 99, category: '经济指标', name: '售汽收入', unit: '万元', type: 'basic', formula: null, style: { fontWeight: 'normal' }, samePeriodEditable: false, requiredProperties: { productionMethod: ['heating_company'], businessModel: ['independent'] ,special:['steam'] }, validation: { soft: [] } },
-  { id: 100, category: '经济指标', name: '汽平均单价', unit: '元/吨', type: 'calculated', formula: 'VAL(99)*10000/VAL(14)', style: { fontWeight: 'bold' }, samePeriodEditable: false, requiredProperties: { productionMethod: ['heating_company'], businessModel: ['independent'] } , validation: { soft: [] }},
+  { id: 100, category: '经济指标', name: '汽平均单价', unit: '元/吨', type: 'calculated', formula: 'VAL(99)*10000/(VAL(14)+VAL(15))', style: { fontWeight: 'bold' }, samePeriodEditable: false, requiredProperties: { productionMethod: ['heating_company'], businessModel: ['independent'] } , validation: { soft: [] }},
   { id: 101, category: '经济指标', name: '售高温水收入', unit: '万元', type: 'basic', formula: null, style: { fontWeight: 'normal' }, samePeriodEditable: false, requiredProperties: { productionMethod: ['heating_company'], businessModel: ['independent'] } , validation: { soft: [] }},
-  { id: 102, category: '经济指标', name: '高温水平均单价', unit: '元/GJ', type: 'calculated', formula: 'VAL(101)*10000/VAL(24)', style: { fontWeight: 'bold' }, samePeriodEditable: false, requiredProperties: { productionMethod: ['heating_company'], businessModel: ['independent'] } , validation: { soft: [] }},
+  { id: 102, category: '经济指标', name: '高温水平均单价', unit: '元/GJ', type: 'calculated', formula: 'VAL(101)*10000/(VAL(24)+VAL(16))', style: { fontWeight: 'bold' }, samePeriodEditable: false, requiredProperties: { productionMethod: ['heating_company'], businessModel: ['independent'] } , validation: { soft: [] }},
   { id: 103, category: '经济指标', name: '购热成本', unit: '万元', type: 'basic', formula: null, style: { fontWeight: 'normal' }, samePeriodEditable: false, requiredProperties: { fuelType: ['purchased_heat'], businessModel: ['independent'] }, validation: { soft: [] } },
   { id: 104, category: '经济指标', name: '热单价', unit: '元/GJ', type: 'calculated', formula: 'VAL(103)*10000/VAL(39)', style: { fontWeight: 'bold' }, samePeriodEditable: false, requiredProperties: { fuelType: ['purchased_heat'], businessModel: ['independent'] } , validation: { soft: [] }},
   { id: 105, category: '经济指标', name: '煤成本', unit: '万元', type: 'basic', formula: null, style: { fontWeight: 'normal' }, samePeriodEditable: false, requiredProperties: { fuelType: ['coal'], businessModel: ['independent'] } },

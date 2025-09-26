@@ -5,6 +5,7 @@
     {"id": 1009, "name": "gufenbenbu.plan"}, {"id": 1010, "name": "gufenbenbu.samePeriod"}, {"id": 1011, "name": "gufenbenbu.diffRate"},
     {"id": 1012, "name": "beihai.plan"}, {"id": 1013, "name": "beihai.samePeriod"}, {"id": 1014, "name": "beihai.diffRate"},
     {"id": 1015, "name": "xianghai.plan"}, {"id": 1016, "name": "xianghai.samePeriod"}, {"id": 1017, "name": "xianghai.diffRate"},
+    {"id": 1033, "name": "heating_company.plan"}, {"id": 1034, "name": "heating_company.samePeriod"}, {"id": 1035, "name": "heating_company.diffRate"},
     {"id": 1018, "name": "jinzhou.plan"}, {"id": 1019, "name": "jinzhou.samePeriod"}, {"id": 1020, "name": "jinzhou.diffRate"},
     {"id": 1021, "name": "beifang.plan"}, {"id": 1022, "name": "beifang.samePeriod"}, {"id": 1023, "name": "beifang.diffRate"},
     {"id": 1024, "name": "jinpu.plan"}, {"id": 1025, "name": "jinpu.samePeriod"}, {"id": 1026, "name": "jinpu.diffRate"},

@@ -83,12 +83,13 @@ const projectStore = useProjectStore();
 const projectId = computed(() => route.params.projectId);
 
 // 约定单位顺序与显示名
-const unitOrder = ['group','downtown','beihai','xianghai','jinzhou','beifang','jinpu','zhuanghe','research'];
+const unitOrder = ['group','downtown','beihai','xianghai','heating_company','jinzhou','beifang','jinpu','zhuanghe','research'];
 const unitDisplay = {
   group: '集团',
   downtown: '主城区',
   gufenbenbu: '股份本部',
   xianghai: '香海',
+  heating_company: '供热公司',
   jinzhou: '金州',
   beifang: '北方',
   jinpu: '金普',
@@ -180,7 +181,7 @@ const unitToTables = {
   downtown: ['2','3'], // 主城区：表2、表3
   beihai: ['4'],
   xianghai: ['8'],
-  // heating: ['9'], // 如后续需要“供热”单位，可开放此键
+  heating_company: ['9','10'],
   jinzhou: ['11'],
   beifang: ['12'],
   jinpu: ['13'],

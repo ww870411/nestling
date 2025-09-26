@@ -541,27 +541,28 @@ async def get_table_0_data(project_id: str):
             new_row["values"].append({"fieldId": field_id, "value": value})
         table_data.append(new_row)
 
-    # Directly read subsidiary files and populate plan/samePeriod data
+    # 直接读取子表文件，按规则填充 plan/samePeriod 数据
     subsidiaries_map = table_config.get("subsidiaries", {})
     submissions_dir = DATA_DIR / f"{project_id}_data"
 
-    for sub_key, sub_id in subsidiaries_map.items():
-        sub_content = {}
-        file_path = submissions_dir / f"{sub_id}.json"
-        if file_path.exists():
-            try:
-                with open(file_path, "r", encoding="utf-8") as f:
-                    content = f.read()
-                    if content:
-                        sub_content = json.loads(content)
-            except (json.JSONDecodeError, IOError):
-                sub_content = {}  # Continue with empty content on error
+    def _load_table_json(table_file_id: str) -> dict:
+        file_path = submissions_dir / f"{table_file_id}.json"
+        if not file_path.exists():
+            return {}
+        try:
+            with open(file_path, "r", encoding="utf-8") as f:
+                content = f.read()
+                if content:
+                    return json.loads(content)
+        except (json.JSONDecodeError, IOError):
+            return {}
+        return {}
 
-        # 表0汇总逻辑：优先采用“已批准”，若批准无效(无 tableData)则回退到“已提交”
-        approved_payload = sub_content.get("approved")
-        submit_payload = sub_content.get("submit")
-
-        # 新规则：已提交/已批准同时检查，取时间较新的那份（不再设定优先级）
+    def _select_latest_payload(content):
+        if not isinstance(content, dict):
+            return None
+        approved_payload = content.get("approved")
+        submit_payload = content.get("submit")
         candidates: list[tuple[dict, str]] = []
         if isinstance(approved_payload, dict) and isinstance(approved_payload.get("tableData"), list):
             ts_a = approved_payload.get("approvedAt") or approved_payload.get("timestamp") or ""
@@ -569,26 +570,100 @@ async def get_table_0_data(project_id: str):
         if isinstance(submit_payload, dict) and isinstance(submit_payload.get("tableData"), list):
             ts_s = submit_payload.get("submittedAt") or submit_payload.get("timestamp") or ""
             candidates.append((submit_payload, ts_s))
-
         if not candidates:
-            continue
+            return None
 
         def _parse_ts(ts: str):
             try:
-                # 兼容末尾 'Z' 的 UTC 表示
+                # 若末尾 'Z' 为 UTC 表示
                 ts_norm = ts.replace('Z', '+00:00') if isinstance(ts, str) else ""
                 return datetime.fromisoformat(ts_norm)
             except Exception:
                 return None
 
-        sub_data = max(
+        return max(
             candidates,
             key=lambda item: _parse_ts(item[1]) or datetime.min.replace(tzinfo=BEIJING_TZ)
         )[0]
 
+    for sub_key, sub_id in subsidiaries_map.items():
         target_plan_id = key_to_plan_field_id.get(sub_key)
         target_same_period_id = key_to_same_period_field_id.get(sub_key)
         if not target_plan_id or not target_same_period_id:
+            continue
+
+        if sub_key == "heating_company":
+            # 供热公司：表9、表10 的数值合计写入新单位列，并继承表9的 B 类错误
+            aggregated_values: dict[int, dict[str, float]] = {}
+            for source_id in ("9", "10"):
+                source_data = _select_latest_payload(_load_table_json(str(source_id)))
+                if not source_data:
+                    continue
+                for row in source_data.get("tableData", []):
+                    metric_id = row.get("metricId")
+                    if not metric_id:
+                        continue
+
+                    plan_val = 0.0
+                    same_period_val = 0.0
+
+                    for cell in row.get("values", []):
+                        field_id = cell.get("fieldId")
+                        value = cell.get("value", 0) if isinstance(cell.get("value"), (int, float)) else 0
+                        if field_id == 1003:
+                            plan_val += value
+                        elif field_id == 1004:
+                            same_period_val += value
+
+                        if source_id == "9" and field_id in (1003, 1004):
+                            explanation = cell.get("explanation")
+                            if not explanation or not isinstance(explanation, dict):
+                                continue
+                            rule_key = explanation.get("ruleKey")
+                            if not rule_key:
+                                continue
+                            parts = str(rule_key).split("-")
+                            if len(parts) < 2:
+                                continue
+                            issue_type = parts[1]
+                            if issue_type != "B":
+                                continue
+
+                            dest_field_id = target_plan_id if field_id == 1003 else target_same_period_id
+                            issue_detail = {
+                                "type": issue_type,
+                                "message": explanation.get("message"),
+                                "content": explanation.get("content"),
+                                "ruleKey": rule_key,
+                                "metricId": metric_id,
+                                "metricName": row.get("metricName") or metric_name_map.get(metric_id),
+                                "fieldId": dest_field_id,
+                                "fieldLabel": field_label_map.get(dest_field_id),
+                                "sourceTableId": str(source_id),
+                                "sourceTableName": ALL_TABLES.get(str(source_id), {}).get("name"),
+                            }
+                            issue_map[(metric_id, dest_field_id)].append(issue_detail)
+                            explanation_summary.append(issue_detail)
+
+                    aggregated_values.setdefault(metric_id, {"plan": 0.0, "samePeriod": 0.0})
+                    aggregated_values[metric_id]["plan"] += plan_val
+                    aggregated_values[metric_id]["samePeriod"] += same_period_val
+
+            if not aggregated_values:
+                continue
+
+            for agg_row in table_data:
+                metric_id = agg_row.get("metricId")
+                if metric_id in aggregated_values:
+                    for agg_cell in agg_row.get("values", []):
+                        field_id = agg_cell.get("fieldId")
+                        if field_id == target_plan_id:
+                            agg_cell["value"] = aggregated_values[metric_id]["plan"]
+                        elif field_id == target_same_period_id:
+                            agg_cell["value"] = aggregated_values[metric_id]["samePeriod"]
+            continue
+        sub_data = _select_latest_payload(_load_table_json(str(sub_id)))
+        if not sub_data:
             continue
 
         sub_values = {}
