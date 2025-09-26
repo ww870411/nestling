@@ -1,81 +1,46 @@
 /**
- * 通用校验规则实现模块
+ * 通用校验规则模块（仅保留基础与软校验；已移除 C 类计算校验）
  */
 
 export const validationRules = {
   /**
-   * 检查值是否为有效数字
-   * @param {*} value 
-   * @returns {boolean}
+   * 是否为有效数字（为空不报错，required 用 notEmpty）
    */
   isNumber: (value) => {
-    if (value === null || String(value).trim() === '') return true; // Allow empty values, use notEmpty for required fields
+    if (value === null || String(value).trim() === '') return true;
     return !isNaN(parseFloat(value)) && isFinite(value);
   },
 
   /**
-   * 检查值是否不为空
-   * @param {*} value 
-   * @returns {boolean}
+   * 非空判断
    */
   notEmpty: (value) => {
     return value !== null && value !== undefined && String(value).trim() !== '';
   },
 
   /**
-   * 比较两个值，支持乘以系数和增加偏移量
-   * @param {*} valueA 
-   * @param {string} operator 
-   * @param {*} valueB 
-   * @param {number} [factor] - 可选的乘法系数
-   * @param {number} [offset] - 可选的加减偏移量
-   * @returns {boolean}
+   * 比较运算，支持因子与偏移
    */
   comparison: (valueA, operator, valueB, factor, offset) => {
     if (typeof valueA !== 'number' || typeof valueB !== 'number') {
-      return true; // Cannot compare non-numbers
+      return true; // 非数字不比较
     }
-    
+
     let comparisonValue = valueB;
-    // Apply factor first (multiplication)
-    if (factor !== undefined && typeof factor === 'number') {
-      comparisonValue *= factor;
-    }
-    // Then apply offset (addition/subtraction)
-    if (offset !== undefined && typeof offset === 'number') {
-      comparisonValue += offset;
-    }
+    if (factor !== undefined && typeof factor === 'number') comparisonValue *= factor;
+    if (offset !== undefined && typeof offset === 'number') comparisonValue += offset;
 
     switch (operator) {
       case '<=': return valueA <= comparisonValue;
       case '>=': return valueA >= comparisonValue;
-      case '<': return valueA < comparisonValue;
-      case '>': return valueA > comparisonValue;
+      case '<':  return valueA <  comparisonValue;
+      case '>':  return valueA >  comparisonValue;
       case '==': return valueA == comparisonValue;
-      default: return true;
+      default:   return true;
     }
   },
 
-  /**
-   * 校验一个计算结果是否在容差范围内
-   * @param {number} actualValue - 单元格中的实际值
-   * @param {number} expectedValue - 根据公式计算出的期望值
-   * @param {number} [tolerance=0.01] - 容差，默认为 1%
-   * @returns {boolean}
-   */
-  calculation: (actualValue, expectedValue, tolerance = 0.01) => {
-    if (typeof actualValue !== 'number' || typeof expectedValue !== 'number') {
-      return true; // 无法比较非数字
-    }
-
-    // 处理期望值为0的特殊情况
-    if (expectedValue === 0) {
-      return actualValue === 0;
-    }
-
-    const difference = Math.abs(actualValue - expectedValue);
-    const differenceRate = difference / Math.abs(expectedValue);
-
-    return differenceRate <= tolerance;
-  }
+  // 已弃用：C 类（计算）校验彻底移除，占位保持兼容（始终为 true）
+  calculation: () => true,
 };
+

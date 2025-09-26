@@ -1,6 +1,6 @@
 {
     "submit": {
-        "submittedAt": "2025-09-22T15:33:54.062+08:00",
+        "submittedAt": "2025-09-25T09:39:07.533+08:00",
         "table": {
             "id": "4",
             "name": "北海汇总表",
@@ -3091,7 +3091,7 @@
                         "explanation": {
                             "ruleKey": "25-B-0",
                             "message": "本期计划不应超过同期完成",
-                            "content": "近三年气温低于同期，供热负荷增加"
+                            "content": "以近三年平均气温做计划，低于同期气温，供热负荷增加"
                         }
                     },
                     {
@@ -3223,7 +3223,7 @@
                         "explanation": {
                             "ruleKey": "26-B-0",
                             "message": "本期计划不应超过同期完成",
-                            "content": "热电联产为主的供热调整原则，热电联产负荷在僧伽"
+                            "content": "热电联产供热为主，热电联产负荷增加"
                         }
                     },
                     {
@@ -3355,7 +3355,7 @@
                         "explanation": {
                             "ruleKey": "27-B-0",
                             "message": "本期计划不应超过同期完成",
-                            "content": "近三年气温低于同期，供热负荷增加"
+                            "content": "以近三年平均气温做计划，低于同期气温，供热负荷增加"
                         }
                     },
                     {
@@ -3487,7 +3487,7 @@
                         "explanation": {
                             "ruleKey": "28-B-0",
                             "message": "本期计划不应超过同期完成",
-                            "content": "近三年气温低于同期，供热负荷增加"
+                            "content": "以近三年平均气温做计划，低于同期气温，供热负荷增加"
                         }
                     },
                     {
@@ -3619,7 +3619,7 @@
                         "explanation": {
                             "ruleKey": "29-B-0",
                             "message": "本期计划不应超过同期完成",
-                            "content": "热电联产为主的供热调整原则，热电联产负荷在僧伽"
+                            "content": "热电联产供热为主，热电联产负荷增加"
                         }
                     },
                     {
@@ -3751,7 +3751,7 @@
                         "explanation": {
                             "ruleKey": "30-B-0",
                             "message": "本期计划不应超过同期完成",
-                            "content": "热电联产为主的供热调整原则，热电联产负荷在僧伽"
+                            "content": "热电联产供热为主，热电联产负荷增加"
                         }
                     },
                     {
@@ -4010,7 +4010,7 @@
                         "explanation": {
                             "ruleKey": "32-B-0",
                             "message": "本期计划不应超过同期完成",
-                            "content": "近三年气温低于同期，供热负荷增加"
+                            "content": "以近三年平均气温做计划，低于同期气温，供热负荷增加"
                         }
                     },
                     {
@@ -4142,7 +4142,7 @@
                         "explanation": {
                             "ruleKey": "33-B-0",
                             "message": "本期计划不应超过同期完成",
-                            "content": "近三年气温低于同期，供热负荷增加"
+                            "content": "以近三年平均气温做计划，低于同期气温，供热负荷增加"
                         }
                     },
                     {
@@ -4274,7 +4274,7 @@
                         "explanation": {
                             "ruleKey": "34-B-0",
                             "message": "本期计划不应超过同期完成",
-                            "content": "热电联产为主，水炉启停次数增加"
+                            "content": "热电联产供热为主，水炉启停次数增加，耗油量增加"
                         }
                     },
                     {
@@ -4406,7 +4406,7 @@
                         "explanation": {
                             "ruleKey": "35-B-0",
                             "message": "本期计划不应超过同期完成",
-                            "content": "近三年气温低于同期，供热负荷增加，耗煤量增加"
+                            "content": "以近三年平均气温做计划，低于同期气温，供热负荷增加"
                         }
                     },
                     {
@@ -4792,7 +4792,7 @@
                         "explanation": {
                             "ruleKey": "38-B-0",
                             "message": "本期计划不应超过同期完成",
-                            "content": "热电联产为主，水炉启停次数增加"
+                            "content": "热电联产供热为主，水炉启停次数增加，耗油量增加"
                         }
                     },
                     {
@@ -5047,7 +5047,7 @@
                         "fieldId": 1003,
                         "fieldName": "totals.plan",
                         "fieldLabel": "本期计划",
-                        "value": 680699
+                        "value": 1016529
                     },
                     {
                         "fieldId": 1004,
@@ -5059,13 +5059,13 @@
                         "fieldId": 1005,
                         "fieldName": "totals.diffRate",
                         "fieldLabel": "差异率",
-                        "value": -0.4645246046
+                        "value": -0.200342195
                     },
                     {
                         "fieldId": 2001,
                         "fieldName": "monthlyData.october.plan",
                         "fieldLabel": "10月-计划",
-                        "value": 26866
+                        "value": 30326
                     },
                     {
                         "fieldId": 2002,
@@ -5077,7 +5077,7 @@
                         "fieldId": 2003,
                         "fieldName": "monthlyData.november.plan",
                         "fieldLabel": "11月-计划",
-                        "value": 119927
+                        "value": 206447
                     },
                     {
                         "fieldId": 2004,
@@ -5089,7 +5089,7 @@
                         "fieldId": 2005,
                         "fieldName": "monthlyData.december.plan",
                         "fieldLabel": "12月-计划",
-                        "value": 142468
+                        "value": 199118
                     },
                     {
                         "fieldId": 2006,
@@ -5101,7 +5101,7 @@
                         "fieldId": 2007,
                         "fieldName": "monthlyData.january.plan",
                         "fieldLabel": "1月-计划",
-                        "value": 136294
+                        "value": 193594
                     },
                     {
                         "fieldId": 2008,
@@ -5113,7 +5113,7 @@
                         "fieldId": 2009,
                         "fieldName": "monthlyData.february.plan",
                         "fieldLabel": "2月-计划",
-                        "value": 118271
+                        "value": 177551
                     },
                     {
                         "fieldId": 2010,
@@ -5125,7 +5125,7 @@
                         "fieldId": 2011,
                         "fieldName": "monthlyData.march.plan",
                         "fieldLabel": "3月-计划",
-                        "value": 103463
+                        "value": 164083
                     },
                     {
                         "fieldId": 2012,
@@ -5137,7 +5137,7 @@
                         "fieldId": 2013,
                         "fieldName": "monthlyData.april.plan",
                         "fieldLabel": "4月-计划",
-                        "value": 33410
+                        "value": 45410
                     },
                     {
                         "fieldId": 2014,
@@ -5151,7 +5151,6 @@
                 "metricId": 41,
                 "metricName": "其中：1.电厂耗水量",
                 "type": "basic",
-                "force": true,
                 "values": [
                     {
                         "fieldId": 1000,
@@ -5302,7 +5301,7 @@
                         "fieldId": 1003,
                         "fieldName": "totals.plan",
                         "fieldLabel": "本期计划",
-                        "value": 0
+                        "value": 335830
                     },
                     {
                         "fieldId": 1004,
@@ -5314,13 +5313,13 @@
                         "fieldId": 1005,
                         "fieldName": "totals.diffRate",
                         "fieldLabel": "差异率",
-                        "value": -1
+                        "value": -0.3153396696
                     },
                     {
                         "fieldId": 2001,
                         "fieldName": "monthlyData.october.plan",
                         "fieldLabel": "10月-计划",
-                        "value": 0
+                        "value": 3460
                     },
                     {
                         "fieldId": 2002,
@@ -5332,7 +5331,7 @@
                         "fieldId": 2003,
                         "fieldName": "monthlyData.november.plan",
                         "fieldLabel": "11月-计划",
-                        "value": 0
+                        "value": 86520
                     },
                     {
                         "fieldId": 2004,
@@ -5344,7 +5343,7 @@
                         "fieldId": 2005,
                         "fieldName": "monthlyData.december.plan",
                         "fieldLabel": "12月-计划",
-                        "value": 0
+                        "value": 56650
                     },
                     {
                         "fieldId": 2006,
@@ -5356,7 +5355,7 @@
                         "fieldId": 2007,
                         "fieldName": "monthlyData.january.plan",
                         "fieldLabel": "1月-计划",
-                        "value": 0
+                        "value": 57300
                     },
                     {
                         "fieldId": 2008,
@@ -5368,7 +5367,7 @@
                         "fieldId": 2009,
                         "fieldName": "monthlyData.february.plan",
                         "fieldLabel": "2月-计划",
-                        "value": 0
+                        "value": 59280
                     },
                     {
                         "fieldId": 2010,
@@ -5380,7 +5379,7 @@
                         "fieldId": 2011,
                         "fieldName": "monthlyData.march.plan",
                         "fieldLabel": "3月-计划",
-                        "value": 0
+                        "value": 60620
                     },
                     {
                         "fieldId": 2012,
@@ -5392,7 +5391,7 @@
                         "fieldId": 2013,
                         "fieldName": "monthlyData.april.plan",
                         "fieldLabel": "4月-计划",
-                        "value": 0
+                        "value": 12000
                     },
                     {
                         "fieldId": 2014,
@@ -5406,7 +5405,6 @@
                 "metricId": 43,
                 "metricName": "2.1主城区高温水首站补水量",
                 "type": "basic",
-                "force": true,
                 "values": [
                     {
                         "fieldId": 1000,
@@ -5430,7 +5428,7 @@
                         "fieldId": 1003,
                         "fieldName": "totals.plan",
                         "fieldLabel": "本期计划",
-                        "value": 0
+                        "value": 335830
                     },
                     {
                         "fieldId": 1004,
@@ -5442,13 +5440,13 @@
                         "fieldId": 1005,
                         "fieldName": "totals.diffRate",
                         "fieldLabel": "差异率",
-                        "value": -1
+                        "value": -0.3153396696
                     },
                     {
                         "fieldId": 2001,
                         "fieldName": "monthlyData.october.plan",
                         "fieldLabel": "10月-计划",
-                        "value": 0
+                        "value": 3460
                     },
                     {
                         "fieldId": 2002,
@@ -5460,7 +5458,7 @@
                         "fieldId": 2003,
                         "fieldName": "monthlyData.november.plan",
                         "fieldLabel": "11月-计划",
-                        "value": 0
+                        "value": 86520
                     },
                     {
                         "fieldId": 2004,
@@ -5472,7 +5470,7 @@
                         "fieldId": 2005,
                         "fieldName": "monthlyData.december.plan",
                         "fieldLabel": "12月-计划",
-                        "value": 0
+                        "value": 56650
                     },
                     {
                         "fieldId": 2006,
@@ -5484,7 +5482,7 @@
                         "fieldId": 2007,
                         "fieldName": "monthlyData.january.plan",
                         "fieldLabel": "1月-计划",
-                        "value": 0
+                        "value": 57300
                     },
                     {
                         "fieldId": 2008,
@@ -5496,7 +5494,7 @@
                         "fieldId": 2009,
                         "fieldName": "monthlyData.february.plan",
                         "fieldLabel": "2月-计划",
-                        "value": 0
+                        "value": 59280
                     },
                     {
                         "fieldId": 2010,
@@ -5508,7 +5506,7 @@
                         "fieldId": 2011,
                         "fieldName": "monthlyData.march.plan",
                         "fieldLabel": "3月-计划",
-                        "value": 0
+                        "value": 60620
                     },
                     {
                         "fieldId": 2012,
@@ -5520,7 +5518,7 @@
                         "fieldId": 2013,
                         "fieldName": "monthlyData.april.plan",
                         "fieldLabel": "4月-计划",
-                        "value": 0
+                        "value": 12000
                     },
                     {
                         "fieldId": 2014,
@@ -6192,103 +6190,103 @@
                         "fieldId": 1003,
                         "fieldName": "totals.plan",
                         "fieldLabel": "本期计划",
-                        "value": 0
+                        "value": 453585
                     },
                     {
                         "fieldId": 1004,
                         "fieldName": "totals.samePeriod",
                         "fieldLabel": "同期完成",
-                        "value": 0
+                        "value": 675106
                     },
                     {
                         "fieldId": 1005,
                         "fieldName": "totals.diffRate",
                         "fieldLabel": "差异率",
-                        "value": null
+                        "value": -0.3281277311
                     },
                     {
                         "fieldId": 2001,
                         "fieldName": "monthlyData.october.plan",
                         "fieldLabel": "10月-计划",
-                        "value": 0
+                        "value": 25721
                     },
                     {
                         "fieldId": 2002,
                         "fieldName": "monthlyData.october.samePeriod",
                         "fieldLabel": "10月-同期",
-                        "value": 0
+                        "value": 38048
                     },
                     {
                         "fieldId": 2003,
                         "fieldName": "monthlyData.november.plan",
                         "fieldLabel": "11月-计划",
-                        "value": 0
+                        "value": 112629
                     },
                     {
                         "fieldId": 2004,
                         "fieldName": "monthlyData.november.samePeriod",
                         "fieldLabel": "11月-同期",
-                        "value": 0
+                        "value": 148441
                     },
                     {
                         "fieldId": 2005,
                         "fieldName": "monthlyData.december.plan",
                         "fieldLabel": "12月-计划",
-                        "value": 0
+                        "value": 84687
                     },
                     {
                         "fieldId": 2006,
                         "fieldName": "monthlyData.december.samePeriod",
                         "fieldLabel": "12月-同期",
-                        "value": 0
+                        "value": 109831
                     },
                     {
                         "fieldId": 2007,
                         "fieldName": "monthlyData.january.plan",
                         "fieldLabel": "1月-计划",
-                        "value": 0
+                        "value": 76885
                     },
                     {
                         "fieldId": 2008,
                         "fieldName": "monthlyData.january.samePeriod",
                         "fieldLabel": "1月-同期",
-                        "value": 0
+                        "value": 104305
                     },
                     {
                         "fieldId": 2009,
                         "fieldName": "monthlyData.february.plan",
                         "fieldLabel": "2月-计划",
-                        "value": 0
+                        "value": 65529
                     },
                     {
                         "fieldId": 2010,
                         "fieldName": "monthlyData.february.samePeriod",
                         "fieldLabel": "2月-同期",
-                        "value": 0
+                        "value": 110527
                     },
                     {
                         "fieldId": 2011,
                         "fieldName": "monthlyData.march.plan",
                         "fieldLabel": "3月-计划",
-                        "value": 0
+                        "value": 62583
                     },
                     {
                         "fieldId": 2012,
                         "fieldName": "monthlyData.march.samePeriod",
                         "fieldLabel": "3月-同期",
-                        "value": 0
+                        "value": 114104
                     },
                     {
                         "fieldId": 2013,
                         "fieldName": "monthlyData.april.plan",
                         "fieldLabel": "4月-计划",
-                        "value": 0
+                        "value": 25551
                     },
                     {
                         "fieldId": 2014,
                         "fieldName": "monthlyData.april.samePeriod",
                         "fieldLabel": "4月-同期",
-                        "value": 0
+                        "value": 49850
                     }
                 ]
             },
@@ -6319,7 +6317,7 @@
                         "fieldId": 1003,
                         "fieldName": "totals.plan",
                         "fieldLabel": "本期计划",
-                        "value": 596099
+                        "value": 562944
                     },
                     {
                         "fieldId": 1004,
@@ -6331,13 +6329,13 @@
                         "fieldId": 1005,
                         "fieldName": "totals.diffRate",
                         "fieldLabel": "差异率",
-                        "value": 0
+                        "value": -0.0556199557
                     },
                     {
                         "fieldId": 2001,
                         "fieldName": "monthlyData.october.plan",
                         "fieldLabel": "10月-计划",
-                        "value": 37760
+                        "value": 4605
                     },
                     {
                         "fieldId": 2002,
@@ -6450,7 +6448,7 @@
                         "explanation": {
                             "ruleKey": "50-B-0",
                             "message": "本期计划不应超过同期的90%。",
-                            "content": "实施疏水改造，疏水供化学水量减少，供化学自来水或中水量增加"
+                            "content": "疏水改造后，疏水至化学水量减少，生水量增加，水质下降，耗酸量增加"
                         }
                     },
                     {
@@ -6836,7 +6834,7 @@
                         "explanation": {
                             "ruleKey": "53-B-0",
                             "message": "本期计划不应超过同期的90%。",
-                            "content": "入厂煤含硫量增加超过49%，石灰石耗量增加。"
+                            "content": "入厂煤含硫量增加，石灰石耗量增加"
                         }
                     },
                     {
@@ -7994,7 +7992,7 @@
                         "explanation": {
                             "ruleKey": "62-B-0",
                             "message": "本期计划不应超过同期完成",
-                            "content": "热电联产负荷增加，耗电量增加"
+                            "content": "热电联产负荷增加，厂用电量增加"
                         }
                     },
                     {
@@ -9392,7 +9390,7 @@
                         "fieldId": 1003,
                         "fieldName": "totals.plan",
                         "fieldLabel": "本期计划",
-                        "value": 189783
+                        "value": 89783
                     },
                     {
                         "fieldId": 1004,
@@ -9404,7 +9402,7 @@
                         "fieldId": 1005,
                         "fieldName": "totals.diffRate",
                         "fieldLabel": "差异率",
-                        "value": 0
+                        "value": -0.5269175848
                     },
                     {
                         "fieldId": 2001,
@@ -9422,7 +9420,7 @@
                         "fieldId": 2003,
                         "fieldName": "monthlyData.november.plan",
                         "fieldLabel": "11月-计划",
-                        "value": 25178
+                        "value": 5178
                     },
                     {
                         "fieldId": 2004,
@@ -9434,7 +9432,7 @@
                         "fieldId": 2005,
                         "fieldName": "monthlyData.december.plan",
                         "fieldLabel": "12月-计划",
-                        "value": 42894
+                        "value": 22894
                     },
                     {
                         "fieldId": 2006,
@@ -9446,7 +9444,7 @@
                         "fieldId": 2007,
                         "fieldName": "monthlyData.january.plan",
                         "fieldLabel": "1月-计划",
-                        "value": 43982
+                        "value": 23982
                     },
                     {
                         "fieldId": 2008,
@@ -9458,7 +9456,7 @@
                         "fieldId": 2009,
                         "fieldName": "monthlyData.february.plan",
                         "fieldLabel": "2月-计划",
-                        "value": 43635
+                        "value": 23635
                     },
                     {
                         "fieldId": 2010,
@@ -9470,7 +9468,7 @@
                         "fieldId": 2011,
                         "fieldName": "monthlyData.march.plan",
                         "fieldLabel": "3月-计划",
-                        "value": 31290
+                        "value": 11290
                     },
                     {
                         "fieldId": 2012,
@@ -9519,7 +9517,7 @@
                         "fieldId": 1003,
                         "fieldName": "totals.plan",
                         "fieldLabel": "本期计划",
-                        "value": 0
+                        "value": 4287960.200000003
                     },
                     {
                         "fieldId": 1004,
@@ -9531,13 +9529,13 @@
                         "fieldId": 1005,
                         "fieldName": "totals.diffRate",
                         "fieldLabel": "差异率",
-                        "value": -1
+                        "value": 0
                     },
                     {
                         "fieldId": 2001,
                         "fieldName": "monthlyData.october.plan",
                         "fieldLabel": "10月-计划",
-                        "value": 0
+                        "value": 26626.6000000006
                     },
                     {
                         "fieldId": 2002,
@@ -9549,7 +9547,7 @@
                         "fieldId": 2003,
                         "fieldName": "monthlyData.november.plan",
                         "fieldLabel": "11月-计划",
-                        "value": 0
+                        "value": 654615.100000001
                     },
                     {
                         "fieldId": 2004,
@@ -9561,7 +9559,7 @@
                         "fieldId": 2005,
                         "fieldName": "monthlyData.december.plan",
                         "fieldLabel": "12月-计划",
-                        "value": 0
+                        "value": 1211017.500000001
                     },
                     {
                         "fieldId": 2006,
@@ -9573,7 +9571,7 @@
                         "fieldId": 2007,
                         "fieldName": "monthlyData.january.plan",
                         "fieldLabel": "1月-计划",
-                        "value": 0
+                        "value": 911279.000000001
                     },
                     {
                         "fieldId": 2008,
@@ -9585,7 +9583,7 @@
                         "fieldId": 2009,
                         "fieldName": "monthlyData.february.plan",
                         "fieldLabel": "2月-计划",
-                        "value": 0
+                        "value": 722016.999999999
                     },
                     {
                         "fieldId": 2010,
@@ -9597,7 +9595,7 @@
                         "fieldId": 2011,
                         "fieldName": "monthlyData.march.plan",
                         "fieldLabel": "3月-计划",
-                        "value": 0
+                        "value": 689402
                     },
                     {
                         "fieldId": 2012,
@@ -9609,7 +9607,7 @@
                         "fieldId": 2013,
                         "fieldName": "monthlyData.april.plan",
                         "fieldLabel": "4月-计划",
-                        "value": 0
+                        "value": 73003
                     },
                     {
                         "fieldId": 2014,
@@ -9650,7 +9648,7 @@
                         "explanation": {
                             "ruleKey": "75-B-0",
                             "message": "本期计划应不低于同期。",
-                            "content": "主要是水炉启停次数增加"
+                            "content": "热电联产负荷增加，且水炉启停次数增加，全厂效率略有下降"
                         }
                     },
                     {
@@ -9909,7 +9907,7 @@
                         "explanation": {
                             "ruleKey": "77-B-0",
                             "message": "本期计划应不低于同期。",
-                            "content": "主要是水炉启停次数增加"
+                            "content": "热电联产负荷增加，且水炉启停次数增加，全厂效率略有下降"
                         }
                     },
                     {
@@ -11184,7 +11182,7 @@
                         "explanation": {
                             "ruleKey": "87-B-0",
                             "message": "本期计划不应超过同期完成",
-                            "content": "主要是水炉启停次数增加"
+                            "content": "水炉启停次数增加，供热单耗略有增加"
                         }
                     },
                     {
@@ -12074,19 +12072,19 @@
                         "fieldId": 1003,
                         "fieldName": "totals.plan",
                         "fieldLabel": "本期计划",
-                        "value": 0
+                        "value": 8329.379609075
                     },
                     {
                         "fieldId": 1004,
                         "fieldName": "totals.samePeriod",
                         "fieldLabel": "同期完成",
-                        "value": 0
+                        "value": 6330.06
                     },
                     {
                         "fieldId": 1005,
                         "fieldName": "totals.diffRate",
                         "fieldLabel": "差异率",
-                        "value": null
+                        "value": 0.3158452857
                     },
                     {
                         "fieldId": 2001,
@@ -12104,73 +12102,73 @@
                         "fieldId": 2003,
                         "fieldName": "monthlyData.november.plan",
                         "fieldLabel": "11月-计划",
-                        "value": 0
+                        "value": 1141.39224095
                     },
                     {
                         "fieldId": 2004,
                         "fieldName": "monthlyData.november.samePeriod",
                         "fieldLabel": "11月-同期",
-                        "value": 0
+                        "value": 1001
                     },
                     {
                         "fieldId": 2005,
                         "fieldName": "monthlyData.december.plan",
                         "fieldLabel": "12月-计划",
-                        "value": 0
+                        "value": 2057.61581025
                     },
                     {
                         "fieldId": 2006,
                         "fieldName": "monthlyData.december.samePeriod",
                         "fieldLabel": "12月-同期",
-                        "value": 0
+                        "value": 1322.06
                     },
                     {
                         "fieldId": 2007,
                         "fieldName": "monthlyData.january.plan",
                         "fieldLabel": "1月-计划",
-                        "value": 0
+                        "value": 2066.39696835
                     },
                     {
                         "fieldId": 2008,
                         "fieldName": "monthlyData.january.samePeriod",
                         "fieldLabel": "1月-同期",
-                        "value": 0
+                        "value": 1482
                     },
                     {
                         "fieldId": 2009,
                         "fieldName": "monthlyData.february.plan",
                         "fieldLabel": "2月-计划",
-                        "value": 0
+                        "value": 1872.726617775
                     },
                     {
                         "fieldId": 2010,
                         "fieldName": "monthlyData.february.samePeriod",
                         "fieldLabel": "2月-同期",
-                        "value": 0
+                        "value": 1212
                     },
                     {
                         "fieldId": 2011,
                         "fieldName": "monthlyData.march.plan",
                         "fieldLabel": "3月-计划",
-                        "value": 0
+                        "value": 1141.76237175
                     },
                     {
                         "fieldId": 2012,
                         "fieldName": "monthlyData.march.samePeriod",
                         "fieldLabel": "3月-同期",
-                        "value": 0
+                        "value": 1196
                     },
                     {
                         "fieldId": 2013,
                         "fieldName": "monthlyData.april.plan",
                         "fieldLabel": "4月-计划",
-                        "value": 0
+                        "value": 49.4856
                     },
                     {
                         "fieldId": 2014,
                         "fieldName": "monthlyData.april.samePeriod",
                         "fieldLabel": "4月-同期",
-                        "value": 0
+                        "value": 117
                     }
                 ]
             },
@@ -12455,19 +12453,19 @@
                         "fieldId": 1003,
                         "fieldName": "totals.plan",
                         "fieldLabel": "本期计划",
-                        "value": 0
+                        "value": 8329.379609075
                     },
                     {
                         "fieldId": 1004,
                         "fieldName": "totals.samePeriod",
                         "fieldLabel": "同期完成",
-                        "value": 0
+                        "value": 6330.06
                     },
                     {
                         "fieldId": 1005,
                         "fieldName": "totals.diffRate",
                         "fieldLabel": "差异率",
-                        "value": null
+                        "value": 0.3158452857
                     },
                     {
                         "fieldId": 2001,
@@ -12485,73 +12483,73 @@
                         "fieldId": 2003,
                         "fieldName": "monthlyData.november.plan",
                         "fieldLabel": "11月-计划",
-                        "value": 0
+                        "value": 1141.39224095
                     },
                     {
                         "fieldId": 2004,
                         "fieldName": "monthlyData.november.samePeriod",
                         "fieldLabel": "11月-同期",
-                        "value": 0
+                        "value": 1001
                     },
                     {
                         "fieldId": 2005,
                         "fieldName": "monthlyData.december.plan",
                         "fieldLabel": "12月-计划",
-                        "value": 0
+                        "value": 2057.61581025
                     },
                     {
                         "fieldId": 2006,
                         "fieldName": "monthlyData.december.samePeriod",
                         "fieldLabel": "12月-同期",
-                        "value": 0
+                        "value": 1322.06
                     },
                     {
                         "fieldId": 2007,
                         "fieldName": "monthlyData.january.plan",
                         "fieldLabel": "1月-计划",
-                        "value": 0
+                        "value": 2066.39696835
                     },
                     {
                         "fieldId": 2008,
                         "fieldName": "monthlyData.january.samePeriod",
                         "fieldLabel": "1月-同期",
-                        "value": 0
+                        "value": 1482
                     },
                     {
                         "fieldId": 2009,
                         "fieldName": "monthlyData.february.plan",
                         "fieldLabel": "2月-计划",
-                        "value": 0
+                        "value": 1872.726617775
                     },
                     {
                         "fieldId": 2010,
                         "fieldName": "monthlyData.february.samePeriod",
                         "fieldLabel": "2月-同期",
-                        "value": 0
+                        "value": 1212
                     },
                     {
                         "fieldId": 2011,
                         "fieldName": "monthlyData.march.plan",
                         "fieldLabel": "3月-计划",
-                        "value": 0
+                        "value": 1141.76237175
                     },
                     {
                         "fieldId": 2012,
                         "fieldName": "monthlyData.march.samePeriod",
                         "fieldLabel": "3月-同期",
-                        "value": 0
+                        "value": 1196
                     },
                     {
                         "fieldId": 2013,
                         "fieldName": "monthlyData.april.plan",
                         "fieldLabel": "4月-计划",
-                        "value": 0
+                        "value": 49.4856
                     },
                     {
                         "fieldId": 2014,
                         "fieldName": "monthlyData.april.samePeriod",
                         "fieldLabel": "4月-同期",
-                        "value": 0
+                        "value": 117
                     }
                 ]
             },
@@ -12582,19 +12580,19 @@
                         "fieldId": 1003,
                         "fieldName": "totals.plan",
                         "fieldLabel": "本期计划",
-                        "value": 0
+                        "value": 0.395
                     },
                     {
                         "fieldId": 1004,
                         "fieldName": "totals.samePeriod",
                         "fieldLabel": "同期完成",
-                        "value": 0
+                        "value": 0.3922532089
                     },
                     {
                         "fieldId": 1005,
                         "fieldName": "totals.diffRate",
                         "fieldLabel": "差异率",
-                        "value": null
+                        "value": 0.0070025969
                     },
                     {
                         "fieldId": 2001,
@@ -12612,73 +12610,73 @@
                         "fieldId": 2003,
                         "fieldName": "monthlyData.november.plan",
                         "fieldLabel": "11月-计划",
-                        "value": 0
+                        "value": 0.395
                     },
                     {
                         "fieldId": 2004,
                         "fieldName": "monthlyData.november.samePeriod",
                         "fieldLabel": "11月-同期",
-                        "value": 0
+                        "value": 0.431955371
                     },
                     {
                         "fieldId": 2005,
                         "fieldName": "monthlyData.december.plan",
                         "fieldLabel": "12月-计划",
-                        "value": 0
+                        "value": 0.395
                     },
                     {
                         "fieldId": 2006,
                         "fieldName": "monthlyData.december.samePeriod",
                         "fieldLabel": "12月-同期",
-                        "value": 0
+                        "value": 0.3405325362
                     },
                     {
                         "fieldId": 2007,
                         "fieldName": "monthlyData.january.plan",
                         "fieldLabel": "1月-计划",
-                        "value": 0
+                        "value": 0.395
                     },
                     {
                         "fieldId": 2008,
                         "fieldName": "monthlyData.january.samePeriod",
                         "fieldLabel": "1月-同期",
-                        "value": 0
+                        "value": 0.3768550852
                     },
                     {
                         "fieldId": 2009,
                         "fieldName": "monthlyData.february.plan",
                         "fieldLabel": "2月-计划",
-                        "value": 0
+                        "value": 0.395
                     },
                     {
                         "fieldId": 2010,
                         "fieldName": "monthlyData.february.samePeriod",
                         "fieldLabel": "2月-同期",
-                        "value": 0
+                        "value": 0.4291367759
                     },
                     {
                         "fieldId": 2011,
                         "fieldName": "monthlyData.march.plan",
                         "fieldLabel": "3月-计划",
-                        "value": 0
+                        "value": 0.395
                     },
                     {
                         "fieldId": 2012,
                         "fieldName": "monthlyData.march.samePeriod",
                         "fieldLabel": "3月-同期",
-                        "value": 0
+                        "value": 0.3993455957
                     },
                     {
                         "fieldId": 2013,
                         "fieldName": "monthlyData.april.plan",
                         "fieldLabel": "4月-计划",
-                        "value": 0
+                        "value": 0.395
                     },
                     {
                         "fieldId": 2014,
                         "fieldName": "monthlyData.april.samePeriod",
                         "fieldLabel": "4月-同期",
-                        "value": 0
+                        "value": 0.6281268638
                     }
                 ]
             },
@@ -13471,103 +13469,103 @@
                         "fieldId": 1003,
                         "fieldName": "totals.plan",
                         "fieldLabel": "本期计划",
-                        "value": 0
+                        "value": 21438.0889309345
                     },
                     {
                         "fieldId": 1004,
                         "fieldName": "totals.samePeriod",
                         "fieldLabel": "同期完成",
-                        "value": 0
+                        "value": 26015.04
                     },
                     {
                         "fieldId": 1005,
                         "fieldName": "totals.diffRate",
                         "fieldLabel": "差异率",
-                        "value": null
+                        "value": -0.1759348081
                     },
                     {
                         "fieldId": 2001,
                         "fieldName": "monthlyData.october.plan",
                         "fieldLabel": "10月-计划",
-                        "value": 0
+                        "value": 30.3333898256786
                     },
                     {
                         "fieldId": 2002,
                         "fieldName": "monthlyData.october.samePeriod",
                         "fieldLabel": "10月-同期",
-                        "value": 0
+                        "value": 229.8
                     },
                     {
                         "fieldId": 2003,
                         "fieldName": "monthlyData.november.plan",
                         "fieldLabel": "11月-计划",
-                        "value": 0
+                        "value": 2469.48283734419
                     },
                     {
                         "fieldId": 2004,
                         "fieldName": "monthlyData.november.samePeriod",
                         "fieldLabel": "11月-同期",
-                        "value": 0
+                        "value": 3966
                     },
                     {
                         "fieldId": 2005,
                         "fieldName": "monthlyData.december.plan",
                         "fieldLabel": "12月-计划",
-                        "value": 0
+                        "value": 5170.38120062769
                     },
                     {
                         "fieldId": 2006,
                         "fieldName": "monthlyData.december.samePeriod",
                         "fieldLabel": "12月-同期",
-                        "value": 0
+                        "value": 6511.24
                     },
                     {
                         "fieldId": 2007,
                         "fieldName": "monthlyData.january.plan",
                         "fieldLabel": "1月-计划",
-                        "value": 0
+                        "value": 5618.62920096688
                     },
                     {
                         "fieldId": 2008,
                         "fieldName": "monthlyData.january.samePeriod",
                         "fieldLabel": "1月-同期",
-                        "value": 0
+                        "value": 6283
                     },
                     {
                         "fieldId": 2009,
                         "fieldName": "monthlyData.february.plan",
                         "fieldLabel": "2月-计划",
-                        "value": 0
+                        "value": 5114.47483640034
                     },
                     {
                         "fieldId": 2010,
                         "fieldName": "monthlyData.february.samePeriod",
                         "fieldLabel": "2月-同期",
-                        "value": 0
+                        "value": 5511
                     },
                     {
                         "fieldId": 2011,
                         "fieldName": "monthlyData.march.plan",
                         "fieldLabel": "3月-计划",
-                        "value": 0
+                        "value": 2918.90582773163
                     },
                     {
                         "fieldId": 2012,
                         "fieldName": "monthlyData.march.samePeriod",
                         "fieldLabel": "3月-同期",
-                        "value": 0
+                        "value": 3398
                     },
                     {
                         "fieldId": 2013,
                         "fieldName": "monthlyData.april.plan",
                         "fieldLabel": "4月-计划",
-                        "value": 0
+                        "value": 115.881638038046
                     },
                     {
                         "fieldId": 2014,
                         "fieldName": "monthlyData.april.samePeriod",
                         "fieldLabel": "4月-同期",
-                        "value": 0
+                        "value": 116
                     }
                 ]
             },
@@ -13598,103 +13596,103 @@
                         "fieldId": 1003,
                         "fieldName": "totals.plan",
                         "fieldLabel": "本期计划",
-                        "value": 0
+                        "value": 807.7713723704
                     },
                     {
                         "fieldId": 1004,
                         "fieldName": "totals.samePeriod",
                         "fieldLabel": "同期完成",
-                        "value": 0
+                        "value": 1048.9125725125
                     },
                     {
                         "fieldId": 1005,
                         "fieldName": "totals.diffRate",
                         "fieldLabel": "差异率",
-                        "value": null
+                        "value": -0.2298963769
                     },
                     {
                         "fieldId": 2001,
                         "fieldName": "monthlyData.october.plan",
                         "fieldLabel": "10月-计划",
-                        "value": 0
+                        "value": 794.9269327359
                     },
                     {
                         "fieldId": 2002,
                         "fieldName": "monthlyData.october.samePeriod",
                         "fieldLabel": "10月-同期",
-                        "value": 0
+                        "value": 1548.3829820167
                     },
                     {
                         "fieldId": 2003,
                         "fieldName": "monthlyData.november.plan",
                         "fieldLabel": "11月-计划",
-                        "value": 0
+                        "value": 806.0544043482
                     },
                     {
                         "fieldId": 2004,
                         "fieldName": "monthlyData.november.samePeriod",
                         "fieldLabel": "11月-同期",
-                        "value": 0
+                        "value": 1186.7865355546
                     },
                     {
                         "fieldId": 2005,
                         "fieldName": "monthlyData.december.plan",
                         "fieldLabel": "12月-计划",
-                        "value": 0
+                        "value": 808.1855783902
                     },
                     {
                         "fieldId": 2006,
                         "fieldName": "monthlyData.december.samePeriod",
                         "fieldLabel": "12月-同期",
-                        "value": 0
+                        "value": 1073.1115246403
                     },
                     {
                         "fieldId": 2007,
                         "fieldName": "monthlyData.january.plan",
                         "fieldLabel": "1月-计划",
-                        "value": 0
+                        "value": 808.0064400036
                     },
                     {
                         "fieldId": 2008,
                         "fieldName": "monthlyData.january.samePeriod",
                         "fieldLabel": "1月-同期",
-                        "value": 0
+                        "value": 1002.3401628812
                     },
                     {
                         "fieldId": 2009,
                         "fieldName": "monthlyData.february.plan",
                         "fieldLabel": "2月-计划",
-                        "value": 0
+                        "value": 807.9107222151
                     },
                     {
                         "fieldId": 2010,
                         "fieldName": "monthlyData.february.samePeriod",
                         "fieldLabel": "2月-同期",
-                        "value": 0
+                        "value": 1051.5243173558
                     },
                     {
                         "fieldId": 2011,
                         "fieldName": "monthlyData.march.plan",
                         "fieldLabel": "3月-计划",
-                        "value": 0
+                        "value": 808.1482153809
                     },
                     {
                         "fieldId": 2012,
                         "fieldName": "monthlyData.march.samePeriod",
                         "fieldLabel": "3月-同期",
-                        "value": 0
+                        "value": 944.3415101764
                     },
                     {
                         "fieldId": 2013,
                         "fieldName": "monthlyData.april.plan",
                         "fieldLabel": "4月-计划",
-                        "value": 0
+                        "value": 802.3886061981
                     },
                     {
                         "fieldId": 2014,
                         "fieldName": "monthlyData.april.samePeriod",
                         "fieldLabel": "4月-同期",
-                        "value": 0
+                        "value": 849.7592447298
                     }
                 ]
             },
@@ -13725,43 +13723,43 @@
                         "fieldId": 1003,
                         "fieldName": "totals.plan",
                         "fieldLabel": "本期计划",
-                        "value": 0
+                        "value": 51.19045068
                     },
                     {
                         "fieldId": 1004,
                         "fieldName": "totals.samePeriod",
                         "fieldLabel": "同期完成",
-                        "value": 0
+                        "value": 51.19045068
                     },
                     {
                         "fieldId": 1005,
                         "fieldName": "totals.diffRate",
                         "fieldLabel": "差异率",
-                        "value": null
+                        "value": 0
                     },
                     {
                         "fieldId": 2001,
                         "fieldName": "monthlyData.october.plan",
                         "fieldLabel": "10月-计划",
-                        "value": 0
+                        "value": 24.272781
                     },
                     {
                         "fieldId": 2002,
                         "fieldName": "monthlyData.october.samePeriod",
                         "fieldLabel": "10月-同期",
-                        "value": 0
+                        "value": 24.272781
                     },
                     {
                         "fieldId": 2003,
                         "fieldName": "monthlyData.november.plan",
                         "fieldLabel": "11月-计划",
-                        "value": 0
+                        "value": 9.73549368
                     },
                     {
                         "fieldId": 2004,
                         "fieldName": "monthlyData.november.samePeriod",
                         "fieldLabel": "11月-同期",
-                        "value": 0
+                        "value": 9.73549368
                     },
                     {
                         "fieldId": 2005,
@@ -13815,13 +13813,13 @@
                         "fieldId": 2013,
                         "fieldName": "monthlyData.april.plan",
                         "fieldLabel": "4月-计划",
-                        "value": 0
+                        "value": 17.182176
                     },
                     {
                         "fieldId": 2014,
                         "fieldName": "monthlyData.april.samePeriod",
                         "fieldLabel": "4月-同期",
-                        "value": 0
+                        "value": 17.182176
                     }
                 ]
             },
@@ -13852,43 +13850,43 @@
                         "fieldId": 1003,
                         "fieldName": "totals.plan",
                         "fieldLabel": "本期计划",
-                        "value": 0
+                        "value": 0.53
                     },
                     {
                         "fieldId": 1004,
                         "fieldName": "totals.samePeriod",
                         "fieldLabel": "同期完成",
-                        "value": 0
+                        "value": 0.53
                     },
                     {
                         "fieldId": 1005,
                         "fieldName": "totals.diffRate",
                         "fieldLabel": "差异率",
-                        "value": null
+                        "value": 0
                     },
                     {
                         "fieldId": 2001,
                         "fieldName": "monthlyData.october.plan",
                         "fieldLabel": "10月-计划",
-                        "value": 0
+                        "value": 0.53
                     },
                     {
                         "fieldId": 2002,
                         "fieldName": "monthlyData.october.samePeriod",
                         "fieldLabel": "10月-同期",
-                        "value": 0
+                        "value": 0.53
                     },
                     {
                         "fieldId": 2003,
                         "fieldName": "monthlyData.november.plan",
                         "fieldLabel": "11月-计划",
-                        "value": 0
+                        "value": 0.53
                     },
                     {
                         "fieldId": 2004,
                         "fieldName": "monthlyData.november.samePeriod",
                         "fieldLabel": "11月-同期",
-                        "value": 0
+                        "value": 0.53
                     },
                     {
                         "fieldId": 2005,
@@ -13942,13 +13940,13 @@
                         "fieldId": 2013,
                         "fieldName": "monthlyData.april.plan",
                         "fieldLabel": "4月-计划",
-                        "value": 0
+                        "value": 0.53
                     },
                     {
                         "fieldId": 2014,
                         "fieldName": "monthlyData.april.samePeriod",
                         "fieldLabel": "4月-同期",
-                        "value": 0
+                        "value": 0.53
                     }
                 ]
             },
@@ -13979,103 +13977,103 @@
                         "fieldId": 1003,
                         "fieldName": "totals.plan",
                         "fieldLabel": "本期计划",
-                        "value": 0
+                        "value": 263.739983
                     },
                     {
                         "fieldId": 1004,
                         "fieldName": "totals.samePeriod",
                         "fieldLabel": "同期完成",
-                        "value": 0
+                        "value": 340.93
                     },
                     {
                         "fieldId": 1005,
                         "fieldName": "totals.diffRate",
                         "fieldLabel": "差异率",
-                        "value": null
+                        "value": -0.2264101634
                     },
                     {
                         "fieldId": 2001,
                         "fieldName": "monthlyData.october.plan",
                         "fieldLabel": "10月-计划",
-                        "value": 0
+                        "value": 12.20006
                     },
                     {
                         "fieldId": 2002,
                         "fieldName": "monthlyData.october.samePeriod",
                         "fieldLabel": "10月-同期",
-                        "value": 0
+                        "value": 5.08
                     },
                     {
                         "fieldId": 2003,
                         "fieldName": "monthlyData.november.plan",
                         "fieldLabel": "11月-计划",
-                        "value": 0
+                        "value": 56.533059
                     },
                     {
                         "fieldId": 2004,
                         "fieldName": "monthlyData.november.samePeriod",
                         "fieldLabel": "11月-同期",
-                        "value": 0
+                        "value": 18
                     },
                     {
                         "fieldId": 2005,
                         "fieldName": "monthlyData.december.plan",
                         "fieldLabel": "12月-计划",
-                        "value": 0
+                        "value": 49.492137
                     },
                     {
                         "fieldId": 2006,
                         "fieldName": "monthlyData.december.samePeriod",
                         "fieldLabel": "12月-同期",
-                        "value": 0
+                        "value": 49.85
                     },
                     {
                         "fieldId": 2007,
                         "fieldName": "monthlyData.january.plan",
                         "fieldLabel": "1月-计划",
-                        "value": 0
+                        "value": 47.247955
                     },
                     {
                         "fieldId": 2008,
                         "fieldName": "monthlyData.january.samePeriod",
                         "fieldLabel": "1月-同期",
-                        "value": 0
+                        "value": 44
                     },
                     {
                         "fieldId": 2009,
                         "fieldName": "monthlyData.february.plan",
                         "fieldLabel": "2月-计划",
-                        "value": 0
+                        "value": 43.341279
                     },
                     {
                         "fieldId": 2010,
                         "fieldName": "monthlyData.february.samePeriod",
                         "fieldLabel": "2月-同期",
-                        "value": 0
+                        "value": 39
                     },
                     {
                         "fieldId": 2011,
                         "fieldName": "monthlyData.march.plan",
                         "fieldLabel": "3月-计划",
-                        "value": 0
+                        "value": 41.583313
                     },
                     {
                         "fieldId": 2012,
                         "fieldName": "monthlyData.march.samePeriod",
                         "fieldLabel": "3月-同期",
-                        "value": 0
+                        "value": 152
                     },
                     {
                         "fieldId": 2013,
                         "fieldName": "monthlyData.april.plan",
                         "fieldLabel": "4月-计划",
-                        "value": 0
+                        "value": 13.34218
                     },
                     {
                         "fieldId": 2014,
                         "fieldName": "monthlyData.april.samePeriod",
                         "fieldLabel": "4月-同期",
-                        "value": 0
+                        "value": 33
                     }
                 ]
             },
@@ -14106,103 +14104,103 @@
                         "fieldId": 1003,
                         "fieldName": "totals.plan",
                         "fieldLabel": "本期计划",
-                        "value": 0
+                        "value": 2.5945150901
                     },
                     {
                         "fieldId": 1004,
                         "fieldName": "totals.samePeriod",
                         "fieldLabel": "同期完成",
-                        "value": 0
+                        "value": 2.6819435103
                     },
                     {
                         "fieldId": 1005,
                         "fieldName": "totals.diffRate",
                         "fieldLabel": "差异率",
-                        "value": null
+                        "value": -0.0325989044
                     },
                     {
                         "fieldId": 2001,
                         "fieldName": "monthlyData.october.plan",
                         "fieldLabel": "10月-计划",
-                        "value": 0
+                        "value": 4.0229703884
                     },
                     {
                         "fieldId": 2002,
                         "fieldName": "monthlyData.october.samePeriod",
                         "fieldLabel": "10月-同期",
-                        "value": 0
+                        "value": 0.6701139721
                     },
                     {
                         "fieldId": 2003,
                         "fieldName": "monthlyData.november.plan",
                         "fieldLabel": "11月-计划",
-                        "value": 0
+                        "value": 2.738381231
                     },
                     {
                         "fieldId": 2004,
                         "fieldName": "monthlyData.november.samePeriod",
                         "fieldLabel": "11月-同期",
-                        "value": 0
+                        "value": 0.7430064518
                     },
                     {
                         "fieldId": 2005,
                         "fieldName": "monthlyData.december.plan",
                         "fieldLabel": "12月-计划",
-                        "value": 0
+                        "value": 2.4855682058
                     },
                     {
                         "fieldId": 2006,
                         "fieldName": "monthlyData.december.samePeriod",
                         "fieldLabel": "12月-同期",
-                        "value": 0
+                        "value": 2.222846492
                     },
                     {
                         "fieldId": 2007,
                         "fieldName": "monthlyData.january.plan",
                         "fieldLabel": "1月-计划",
-                        "value": 0
+                        "value": 2.4405691809
                     },
                     {
                         "fieldId": 2008,
                         "fieldName": "monthlyData.january.samePeriod",
                         "fieldLabel": "1月-同期",
-                        "value": 0
+                        "value": 1.9908241107
                     },
                     {
                         "fieldId": 2009,
                         "fieldName": "monthlyData.february.plan",
                         "fieldLabel": "2月-计划",
-                        "value": 0
+                        "value": 2.441060822
                     },
                     {
                         "fieldId": 2010,
                         "fieldName": "monthlyData.february.samePeriod",
                         "fieldLabel": "2月-同期",
-                        "value": 0
+                        "value": 1.7524230619
                     },
                     {
                         "fieldId": 2011,
                         "fieldName": "monthlyData.march.plan",
                         "fieldLabel": "3月-计划",
-                        "value": 0
+                        "value": 2.5342852703
                     },
                     {
                         "fieldId": 2012,
                         "fieldName": "monthlyData.march.samePeriod",
                         "fieldLabel": "3月-同期",
-                        "value": 0
+                        "value": 7.0499619673
                     },
                     {
                         "fieldId": 2013,
                         "fieldName": "monthlyData.april.plan",
                         "fieldLabel": "4月-计划",
-                        "value": 0
+                        "value": 2.9381589958
                     },
                     {
                         "fieldId": 2014,
                         "fieldName": "monthlyData.april.samePeriod",
                         "fieldLabel": "4月-同期",
-                        "value": 0
+                        "value": 4.7339654851
                     }
                 ]
             },
@@ -14487,103 +14485,108 @@
                         "fieldId": 1003,
                         "fieldName": "totals.plan",
                         "fieldLabel": "本期计划",
-                        "value": 0
+                        "value": 105.8,
+                        "explanation": {
+                            "ruleKey": "113-B-0",
+                            "message": "本期计划不应超过同期完成",
+                            "content": "运行人员退休，运行岗位缺员数量增加，适当增加劳务工"
+                        }
                     },
                     {
                         "fieldId": 1004,
                         "fieldName": "totals.samePeriod",
                         "fieldLabel": "同期完成",
-                        "value": 0
+                        "value": 81.29
                     },
                     {
                         "fieldId": 1005,
                         "fieldName": "totals.diffRate",
                         "fieldLabel": "差异率",
-                        "value": null
+                        "value": 0.3015131012
                     },
                     {
                         "fieldId": 2001,
                         "fieldName": "monthlyData.october.plan",
                         "fieldLabel": "10月-计划",
-                        "value": 0
+                        "value": 7.9
                     },
                     {
                         "fieldId": 2002,
                         "fieldName": "monthlyData.october.samePeriod",
                         "fieldLabel": "10月-同期",
-                        "value": 0
+                        "value": 7.55
                     },
                     {
                         "fieldId": 2003,
                         "fieldName": "monthlyData.november.plan",
                         "fieldLabel": "11月-计划",
-                        "value": 0
+                        "value": 14.32
                     },
                     {
                         "fieldId": 2004,
                         "fieldName": "monthlyData.november.samePeriod",
                         "fieldLabel": "11月-同期",
-                        "value": 0
+                        "value": 6
                     },
                     {
                         "fieldId": 2005,
                         "fieldName": "monthlyData.december.plan",
                         "fieldLabel": "12月-计划",
-                        "value": 0
+                        "value": 16.91
                     },
                     {
                         "fieldId": 2006,
                         "fieldName": "monthlyData.december.samePeriod",
                         "fieldLabel": "12月-同期",
-                        "value": 0
+                        "value": 10.24
                     },
                     {
                         "fieldId": 2007,
                         "fieldName": "monthlyData.january.plan",
                         "fieldLabel": "1月-计划",
-                        "value": 0
+                        "value": 17.82
                     },
                     {
                         "fieldId": 2008,
                         "fieldName": "monthlyData.january.samePeriod",
                         "fieldLabel": "1月-同期",
-                        "value": 0
+                        "value": 14
                     },
                     {
                         "fieldId": 2009,
                         "fieldName": "monthlyData.february.plan",
                         "fieldLabel": "2月-计划",
-                        "value": 0
+                        "value": 18.57
                     },
                     {
                         "fieldId": 2010,
                         "fieldName": "monthlyData.february.samePeriod",
                         "fieldLabel": "2月-同期",
-                        "value": 0
+                        "value": 15.3
                     },
                     {
                         "fieldId": 2011,
                         "fieldName": "monthlyData.march.plan",
                         "fieldLabel": "3月-计划",
-                        "value": 0
+                        "value": 19.93
                     },
                     {
                         "fieldId": 2012,
                         "fieldName": "monthlyData.march.samePeriod",
                         "fieldLabel": "3月-同期",
-                        "value": 0
+                        "value": 14.2
                     },
                     {
                         "fieldId": 2013,
                         "fieldName": "monthlyData.april.plan",
                         "fieldLabel": "4月-计划",
-                        "value": 0
+                        "value": 10.35
                     },
                     {
                         "fieldId": 2014,
                         "fieldName": "monthlyData.april.samePeriod",
                         "fieldLabel": "4月-同期",
-                        "value": 0
+                        "value": 14
                     }
                 ]
             },
@@ -14614,19 +14617,19 @@
                         "fieldId": 1003,
                         "fieldName": "totals.plan",
                         "fieldLabel": "本期计划",
-                        "value": 0
+                        "value": 16
                     },
                     {
                         "fieldId": 1004,
                         "fieldName": "totals.samePeriod",
                         "fieldLabel": "同期完成",
-                        "value": 0
+                        "value": 16.4
                     },
                     {
                         "fieldId": 1005,
                         "fieldName": "totals.diffRate",
                         "fieldLabel": "差异率",
-                        "value": null
+                        "value": -0.0243902439
                     },
                     {
                         "fieldId": 2001,
@@ -14644,61 +14647,61 @@
                         "fieldId": 2003,
                         "fieldName": "monthlyData.november.plan",
                         "fieldLabel": "11月-计划",
-                        "value": 0
+                        "value": 2.47
                     },
                     {
                         "fieldId": 2004,
                         "fieldName": "monthlyData.november.samePeriod",
                         "fieldLabel": "11月-同期",
-                        "value": 0
+                        "value": 2.87
                     },
                     {
                         "fieldId": 2005,
                         "fieldName": "monthlyData.december.plan",
                         "fieldLabel": "12月-计划",
-                        "value": 0
+                        "value": 1.12
                     },
                     {
                         "fieldId": 2006,
                         "fieldName": "monthlyData.december.samePeriod",
                         "fieldLabel": "12月-同期",
-                        "value": 0
+                        "value": 1.12
                     },
                     {
                         "fieldId": 2007,
                         "fieldName": "monthlyData.january.plan",
                         "fieldLabel": "1月-计划",
-                        "value": 0
+                        "value": 7.64
                     },
                     {
                         "fieldId": 2008,
                         "fieldName": "monthlyData.january.samePeriod",
                         "fieldLabel": "1月-同期",
-                        "value": 0
+                        "value": 7.64
                     },
                     {
                         "fieldId": 2009,
                         "fieldName": "monthlyData.february.plan",
                         "fieldLabel": "2月-计划",
-                        "value": 0
+                        "value": 1.59
                     },
                     {
                         "fieldId": 2010,
                         "fieldName": "monthlyData.february.samePeriod",
                         "fieldLabel": "2月-同期",
-                        "value": 0
+                        "value": 1.59
                     },
                     {
                         "fieldId": 2011,
                         "fieldName": "monthlyData.march.plan",
                         "fieldLabel": "3月-计划",
-                        "value": 0
+                        "value": 3.18
                     },
                     {
                         "fieldId": 2012,
                         "fieldName": "monthlyData.march.samePeriod",
                         "fieldLabel": "3月-同期",
-                        "value": 0
+                        "value": 3.18
                     },
                     {
                         "fieldId": 2013,
@@ -14741,103 +14744,103 @@
                         "fieldId": 1003,
                         "fieldName": "totals.plan",
                         "fieldLabel": "本期计划",
-                        "value": 0
+                        "value": -13545.4397555395
                     },
                     {
                         "fieldId": 1004,
                         "fieldName": "totals.samePeriod",
                         "fieldLabel": "同期完成",
-                        "value": 0
+                        "value": -20174.79045068
                     },
                     {
                         "fieldId": 1005,
                         "fieldName": "totals.diffRate",
                         "fieldLabel": "差异率",
-                        "value": null
+                        "value": -0.3285957647
                     },
                     {
                         "fieldId": 2001,
                         "fieldName": "monthlyData.october.plan",
                         "fieldLabel": "10月-计划",
-                        "value": 0
+                        "value": -74.7062308257
                     },
                     {
                         "fieldId": 2002,
                         "fieldName": "monthlyData.october.samePeriod",
                         "fieldLabel": "10月-同期",
-                        "value": 0
+                        "value": -266.702781
                     },
                     {
                         "fieldId": 2003,
                         "fieldName": "monthlyData.november.plan",
                         "fieldLabel": "11月-计划",
-                        "value": 0
+                        "value": -1411.1491490742
                     },
                     {
                         "fieldId": 2004,
                         "fieldName": "monthlyData.november.samePeriod",
                         "fieldLabel": "11月-同期",
-                        "value": 0
+                        "value": -3001.60549368
                     },
                     {
                         "fieldId": 2005,
                         "fieldName": "monthlyData.december.plan",
                         "fieldLabel": "12月-计划",
-                        "value": 0
+                        "value": -3180.2875273777
                     },
                     {
                         "fieldId": 2006,
                         "fieldName": "monthlyData.december.samePeriod",
                         "fieldLabel": "12月-同期",
-                        "value": 0
+                        "value": -5250.39
                     },
                     {
                         "fieldId": 2007,
                         "fieldName": "monthlyData.january.plan",
                         "fieldLabel": "1月-计划",
-                        "value": 0
+                        "value": -3624.9401876169
                     },
                     {
                         "fieldId": 2008,
                         "fieldName": "monthlyData.january.samePeriod",
                         "fieldLabel": "1月-同期",
-                        "value": 0
+                        "value": -4866.64
                     },
                     {
                         "fieldId": 2009,
                         "fieldName": "monthlyData.february.plan",
                         "fieldLabel": "2月-计划",
-                        "value": 0
+                        "value": -3305.2494976253
                     },
                     {
                         "fieldId": 2010,
                         "fieldName": "monthlyData.february.samePeriod",
                         "fieldLabel": "2月-同期",
-                        "value": 0
+                        "value": -4354.89
                     },
                     {
                         "fieldId": 2011,
                         "fieldName": "monthlyData.march.plan",
                         "fieldLabel": "3月-计划",
-                        "value": 0
+                        "value": -1841.8367689816
                     },
                     {
                         "fieldId": 2012,
                         "fieldName": "monthlyData.march.samePeriod",
                         "fieldLabel": "3月-同期",
-                        "value": 0
+                        "value": -2371.38
                     },
                     {
                         "fieldId": 2013,
                         "fieldName": "monthlyData.april.plan",
                         "fieldLabel": "4月-计划",
-                        "value": 0
+                        "value": -107.270394038
                     },
                     {
                         "fieldId": 2014,
                         "fieldName": "monthlyData.april.samePeriod",
                         "fieldLabel": "4月-同期",
-                        "value": 0
+                        "value": -63.182176
                     }
                 ]
             },
@@ -14969,5 +14972,14 @@
                 ]
             }
         ]
+    },
+    "unapproved": {
+        "unapprovedAt": "2025-09-26T07:31:04.635088+08:00",
+        "unapprovedBy": {
+            "username": "group_admin",
+            "password": "password",
+            "unit": "集团公司",
+            "globalRole": "super_admin"
+        }
     }
 }

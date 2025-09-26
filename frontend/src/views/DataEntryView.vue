@@ -601,7 +601,42 @@ const _fetchDataFromServer = async (silent = false) => {
     }
 
     if (payloadToApply) {
+      // 建立旧版解释索引：以 (metricId, fieldId, message) 为键
+      const legacyExplanationIndex = new Map();
+      try {
+        if (Array.isArray(payloadToApply.tableData)) {
+          payloadToApply.tableData.forEach(r => {
+            const mId = r?.metricId;
+            (r?.values || []).forEach(cell => {
+              const fid = cell?.fieldId;
+              const exp = cell?.explanation;
+              if (mId != null && fid != null && exp && typeof exp.message === 'string') {
+                legacyExplanationIndex.set(`${mId}:${fid}:${exp.message}`, exp.content || '');
+              }
+            });
+          });
+        }
+      } catch (_) {}
+
       _applyPayloadToTable(payloadToApply);
+
+      // 运行一次完整校验以生成 B 类规则的稳定 key
+      try { runValidation({ level: 'all' }); } catch (_) {}
+
+      // 将旧索引中的说明迁移到新的稳定 key（按 metricId+fieldId+message 匹配）
+      try {
+        Object.entries(errors.value || {}).forEach(([k, err]) => {
+          if (!err || err.type !== 'B') return;
+          if (!explanations.value[k]) {
+            const key3 = `${err.metricId}:${err.fieldId}:${err.message}`;
+            const content = legacyExplanationIndex.get(key3);
+            if (content && String(content).trim().length > 0) {
+              explanations.value[k] = content;
+            }
+          }
+        });
+      } catch (_) {}
+
       return true;
     } else {
       if (!silent) ElMessage.info('服务器上没有找到该表格的已提交数据。');
@@ -785,6 +820,21 @@ const evaluateValidationRule = (rule, rowData, findFieldByIdentifier) => {
     }
 };
 
+// 生成稳定 key 的轻量哈希函数（djb2）
+const __hashRule = (str) => {
+  try {
+    let hash = 5381;
+    for (let i = 0; i < String(str).length; i++) {
+      hash = ((hash << 5) + hash) + String(str).charCodeAt(i);
+      hash = hash & 0xffffffff;
+    }
+    // 使用无符号右移并转为 36 进制，缩短长度
+    return (hash >>> 0).toString(36);
+  } catch {
+    return '0';
+  }
+};
+
 const runValidation = ({ level = 'hard' } = {}) => {
   const newErrors = {};
 
@@ -827,12 +877,14 @@ const runValidation = ({ level = 'hard' } = {}) => {
       if (!rules) return;
       
       rules.forEach((ruleDef, index) => {
-        const key = `${metricId}-${errorType}-${index}`;
-        
-        if (!evaluateValidationRule(ruleDef.rule, row, findFieldByIdentifier)) {
-          const firstFieldInRule = (ruleDef.rule.match(/[a-zA-Z_][a-zA-Z0-9_.]*/g) || [])[0];
-          const fieldForError = findFieldByIdentifier(firstFieldInRule);
+        // 确定落点字段（用于构造稳定 key 与前端展示）
+        const firstFieldInRule = (ruleDef.rule.match(/[a-zA-Z_][a-zA-Z0-9_.]*/g) || [])[0];
+        const fieldForError = findFieldByIdentifier(firstFieldInRule);
+        const fieldIdForKey = fieldForError ? fieldForError.id : 0;
+        // 构造稳定 key：<metric>-<type>-F<fieldId>-<hash(rule)>
+        const key = `${metricId}-${errorType}-F${fieldIdForKey}-${__hashRule(ruleDef.rule)}`;
 
+        if (!evaluateValidationRule(ruleDef.rule, row, findFieldByIdentifier)) {
           newErrors[key] = { 
             type: errorType, 
             message: ruleDef.message,
@@ -1026,7 +1078,7 @@ const getCellClass = ({ row, column }) => {
   }
 
   const aggregatedIssues = row.cellIssues?.[field.id];
-  if (Array.isArray(aggregatedIssues) && aggregatedIssues.some(issue => issue && (issue.type === 'B' || issue.type === 'C'))) {
+  if (Array.isArray(aggregatedIssues) && aggregatedIssues.some(issue => issue && (issue.type === 'B'))) {
     classes.push('has-soft-issue');
   }
 
@@ -2065,4 +2117,3 @@ const handleImport = async (file) => {
 .text-danger { color: #f56c6c; }
 .text-success { color: #67c23a; }
 </style>
-
