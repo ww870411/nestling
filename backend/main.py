@@ -6,7 +6,7 @@ from datetime import datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
 from fastapi import FastAPI, HTTPException, status, Body, Request
-from typing import List
+from typing import List, Optional
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
@@ -92,7 +92,7 @@ def _get_user_from_request(request: Request):
             return u
     return None
 
-def _is_read_only_user(user: dict | None) -> bool:
+def _is_read_only_user(user: Optional[dict]) -> bool:
     """只读用户判定：super_viewer 等角色不可执行任何写操作。
     允许扩展其它只读别名，保持后端兜底安全。
     """
